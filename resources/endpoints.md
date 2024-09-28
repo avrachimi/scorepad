@@ -8,12 +8,13 @@ Most of these endpoints will be behind auth.
 
 ## Users
 
-| Method | Endpoint       | Description                     |
-| ------ | -------------- | ------------------------------- |
-| GET    | /users         | Get all users excluding friends |
-| POST   | /users         | Create user account             |
-| GET    | /users/profile | Get user's profile              |
-| DELETE | /users[id]     | Delete user account             |
+| Method | Endpoint            | Description                     |
+| ------ | ------------------- | ------------------------------- |
+| GET    | /users              | Get all users excluding friends |
+| POST   | /users              | Create user account             |
+| DELETE | /users/[id]         | Delete user account             |
+| GET    | /users/profile      | Get user's profile              |
+| GET    | /users/profile/[id] | Get friends' profile            |
 
 ## Friends
 
@@ -21,9 +22,9 @@ Most of these endpoints will be behind auth.
 | ------ | ----------------- | ------------------------------- |
 | GET    | /friends          | Get logged in user's friends    |
 | POST   | /friends          | Send (create) friend request    |
-| GET    | /friends/requests | Get friend requests             |
 | PATCH  | /friends/[id]     | Accept friend request           |
 | DELETE | /friends/[id]     | Delete friend or reject request |
+| GET    | /friends/requests | Get friend requests             |
 
 ## Matches
 
@@ -31,10 +32,10 @@ Most of these endpoints will be behind auth.
 | ------ | --------------- | ------------------ |
 | GET    | /matches        | Get all matches    |
 | POST   | /matches        | Create match       |
-| GET    | /matches/recent | Get recent matches |
 | GET    | /matches/[id]   | Get match          |
 | PUT    | /matches[id]    | Update match       |
 | DELETE | /matches/[id]   | Delete match       |
+| GET    | /matches/recent | Get recent matches |
 
 ## Stats
 
