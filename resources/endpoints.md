@@ -20,9 +20,9 @@ Most of these endpoints will be behind auth.
 | Method | Endpoint          | Description                     |
 | ------ | ----------------- | ------------------------------- |
 | GET    | /friends          | Get logged in user's friends    |
+| POST   | /friends          | Send (create) friend request    |
 | GET    | /friends/requests | Get friend requests             |
-| POST   | /friends/add      | Send friend request             |
-| PATCH  | /friends/accept   | Accept friend request           |
+| PATCH  | /friends/[id]     | Accept friend request           |
 | DELETE | /friends/[id]     | Delete friend or reject request |
 
 ## Matches
@@ -38,8 +38,15 @@ Most of these endpoints will be behind auth.
 
 ## Stats
 
-| Method | Endpoint           | Description              |
-| ------ | ------------------ | ------------------------ |
-| GET    | /stats             | Get all stats            |
-| GET    | /stats/matches     | Get matches played stats |
-| GET    | /stats/leaderboard | Get leaderboard          |
+| Method | Endpoint | Description |
+| ------ | -------- | ----------- |
+| GET    | /stats   | Get stats   |
+
+</br>
+
+##### GET /stats filters
+
+```go
+// default is "all"
+type = "all" | "matches" | "leaderboard";
+```
