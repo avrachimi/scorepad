@@ -11,6 +11,31 @@ import (
 	"github.com/google/uuid"
 )
 
+type Friendship struct {
+	ID         uuid.UUID
+	Member1ID  uuid.UUID
+	Member2ID  uuid.UUID
+	Status     string
+	AcceptedOn sql.NullTime
+	CreatedAt  time.Time
+	UpdatedAt  sql.NullTime
+}
+
+type Match struct {
+	ID              uuid.UUID
+	MatchDate       time.Time
+	DurationMinutes int32
+	CreatedBy       uuid.UUID
+	Team1Score      int32
+	Team1Player1    uuid.UUID
+	Team1Player2    uuid.UUID
+	Team2Score      int32
+	Team2Player1    uuid.UUID
+	Team2Player2    uuid.UUID
+	CreatedAt       time.Time
+	UpdatedAt       sql.NullTime
+}
+
 type User struct {
 	ID        uuid.UUID
 	Name      string

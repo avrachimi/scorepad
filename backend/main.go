@@ -37,8 +37,9 @@ func main() {
 	db := database.New(conn)
 
 	handler := api.API{
-		User:   api.User{DB: db},
-		Friend: api.Friend{DB: db},
+		User:       api.User{DB: db},
+		Friendship: api.Friendship{DB: db},
+		Match:      api.Match{DB: db},
 	}
 
 	router := chi.NewRouter()
@@ -60,7 +61,10 @@ func main() {
 	v1Router.Get("/users/profile", handler.User.GetProfile)
 	v1Router.Get("/users/profile/{id}", handler.User.GetProfileById)
 
-	v1Router.Get("/friends", handler.Friend.GetAll)
+	v1Router.Get("/matches", handler.Match.GetAll)
+	v1Router.Post("/matches", handler.Match.Create)
+
+	v1Router.Get("/friends", handler.Friendship.GetAll)
 
 	router.Mount("/v1", v1Router)
 
