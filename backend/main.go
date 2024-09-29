@@ -5,11 +5,16 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/avrachimi/scorepad/backend/api"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 )
 
 func main() {
+
+	handler := api.API{
+		Users: api.Users{},
+	}
 
 	router := chi.NewRouter()
 
@@ -24,9 +29,11 @@ func main() {
 
 	v1Router := chi.NewRouter()
 
-	v1Router.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World"))
-	})
+	v1Router.Get("/users", handler.Users.GetAll)
+	v1Router.Post("/users", handler.Users.Create)
+	v1Router.Delete("/users/{id}", handler.Users.Delete)
+	v1Router.Get("/users/profile", handler.Users.GetProfile)
+	v1Router.Get("/users/profile/{id}", handler.Users.GetProfileById)
 
 	router.Mount("/v1", v1Router)
 
