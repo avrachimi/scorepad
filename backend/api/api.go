@@ -1,5 +1,6 @@
 package api
 
 type API struct {
-	Users Users
+	User   User
+	Friend Friend
 }
