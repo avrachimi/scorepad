@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/avrachimi/scorepad/backend/api"
+	"github.com/avrachimi/scorepad/backend/auth"
 	"github.com/avrachimi/scorepad/backend/internal/database"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -53,6 +54,13 @@ func main() {
 		MaxAge:           300,
 	}))
 
+	auth.SetupAuth()
+	router.Get("/auth/signin", auth.SignIn)
+	router.Get("/auth/signout", auth.SignOut)
+	router.Get("/auth/{provider}/callback", func(w http.ResponseWriter, r *http.Request) {
+		auth.AuthCallback(w, r, db)
+	})
+
 	v1Router := chi.NewRouter()
 
 	v1Router.Get("/users", handler.User.GetAll)
@@ -63,6 +71,7 @@ func main() {
 
 	v1Router.Get("/matches", handler.Match.GetAll)
 	v1Router.Post("/matches", handler.Match.Create)
+	v1Router.Get("/matches/{id}", handler.Match.GetById)
 
 	v1Router.Get("/friends", handler.Friendship.GetAll)
 

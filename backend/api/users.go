@@ -14,8 +14,14 @@ type User struct {
 }
 
 func (u *User) GetAll(w http.ResponseWriter, r *http.Request) {
-	// TODO: Update query to retrieve all users excluding friends
-	responseWithJSON(w, 200, "All users")
+	// FIX: should be admin only or just deleted
+	users, err := u.DB.GetUsers(r.Context())
+	if err != nil {
+		responseWithError(w, 500, "Failed to get users")
+		return
+	}
+
+	responseWithJSON(w, 200, users)
 }
 
 func (u *User) Create(w http.ResponseWriter, r *http.Request) {

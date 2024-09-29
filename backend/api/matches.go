@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/avrachimi/scorepad/backend/internal/database"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -57,4 +58,22 @@ func (m *Match) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	responseWithJSON(w, 200, matches)
+}
+
+func (m *Match) GetById(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		responseWithError(w, 400, fmt.Sprintf("Error parsing user ID: %v", err))
+		return
+	}
+
+	// TODO: maybe worth checking if the user is allowed to see this match
+	match, err := m.DB.GetMatchById(r.Context(), id)
+	if err != nil {
+		responseWithError(w, 500, fmt.Sprintf("Error getting match: %v", err))
+		return
+	}
+
+	responseWithJSON(w, 200, match)
 }
