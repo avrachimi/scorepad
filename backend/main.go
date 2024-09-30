@@ -63,18 +63,19 @@ func main() {
 
 	v1Router := chi.NewRouter()
 
-	v1Router.Get("/users", handler.User.GetAll)
+	v1Router.Get("/users", handler.MiddlewareAuth(handler.User.GetAll))
 	v1Router.Post("/users", handler.User.Create)
-	v1Router.Delete("/users/{id}", handler.User.Delete)
-	v1Router.Get("/users/profile", handler.User.GetProfile)
-	v1Router.Get("/users/profile/{id}", handler.User.GetProfileById)
+	v1Router.Delete("/users/{id}", handler.MiddlewareAuth(handler.User.Delete))
+	v1Router.Get("/users/profile", handler.MiddlewareAuth(handler.User.GetProfile))
+	v1Router.Get("/users/profile/{id}", handler.MiddlewareAuth(handler.User.GetProfileById))
 
-	v1Router.Get("/matches", handler.Match.GetAll)
-	v1Router.Post("/matches", handler.Match.Create)
-	v1Router.Get("/matches/{id}", handler.Match.GetById)
-	v1Router.Put("/matches/{id}", handler.Match.UpdateMatch)
+	v1Router.Get("/matches", handler.MiddlewareAuth(handler.Match.GetAll))
+	v1Router.Post("/matches", handler.MiddlewareAuth(handler.Match.Create))
+	v1Router.Get("/matches/{id}", handler.MiddlewareAuth(handler.Match.GetById))
+	v1Router.Put("/matches/{id}", handler.MiddlewareAuth(handler.Match.UpdateMatch))
 
-	v1Router.Get("/friends", handler.Friendship.GetAll)
+	v1Router.Get("/friends", handler.MiddlewareAuth(handler.Friendship.GetAll))
+	v1Router.Post("/friends", handler.MiddlewareAuth(handler.Friendship.SendFriendRequest))
 
 	router.Mount("/v1", v1Router)
 

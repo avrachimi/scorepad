@@ -152,3 +152,31 @@ func DatabaseFriendshipsToFriendships(dbFriendships []database.Friendship) []Fri
 
 	return friendships
 }
+
+type Friend struct {
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	Email    string    `json:"email"`
+	ImageUrl *string   `json:"image_url"`
+}
+
+func DatabaseFriendsToFriends(dbFriends []database.GetFriendsRow) []Friend {
+	friends := []Friend{}
+
+	for _, dbFriendship := range dbFriends {
+		var imageUrl *string
+
+		if dbFriendship.ImageUrl.Valid {
+			imageUrl = &dbFriendship.ImageUrl.String
+		}
+
+		friends = append(friends, Friend{
+			ID:       dbFriendship.ID,
+			Name:     dbFriendship.Name,
+			Email:    dbFriendship.Email,
+			ImageUrl: imageUrl,
+		})
+	}
+
+	return friends
+}

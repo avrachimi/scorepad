@@ -14,7 +14,7 @@ type User struct {
 	DB *database.Queries
 }
 
-func (u *User) GetAll(w http.ResponseWriter, r *http.Request) {
+func (u *User) GetAll(w http.ResponseWriter, r *http.Request, user database.User) {
 	// FIX: should be admin only or just deleted
 	users, err := u.DB.GetUsers(r.Context())
 	if err != nil {
@@ -39,7 +39,7 @@ func (u *User) Create(w http.ResponseWriter, r *http.Request) {
 	responseWithJSON(w, 201, util.DatabaseUserToUser(user))
 }
 
-func (u *User) Delete(w http.ResponseWriter, r *http.Request) {
+func (u *User) Delete(w http.ResponseWriter, r *http.Request, user database.User) {
 	// TODO: Either, 1. only admins or 2. the user themselves should be able to delete their account
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -57,17 +57,17 @@ func (u *User) Delete(w http.ResponseWriter, r *http.Request) {
 	responseWithJSON(w, 204, struct{}{})
 }
 
-func (u *User) GetProfile(w http.ResponseWriter, r *http.Request) {
-	user, err := u.DB.GetUserProfileById(r.Context(), uuid.New()) // TODO: change uuid.New() to the logged user ID
+func (u *User) GetProfile(w http.ResponseWriter, r *http.Request, user database.User) {
+	dbUser, err := u.DB.GetUserProfileById(r.Context(), uuid.New()) // TODO: change uuid.New() to the logged user ID
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error getting user profile: %v", err))
 		return
 	}
 
-	responseWithJSON(w, 200, util.DatabaseUserToUser(user))
+	responseWithJSON(w, 200, util.DatabaseUserToUser(dbUser))
 }
 
-func (u *User) GetProfileById(w http.ResponseWriter, r *http.Request) {
+func (u *User) GetProfileById(w http.ResponseWriter, r *http.Request, user database.User) {
 	// TODO: Profile should return more data than just the user object
 	// NOTE: this endpoint might not be needed??
 	idStr := chi.URLParam(r, "id")
@@ -77,11 +77,11 @@ func (u *User) GetProfileById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := u.DB.GetUserProfileById(r.Context(), id)
+	dbUser, err := u.DB.GetUserProfileById(r.Context(), id)
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error getting user profile: %v", err))
 		return
 	}
 
-	responseWithJSON(w, 200, util.DatabaseUserToUser(user))
+	responseWithJSON(w, 200, util.DatabaseUserToUser(dbUser))
 }

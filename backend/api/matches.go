@@ -16,7 +16,7 @@ type Match struct {
 	DB *database.Queries
 }
 
-func (m *Match) Create(w http.ResponseWriter, r *http.Request) {
+func (m *Match) Create(w http.ResponseWriter, r *http.Request, user database.User) {
 	// TODO: change to the logged user ID
 	parsedId, err := uuid.Parse("80d60220-b829-4d7e-ae1d-22bc4a57b301")
 	if err != nil {
@@ -46,7 +46,7 @@ func (m *Match) Create(w http.ResponseWriter, r *http.Request) {
 	responseWithJSON(w, 201, util.DatabaseMatchToMatch(match))
 }
 
-func (m *Match) GetAll(w http.ResponseWriter, r *http.Request) {
+func (m *Match) GetAll(w http.ResponseWriter, r *http.Request, user database.User) {
 	// TODO: change to the logged user ID
 	id, err := uuid.Parse("80d60220-b829-4d7e-ae1d-22bc4a57b301")
 	if err != nil {
@@ -63,7 +63,7 @@ func (m *Match) GetAll(w http.ResponseWriter, r *http.Request) {
 	responseWithJSON(w, 200, util.DatabaseMatchesToMatches(matches))
 }
 
-func (m *Match) GetById(w http.ResponseWriter, r *http.Request) {
+func (m *Match) GetById(w http.ResponseWriter, r *http.Request, user database.User) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -81,7 +81,7 @@ func (m *Match) GetById(w http.ResponseWriter, r *http.Request) {
 	responseWithJSON(w, 200, util.DatabaseMatchToMatch(match))
 }
 
-func (m *Match) UpdateMatch(w http.ResponseWriter, r *http.Request) {
+func (m *Match) UpdateMatch(w http.ResponseWriter, r *http.Request, user database.User) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
