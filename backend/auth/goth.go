@@ -113,10 +113,17 @@ func createUserTokens(r *http.Request, db *database.Queries, user goth.User) (ma
 		return nil, err
 	}
 
-	refreshToken, _, err := util.CreateToken(dbUser.ID, dbUser.Email, refreshTokenExpiry)
+	refreshToken, refreshTokenClaims, err := util.CreateToken(dbUser.ID, dbUser.Email, refreshTokenExpiry)
 	if err != nil {
 		return nil, err
 	}
+
+	db.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
+		ID:        uuid.MustParse(refreshTokenClaims.RegisteredClaims.ID),
+		Token:     refreshToken,
+		UserID:    dbUser.ID,
+		ExpiresAt: time.Now().Add(refreshTokenExpiry),
+	})
 
 	response := map[string]string{
 		"access_token":  accessToken,
@@ -126,7 +133,7 @@ func createUserTokens(r *http.Request, db *database.Queries, user goth.User) (ma
 	return response, nil
 }
 
-func RefreshToken(w http.ResponseWriter, r *http.Request) {
+func RefreshToken(w http.ResponseWriter, r *http.Request, db *database.Queries) {
 	refreshToken, err := GetJWT(r.Header)
 	if err != nil {
 		http.Error(w, "Missing or invalid token", http.StatusUnauthorized)
@@ -141,6 +148,18 @@ func RefreshToken(w http.ResponseWriter, r *http.Request) {
 
 	if time.Unix(refreshClaims.ExpiresAt.Unix(), 0).Before(time.Now()) {
 		http.Error(w, "Refresh token has expired", http.StatusUnauthorized)
+		db.DeleteRefreshToken(r.Context(), uuid.MustParse(refreshClaims.RegisteredClaims.ID))
+		return
+	}
+
+	dbToken, err := db.GetRefreshTokenById(r.Context(), uuid.MustParse(refreshClaims.RegisteredClaims.ID))
+	if err != nil {
+		http.Error(w, "Failed to get refresh token", http.StatusInternalServerError)
+		return
+	}
+
+	if dbToken.Token != refreshToken {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
 	}
 

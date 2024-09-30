@@ -36,6 +36,14 @@ type Match struct {
 	UpdatedAt       sql.NullTime
 }
 
+type RefreshToken struct {
+	ID        uuid.UUID
+	Token     string
+	ExpiresAt time.Time
+	CreatedAt time.Time
+	UserID    uuid.UUID
+}
+
 type User struct {
 	ID        uuid.UUID
 	Name      string
