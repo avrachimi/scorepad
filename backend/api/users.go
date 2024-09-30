@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/avrachimi/scorepad/backend/internal/database"
+	"github.com/avrachimi/scorepad/backend/util"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
@@ -21,7 +22,7 @@ func (u *User) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseWithJSON(w, 200, users)
+	responseWithJSON(w, 200, util.DatabaseUsersToUsers(users))
 }
 
 func (u *User) Create(w http.ResponseWriter, r *http.Request) {
@@ -35,7 +36,7 @@ func (u *User) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseWithJSON(w, 201, user)
+	responseWithJSON(w, 201, util.DatabaseUserToUser(user))
 }
 
 func (u *User) Delete(w http.ResponseWriter, r *http.Request) {
@@ -63,7 +64,7 @@ func (u *User) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseWithJSON(w, 200, user)
+	responseWithJSON(w, 200, util.DatabaseUserToUser(user))
 }
 
 func (u *User) GetProfileById(w http.ResponseWriter, r *http.Request) {
@@ -82,5 +83,5 @@ func (u *User) GetProfileById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseWithJSON(w, 200, user)
+	responseWithJSON(w, 200, util.DatabaseUserToUser(user))
 }

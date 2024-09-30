@@ -49,10 +49,10 @@ type CreateMatchParams struct {
 	CreatedBy       uuid.UUID
 	Team1Score      int32
 	Team1Player1    uuid.UUID
-	Team1Player2    uuid.UUID
+	Team1Player2    uuid.NullUUID
 	Team2Score      int32
-	Team2Player1    uuid.UUID
-	Team2Player2    uuid.UUID
+	Team2Player1    uuid.NullUUID
+	Team2Player2    uuid.NullUUID
 }
 
 func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) (Match, error) {
@@ -229,10 +229,10 @@ type UpdateMatchParams struct {
 	DurationMinutes int32
 	Team1Score      int32
 	Team1Player1    uuid.UUID
-	Team1Player2    uuid.UUID
+	Team1Player2    uuid.NullUUID
 	Team2Score      int32
-	Team2Player1    uuid.UUID
-	Team2Player2    uuid.UUID
+	Team2Player1    uuid.NullUUID
+	Team2Player2    uuid.NullUUID
 }
 
 func (q *Queries) UpdateMatch(ctx context.Context, arg UpdateMatchParams) error {

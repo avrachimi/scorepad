@@ -72,6 +72,7 @@ func main() {
 	v1Router.Get("/matches", handler.Match.GetAll)
 	v1Router.Post("/matches", handler.Match.Create)
 	v1Router.Get("/matches/{id}", handler.Match.GetById)
+	v1Router.Put("/matches/{id}", handler.Match.UpdateMatch)
 
 	v1Router.Get("/friends", handler.Friendship.GetAll)
 

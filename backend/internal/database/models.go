@@ -28,10 +28,10 @@ type Match struct {
 	CreatedBy       uuid.UUID
 	Team1Score      int32
 	Team1Player1    uuid.UUID
-	Team1Player2    uuid.UUID
+	Team1Player2    uuid.NullUUID
 	Team2Score      int32
-	Team2Player1    uuid.UUID
-	Team2Player2    uuid.UUID
+	Team2Player1    uuid.NullUUID
+	Team2Player2    uuid.NullUUID
 	CreatedAt       time.Time
 	UpdatedAt       sql.NullTime
 }

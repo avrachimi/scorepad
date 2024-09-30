@@ -14,7 +14,19 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
+const (
+	MaxAge = 86400 * 30
+)
+
 func SetupAuth() {
+	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
+	store.MaxAge(MaxAge)
+	store.Options.Path = "/"
+	store.Options.HttpOnly = true
+	store.Options.Secure = os.Getenv("ENV") == "production"
+
+	gothic.Store = store
+
 	goth.UseProviders(
 		google.New(
 			os.Getenv("GOOGLE_CLIENT_ID"),
@@ -23,10 +35,6 @@ func SetupAuth() {
 			"email", "profile",
 		),
 	)
-
-	store := sessions.NewCookieStore([]byte(os.Getenv("SESSION_SECRET")))
-
-	gothic.Store = store
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
