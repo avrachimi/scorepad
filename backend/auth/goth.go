@@ -2,11 +2,14 @@ package auth
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/avrachimi/scorepad/backend/internal/database"
+	"github.com/avrachimi/scorepad/backend/util"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/markbates/goth"
@@ -62,8 +65,8 @@ func AuthCallback(w http.ResponseWriter, r *http.Request, db *database.Queries) 
 	}
 
 	dbUser, err := db.GetUserByEmail(r.Context(), user.Email)
+	// Create user account if it doesn't exist
 	if err != nil {
-		fmt.Println("User sign up")
 		imageUrl := sql.NullString{String: "", Valid: false}
 		if user.AvatarURL != "" {
 			imageUrl = sql.NullString{String: user.AvatarURL, Valid: true}
@@ -71,22 +74,71 @@ func AuthCallback(w http.ResponseWriter, r *http.Request, db *database.Queries) 
 
 		// TODO: validate other fields like name, email, etc. before creating the user
 
-		db.CreateUser(r.Context(), database.CreateUserParams{
+		dbUser, err = db.CreateUser(r.Context(), database.CreateUserParams{
 			ID:       uuid.New(),
 			Name:     user.Name,
 			Email:    user.Email,
 			ImageUrl: imageUrl,
 		})
+	}
 
-		w.Header().Set("Location", "/")
-		w.WriteHeader(http.StatusTemporaryRedirect)
+	const accessTokenExpiry = 15 * time.Minute     // 15 minutes
+	const refreshTokenExpiry = 30 * 24 * time.Hour // 30 days
+
+	accessToken, _, err := util.CreateToken(dbUser.ID, dbUser.Email, accessTokenExpiry)
+	if err != nil {
+		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
 		return
 	}
 
-	// TODO: setup JWT sessions
+	refreshToken, _, err := util.CreateToken(dbUser.ID, dbUser.Email, refreshTokenExpiry)
+	if err != nil {
+		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
+		return
+	}
 
-	fmt.Printf("User logged in: %v", dbUser)
-	w.Header().Set("Location", "/")
-	w.WriteHeader(http.StatusTemporaryRedirect)
+	// Return the tokens in the response (can also set them as cookies if needed)
+	response := map[string]string{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+	w.WriteHeader(http.StatusOK)
+
+	// fmt.Printf("User logged in: %v", dbUser)
+	// w.Header().Set("Location", "/")
+	// w.WriteHeader(http.StatusTemporaryRedirect)
 	return
+}
+
+func RefreshToken(w http.ResponseWriter, r *http.Request) {
+	refreshToken, err := GetJWT(r.Header)
+	if err != nil {
+		http.Error(w, "Missing or invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	refreshClaims, err := util.VerifyToken(refreshToken)
+	if err != nil {
+		http.Error(w, "Invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	if time.Unix(refreshClaims.ExpiresAt.Unix(), 0).Before(time.Now()) {
+		http.Error(w, "Refresh token has expired", http.StatusUnauthorized)
+		return
+	}
+
+	newAccessToken, _, err := util.CreateToken(refreshClaims.ID, refreshClaims.Email, time.Duration(15*time.Minute))
+	if err != nil {
+		http.Error(w, "Failed to generate new token", http.StatusInternalServerError)
+		return
+	}
+
+	response := map[string]string{
+		"access_token": newAccessToken,
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }

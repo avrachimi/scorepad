@@ -57,6 +57,7 @@ func main() {
 	auth.SetupAuth()
 	router.Get("/auth/signin", auth.SignIn)
 	router.Get("/auth/signout", auth.SignOut)
+	router.Get("/auth/refresh", auth.RefreshToken)
 	router.Get("/auth/{provider}/callback", func(w http.ResponseWriter, r *http.Request) {
 		auth.AuthCallback(w, r, db)
 	})
