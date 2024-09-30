@@ -41,6 +41,7 @@ func main() {
 		User:       api.User{DB: db},
 		Friendship: api.Friendship{DB: db},
 		Match:      api.Match{DB: db},
+		Auth:       auth.Auth{DB: db},
 	}
 
 	router := chi.NewRouter()
@@ -55,14 +56,10 @@ func main() {
 	}))
 
 	auth.SetupAuth()
-	router.Get("/auth/signin", auth.SignIn)
-	router.Get("/auth/signout", auth.SignOut)
-	router.Get("/auth/refresh", func(w http.ResponseWriter, r *http.Request) {
-		auth.RefreshToken(w, r, db)
-	})
-	router.Get("/auth/{provider}/callback", func(w http.ResponseWriter, r *http.Request) {
-		auth.AuthCallback(w, r, db)
-	})
+	router.Get("/auth/signin", handler.Auth.SignIn)
+	router.Get("/auth/signout", handler.MiddlewareAuth(handler.Auth.SignOut))
+	router.Get("/auth/refresh", handler.Auth.RefreshToken)
+	router.Get("/auth/{provider}/callback", handler.Auth.AuthCallback)
 
 	v1Router := chi.NewRouter()
 

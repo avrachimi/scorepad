@@ -17,6 +17,10 @@ import (
 	"github.com/markbates/goth/providers/google"
 )
 
+type Auth struct {
+	DB *database.Queries
+}
+
 const (
 	MaxAge = 86400 * 30
 )
@@ -40,37 +44,36 @@ func SetupAuth() {
 	)
 }
 
-func SignIn(w http.ResponseWriter, r *http.Request) {
-	// NOTE: commented out for now, need db access
-	// if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
-	// response, err := createUserTokens(r, db, gothUser)
-	// if err != nil {
-	// 	http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
-	// }
-	//
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(response)
-	// return
-	// } else {
-	// }
+func (a *Auth) SignIn(w http.ResponseWriter, r *http.Request) {
+	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
+		response, err := createUserTokens(r, a.DB, gothUser)
+		if err != nil {
+			http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
+		}
 
-	gothic.BeginAuthHandler(w, r)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(response)
+		return
+	} else {
+		gothic.BeginAuthHandler(w, r)
+	}
 }
 
-func SignOut(w http.ResponseWriter, r *http.Request) {
+func (a *Auth) SignOut(w http.ResponseWriter, r *http.Request, dbUser database.User) {
+	a.DB.DeleteRefreshTokensByUserId(r.Context(), dbUser.ID)
 	gothic.Logout(w, r)
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusTemporaryRedirect)
 }
 
-func AuthCallback(w http.ResponseWriter, r *http.Request, db *database.Queries) {
+func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	response, err := createUserTokens(r, db, user)
+	response, err := createUserTokens(r, a.DB, user)
 	if err != nil {
 		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
 	}
@@ -133,7 +136,7 @@ func createUserTokens(r *http.Request, db *database.Queries, user goth.User) (ma
 	return response, nil
 }
 
-func RefreshToken(w http.ResponseWriter, r *http.Request, db *database.Queries) {
+func (a *Auth) RefreshToken(w http.ResponseWriter, r *http.Request) {
 	refreshToken, err := GetJWT(r.Header)
 	if err != nil {
 		http.Error(w, "Missing or invalid token", http.StatusUnauthorized)
@@ -148,11 +151,11 @@ func RefreshToken(w http.ResponseWriter, r *http.Request, db *database.Queries) 
 
 	if time.Unix(refreshClaims.ExpiresAt.Unix(), 0).Before(time.Now()) {
 		http.Error(w, "Refresh token has expired", http.StatusUnauthorized)
-		db.DeleteRefreshToken(r.Context(), uuid.MustParse(refreshClaims.RegisteredClaims.ID))
+		a.DB.DeleteRefreshToken(r.Context(), uuid.MustParse(refreshClaims.RegisteredClaims.ID))
 		return
 	}
 
-	dbToken, err := db.GetRefreshTokenById(r.Context(), uuid.MustParse(refreshClaims.RegisteredClaims.ID))
+	dbToken, err := a.DB.GetRefreshTokenById(r.Context(), uuid.MustParse(refreshClaims.RegisteredClaims.ID))
 	if err != nil {
 		http.Error(w, "Failed to get refresh token", http.StatusInternalServerError)
 		return
