@@ -17,25 +17,37 @@ type Match struct {
 }
 
 func (m *Match) Create(w http.ResponseWriter, r *http.Request, user database.User) {
-	// TODO: change to the logged user ID
-	parsedId, err := uuid.Parse("80d60220-b829-4d7e-ae1d-22bc4a57b301")
+	type parameters struct {
+		MatchDate       time.Time     `json:"match_date"`
+		DurationMinutes int32         `json:"duration_minutes"`
+		Team1Score      int32         `json:"team1_score"`
+		Team1Player1    uuid.UUID     `json:"team1_player1"`
+		Team1Player2    uuid.NullUUID `json:"team1_player2"`
+		Team2Score      int32         `json:"team2_score"`
+		Team2Player1    uuid.NullUUID `json:"team2_player1"`
+		Team2Player2    uuid.NullUUID `json:"team2_player2"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	params := parameters{}
+	err := decoder.Decode(&params)
 	if err != nil {
-		responseWithError(w, 400, fmt.Sprintf("Error parsing user ID: %v", err))
+		responseWithError(w, 400, fmt.Sprint("Error parsing JSON:", err))
 		return
 	}
-	id := uuid.NullUUID{UUID: parsedId, Valid: true}
 
 	match, err := m.DB.CreateMatch(r.Context(), database.CreateMatchParams{
 		ID:              uuid.New(),
 		MatchDate:       time.Now().UTC(),
 		DurationMinutes: 30,
-		CreatedBy:       parsedId, // TODO: fix this once we retrieve the proper data
+		CreatedBy:       user.ID,
 		Team1Score:      3,
-		Team1Player1:    parsedId,
-		Team1Player2:    id,
+		Team1Player1:    params.Team1Player1,
+		Team1Player2:    params.Team1Player2,
 		Team2Score:      6,
-		Team2Player1:    uuid.NullUUID{Valid: false},
-		Team2Player2:    id,
+		Team2Player1:    params.Team2Player1,
+		Team2Player2:    params.Team2Player2,
 	})
 
 	if err != nil {
@@ -47,14 +59,7 @@ func (m *Match) Create(w http.ResponseWriter, r *http.Request, user database.Use
 }
 
 func (m *Match) GetAll(w http.ResponseWriter, r *http.Request, user database.User) {
-	// TODO: change to the logged user ID
-	id, err := uuid.Parse("80d60220-b829-4d7e-ae1d-22bc4a57b301")
-	if err != nil {
-		responseWithError(w, 400, fmt.Sprintf("Error parsing user ID: %v", err))
-		return
-	}
-
-	matches, err := m.DB.GetMatchesForUserId(r.Context(), id)
+	matches, err := m.DB.GetMatchesForUserId(r.Context(), user.ID)
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error getting matches: %v", err))
 		return
@@ -71,8 +76,7 @@ func (m *Match) GetById(w http.ResponseWriter, r *http.Request, user database.Us
 		return
 	}
 
-	// TODO: maybe worth checking if the user is allowed to see this match
-	match, err := m.DB.GetMatchById(r.Context(), id)
+	match, err := m.DB.GetMatchById(r.Context(), database.GetMatchByIdParams{ID: id, UserID: user.ID})
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error getting match: %v", err))
 		return

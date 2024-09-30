@@ -13,9 +13,12 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, name, email, image_url)
-VALUES ($1, $2, $3, $4)
-RETURNING id, name, email, image_url, created_at, updated_at
+INSERT INTO
+  users (id, name, email, image_url)
+VALUES
+  ($1, $2, $3, $4)
+RETURNING
+  id, name, email, image_url, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -45,7 +48,9 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users WHERE id = $1
+DELETE FROM users
+WHERE
+  id = $1
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
@@ -54,7 +59,12 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, email, image_url, created_at, updated_at FROM users WHERE email = $1
+SELECT
+  id, name, email, image_url, created_at, updated_at
+FROM
+  users
+WHERE
+  email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -72,7 +82,12 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, name, email, image_url, created_at, updated_at FROM users WHERE id = $1
+SELECT
+  id, name, email, image_url, created_at, updated_at
+FROM
+  users
+WHERE
+  id = $1
 `
 
 func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
@@ -90,7 +105,12 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserProfileById = `-- name: GetUserProfileById :one
-SELECT id, name, email, image_url, created_at, updated_at FROM users WHERE id = $1
+SELECT
+  id, name, email, image_url, created_at, updated_at
+FROM
+  users
+WHERE
+  id = $1
 `
 
 func (q *Queries) GetUserProfileById(ctx context.Context, id uuid.UUID) (User, error) {
@@ -108,7 +128,10 @@ func (q *Queries) GetUserProfileById(ctx context.Context, id uuid.UUID) (User, e
 }
 
 const getUsers = `-- name: GetUsers :many
-SELECT id, name, email, image_url, created_at, updated_at FROM users
+SELECT
+  id, name, email, image_url, created_at, updated_at
+FROM
+  users
 `
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {

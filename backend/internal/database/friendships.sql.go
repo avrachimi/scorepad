@@ -14,8 +14,11 @@ import (
 
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
 UPDATE friendships
-SET status = 'accepted', accepted_on = NOW()
-WHERE id = $1
+SET
+  status = 'accepted',
+  accepted_on = NOW()
+WHERE
+  id = $1
 `
 
 func (q *Queries) AcceptFriendRequest(ctx context.Context, id uuid.UUID) error {
@@ -24,17 +27,25 @@ func (q *Queries) AcceptFriendRequest(ctx context.Context, id uuid.UUID) error {
 }
 
 const getFriendRequests = `-- name: GetFriendRequests :many
-SELECT 
-    u.id,
-    u.name,
-    u.email,
-    u.image_url,
-    f.id AS friendship_id
-FROM friendships f
-JOIN users u ON (u.id = f.member1_id OR u.id = f.member2_id)
-WHERE (f.member1_id = $1 OR f.member2_id = $1)
-    AND f.status = 'pending'
-    AND u.id != $1
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  u.image_url,
+  f.id AS friendship_id
+FROM
+  friendships f
+  JOIN users u ON (
+    u.id = f.member1_id
+    OR u.id = f.member2_id
+  )
+WHERE
+  (
+    f.member1_id = $1
+    OR f.member2_id = $1
+  )
+  AND f.status = 'pending'
+  AND u.id != $1
 `
 
 type GetFriendRequestsRow struct {
@@ -75,16 +86,24 @@ func (q *Queries) GetFriendRequests(ctx context.Context, member1ID uuid.UUID) ([
 }
 
 const getFriends = `-- name: GetFriends :many
-SELECT 
-    u.id,
-    u.name,
-    u.email,
-    u.image_url
-FROM friendships f
-JOIN users u ON (u.id = f.member1_id OR u.id = f.member2_id)
-WHERE (f.member1_id = $1 OR f.member2_id = $1)
-    AND f.status = 'accepted'
-    AND u.id != $1
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  u.image_url
+FROM
+  friendships f
+  JOIN users u ON (
+    u.id = f.member1_id
+    OR u.id = f.member2_id
+  )
+WHERE
+  (
+    f.member1_id = $1
+    OR f.member2_id = $1
+  )
+  AND f.status = 'accepted'
+  AND u.id != $1
 `
 
 type GetFriendsRow struct {
@@ -124,8 +143,15 @@ func (q *Queries) GetFriends(ctx context.Context, member1ID uuid.UUID) ([]GetFri
 
 const removeFriend = `-- name: RemoveFriend :exec
 DELETE FROM friendships
-WHERE (member1_id = $1 AND member2_id = $2)
-    OR (member1_id = $2 AND member2_id = $1)
+WHERE
+  (
+    member1_id = $1
+    AND member2_id = $2
+  )
+  OR (
+    member1_id = $2
+    AND member2_id = $1
+  )
 `
 
 type RemoveFriendParams struct {
@@ -139,9 +165,12 @@ func (q *Queries) RemoveFriend(ctx context.Context, arg RemoveFriendParams) erro
 }
 
 const sendFriendRequest = `-- name: SendFriendRequest :one
-INSERT INTO friendships (id, member1_id, member2_id, status)
-VALUES ($1, $2, $3, 'pending')
-RETURNING id, member1_id, member2_id, status, accepted_on, created_at, updated_at
+INSERT INTO
+  friendships (id, member1_id, member2_id, status)
+VALUES
+  ($1, $2, $3, 'pending')
+RETURNING
+  id, member1_id, member2_id, status, accepted_on, created_at, updated_at
 `
 
 type SendFriendRequestParams struct {

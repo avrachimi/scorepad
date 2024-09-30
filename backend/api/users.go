@@ -40,11 +40,15 @@ func (u *User) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u *User) Delete(w http.ResponseWriter, r *http.Request, user database.User) {
-	// TODO: Either, 1. only admins or 2. the user themselves should be able to delete their account
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
 		responseWithError(w, 400, fmt.Sprintf("Error parsing user ID: %v", err))
+		return
+	}
+
+	if id != user.ID {
+		responseWithError(w, 403, "You are not allowed to delete this user")
 		return
 	}
 
@@ -58,7 +62,7 @@ func (u *User) Delete(w http.ResponseWriter, r *http.Request, user database.User
 }
 
 func (u *User) GetProfile(w http.ResponseWriter, r *http.Request, user database.User) {
-	dbUser, err := u.DB.GetUserProfileById(r.Context(), uuid.New()) // TODO: change uuid.New() to the logged user ID
+	dbUser, err := u.DB.GetUserProfileById(r.Context(), user.ID)
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error getting user profile: %v", err))
 		return

@@ -13,33 +13,23 @@ import (
 )
 
 const createMatch = `-- name: CreateMatch :one
-INSERT INTO matches 
-(
-    id, 
-    match_date, 
-    duration_minutes, 
+INSERT INTO
+  matches (
+    id,
+    match_date,
+    duration_minutes,
     created_by,
-    team1_score, 
-    team1_player1, 
-    team1_player2, 
-    team2_score, 
-    team2_player1, 
-    team2_player2 
-)
-VALUES 
-(
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6,
-    $7,
-    $8,
-    $9,
-    $10
-)
-RETURNING id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
+    team1_score,
+    team1_player1,
+    team1_player2,
+    team2_score,
+    team2_player1,
+    team2_player2
+  )
+VALUES
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+RETURNING
+  id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
 `
 
 type CreateMatchParams struct {
@@ -87,8 +77,9 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) (Match
 }
 
 const deleteMatch = `-- name: DeleteMatch :exec
-DELETE FROM matches 
-WHERE id = $1
+DELETE FROM matches
+WHERE
+  id = $1
 `
 
 func (q *Queries) DeleteMatch(ctx context.Context, id uuid.UUID) error {
@@ -97,12 +88,29 @@ func (q *Queries) DeleteMatch(ctx context.Context, id uuid.UUID) error {
 }
 
 const getMatchById = `-- name: GetMatchById :one
-SELECT id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at FROM matches 
-WHERE id = $1
+SELECT
+  id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
+FROM
+  matches
+WHERE
+  id = $1
+  AND (
+    created_by = $2::uuid
+    OR team1_player1 = $2::uuid
+    OR team1_player2 = $2::uuid
+    OR team2_player1 = $2::uuid
+    OR team2_player2 = $2::uuid
+  )
 `
 
-func (q *Queries) GetMatchById(ctx context.Context, id uuid.UUID) (Match, error) {
-	row := q.db.QueryRowContext(ctx, getMatchById, id)
+type GetMatchByIdParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+// params: id uuid, userID uuid
+func (q *Queries) GetMatchById(ctx context.Context, arg GetMatchByIdParams) (Match, error) {
+	row := q.db.QueryRowContext(ctx, getMatchById, arg.ID, arg.UserID)
 	var i Match
 	err := row.Scan(
 		&i.ID,
@@ -122,12 +130,16 @@ func (q *Queries) GetMatchById(ctx context.Context, id uuid.UUID) (Match, error)
 }
 
 const getMatchesForUserId = `-- name: GetMatchesForUserId :many
-SELECT id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at FROM matches
-WHERE created_by = $1
-    OR team1_player1 = $1
-    OR team1_player2 = $1
-    OR team2_player1 = $1
-    OR team2_player2 = $1
+SELECT
+  id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
+FROM
+  matches
+WHERE
+  created_by = $1
+  OR team1_player1 = $1
+  OR team1_player2 = $1
+  OR team2_player1 = $1
+  OR team2_player2 = $1
 `
 
 func (q *Queries) GetMatchesForUserId(ctx context.Context, createdBy uuid.UUID) ([]Match, error) {
@@ -167,10 +179,16 @@ func (q *Queries) GetMatchesForUserId(ctx context.Context, createdBy uuid.UUID) 
 }
 
 const getRecentMatches = `-- name: GetRecentMatches :many
-SELECT id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at FROM matches 
-WHERE match_date > NOW() - INTERVAL '1 week' 
-ORDER BY match_date DESC 
-LIMIT 10
+SELECT
+  id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
+FROM
+  matches
+WHERE
+  match_date > NOW() - INTERVAL '1 week'
+ORDER BY
+  match_date DESC
+LIMIT
+  10
 `
 
 func (q *Queries) GetRecentMatches(ctx context.Context) ([]Match, error) {
@@ -211,16 +229,18 @@ func (q *Queries) GetRecentMatches(ctx context.Context) ([]Match, error) {
 
 const updateMatch = `-- name: UpdateMatch :exec
 UPDATE matches
-SET match_date = $2,
-    duration_minutes = $3,
-    team1_score = $4,
-    team1_player1 = $5,
-    team1_player2 = $6,
-    team2_score = $7,
-    team2_player1 = $8,
-    team2_player2 = $9,
-    updated_at = NOW()
-WHERE id = $1
+SET
+  match_date = $2,
+  duration_minutes = $3,
+  team1_score = $4,
+  team1_player1 = $5,
+  team1_player2 = $6,
+  team2_score = $7,
+  team2_player1 = $8,
+  team2_player2 = $9,
+  updated_at = NOW()
+WHERE
+  id = $1
 `
 
 type UpdateMatchParams struct {

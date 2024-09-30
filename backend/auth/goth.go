@@ -3,7 +3,7 @@ package auth
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"net/http"
 	"os"
 	"time"
@@ -41,14 +41,20 @@ func SetupAuth() {
 }
 
 func SignIn(w http.ResponseWriter, r *http.Request) {
-	// try to get the user without re-authenticating
-	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
-		// TODO: setup JWT sessions
-		// NOTE: should be a function so that it's called below as well
-		fmt.Printf("User logged in: %v", gothUser)
-	} else {
-		gothic.BeginAuthHandler(w, r)
-	}
+	// NOTE: commented out for now, need db access
+	// if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
+	// response, err := createUserTokens(r, db, gothUser)
+	// if err != nil {
+	// 	http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
+	// }
+	//
+	// w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(response)
+	// return
+	// } else {
+	// }
+
+	gothic.BeginAuthHandler(w, r)
 }
 
 func SignOut(w http.ResponseWriter, r *http.Request) {
@@ -64,15 +70,32 @@ func AuthCallback(w http.ResponseWriter, r *http.Request, db *database.Queries) 
 		return
 	}
 
+	response, err := createUserTokens(r, db, user)
+	if err != nil {
+		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+	return
+}
+
+func createUserTokens(r *http.Request, db *database.Queries, user goth.User) (map[string]string, error) {
+
 	dbUser, err := db.GetUserByEmail(r.Context(), user.Email)
-	// Create user account if it doesn't exist
 	if err != nil {
 		imageUrl := sql.NullString{String: "", Valid: false}
 		if user.AvatarURL != "" {
 			imageUrl = sql.NullString{String: user.AvatarURL, Valid: true}
 		}
 
-		// TODO: validate other fields like name, email, etc. before creating the user
+		if user.Name == "" {
+			return nil, errors.New("Name is required")
+		}
+
+		if user.Email == "" {
+			return nil, errors.New("Email is required")
+		}
 
 		dbUser, err = db.CreateUser(r.Context(), database.CreateUserParams{
 			ID:       uuid.New(),
@@ -87,29 +110,20 @@ func AuthCallback(w http.ResponseWriter, r *http.Request, db *database.Queries) 
 
 	accessToken, _, err := util.CreateToken(dbUser.ID, dbUser.Email, accessTokenExpiry)
 	if err != nil {
-		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
 	refreshToken, _, err := util.CreateToken(dbUser.ID, dbUser.Email, refreshTokenExpiry)
 	if err != nil {
-		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
-		return
+		return nil, err
 	}
 
-	// Return the tokens in the response (can also set them as cookies if needed)
 	response := map[string]string{
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	}
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-	w.WriteHeader(http.StatusOK)
 
-	// fmt.Printf("User logged in: %v", dbUser)
-	// w.Header().Set("Location", "/")
-	// w.WriteHeader(http.StatusTemporaryRedirect)
-	return
+	return response, nil
 }
 
 func RefreshToken(w http.ResponseWriter, r *http.Request) {
