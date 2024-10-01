@@ -54,6 +54,11 @@ func main() {
 		MaxAge:           300,
 	}))
 
+	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("OK"))
+	})
+
 	auth.SetupAuth()
 	router.Get("/auth/signin", handler.Auth.SignIn)
 	router.Get("/auth/signout", handler.MiddlewareAuth(handler.Auth.SignOut))

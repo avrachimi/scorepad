@@ -20,7 +20,7 @@ COPY --from=build /app/myapp .
 
 EXPOSE 3000
 
-HEALTHCHECK CMD curl --fail http://localhost:3000 || exit 1
+HEALTHCHECK CMD wget -q --spider http://localhost:3000/health || exit 1
 
 CMD ["./myapp"]
 
