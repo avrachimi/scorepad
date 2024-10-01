@@ -88,7 +88,7 @@ func main() {
 		Addr:    ":" + port,
 	}
 
-	log.Printf("Server started on port %s", "8080")
+	log.Printf("Server started on port %s", port)
 
 	err = srv.ListenAndServe()
 	if err != nil {

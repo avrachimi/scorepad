@@ -39,13 +39,13 @@ func (m *Match) Create(w http.ResponseWriter, r *http.Request, user database.Use
 
 	match, err := m.DB.CreateMatch(r.Context(), database.CreateMatchParams{
 		ID:              uuid.New(),
-		MatchDate:       time.Now().UTC(),
-		DurationMinutes: 30,
+		MatchDate:       params.MatchDate,
+		DurationMinutes: params.DurationMinutes,
 		CreatedBy:       user.ID,
-		Team1Score:      3,
+		Team1Score:      params.Team1Score,
 		Team1Player1:    params.Team1Player1,
 		Team1Player2:    params.Team1Player2,
-		Team2Score:      6,
+		Team2Score:      params.Team2Score,
 		Team2Player1:    params.Team2Player1,
 		Team2Player2:    params.Team2Player2,
 	})
@@ -65,7 +65,7 @@ func (m *Match) GetAll(w http.ResponseWriter, r *http.Request, user database.Use
 		return
 	}
 
-	responseWithJSON(w, 200, util.DatabaseMatchesToMatches(matches))
+	responseWithJSON(w, 200, util.DatabaseMatchForUserRowsToMatches(matches))
 }
 
 func (m *Match) GetById(w http.ResponseWriter, r *http.Request, user database.User) {
@@ -76,13 +76,13 @@ func (m *Match) GetById(w http.ResponseWriter, r *http.Request, user database.Us
 		return
 	}
 
-	match, err := m.DB.GetMatchById(r.Context(), database.GetMatchByIdParams{ID: id, UserID: user.ID})
+	match, err := m.DB.GetMatchById(r.Context(), id)
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error getting match: %v", err))
 		return
 	}
 
-	responseWithJSON(w, 200, util.DatabaseMatchToMatch(match))
+	responseWithJSON(w, 200, util.DatabaseMatchByIdRowToMatch(match))
 }
 
 func (m *Match) UpdateMatch(w http.ResponseWriter, r *http.Request, user database.User) {

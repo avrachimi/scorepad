@@ -1,6 +1,7 @@
 package util
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/avrachimi/scorepad/backend/internal/database"
@@ -16,6 +17,13 @@ type User struct {
 	UpdatedAt *time.Time `json:"updated_at"`
 }
 
+type Player struct {
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	ImageUrl *string   `json:"image_url"`
+	Email    string    `json:"email"`
+}
+
 type Match struct {
 	ID              uuid.UUID  `json:"id"`
 	MatchDate       string     `json:"match_date"`
@@ -27,6 +35,21 @@ type Match struct {
 	Team2Score      int32      `json:"team2_score"`
 	Team2Player1    *uuid.UUID `json:"team2_player1"`
 	Team2Player2    *uuid.UUID `json:"team2_player2"`
+	CreatedAt       time.Time  `json:"created_at"`
+	UpdatedAt       *time.Time `json:"updated_at"`
+}
+
+type MatchByIdRow struct {
+	ID              uuid.UUID  `json:"id"`
+	MatchDate       string     `json:"match_date"`
+	DurationMinutes int32      `json:"duration_minutes"`
+	CreatedBy       Player     `json:"created_by"`
+	Team1Score      int32      `json:"team1_score"`
+	Team1Player1    Player     `json:"team1_player1"`
+	Team1Player2    *Player    `json:"team1_player2"`
+	Team2Score      int32      `json:"team2_score"`
+	Team2Player1    *Player    `json:"team2_player1"`
+	Team2Player2    *Player    `json:"team2_player2"`
 	CreatedAt       time.Time  `json:"created_at"`
 	UpdatedAt       *time.Time `json:"updated_at"`
 }
@@ -72,6 +95,16 @@ func DatabaseUsersToUsers(dbUsers []database.User) []User {
 	return users
 }
 
+func getPlayerFromJson(playerJson []byte) Player {
+	var player Player
+	err := json.Unmarshal(playerJson, &player)
+	if err != nil {
+		panic(err)
+	}
+
+	return player
+}
+
 func DatabaseMatchToMatch(dbMatch database.Match) Match {
 	var team1Player2 *uuid.UUID
 	var team2Player1 *uuid.UUID
@@ -115,6 +148,78 @@ func DatabaseMatchesToMatches(dbMatches []database.Match) []Match {
 
 	for _, dbMatch := range dbMatches {
 		matches = append(matches, DatabaseMatchToMatch(dbMatch))
+	}
+
+	return matches
+}
+
+func DatabaseMatchByIdRowToMatch(dbMatch database.GetMatchByIdRow) MatchByIdRow {
+	var team1Player2 *Player
+	var team2Player1 *Player
+	var team2Player2 *Player
+	var updatedAt *time.Time
+
+	team1Player1 := getPlayerFromJson(dbMatch.Team1Player1_2)
+	if dbMatch.Team1Player2.Valid {
+		player2 := getPlayerFromJson(dbMatch.Team1Player2_2)
+		team1Player2 = &player2
+	}
+
+	if dbMatch.Team2Player1.Valid {
+		player1 := getPlayerFromJson(dbMatch.Team2Player1_2)
+		team2Player1 = &player1
+	}
+
+	if dbMatch.Team2Player2.Valid {
+		player2 := getPlayerFromJson(dbMatch.Team2Player2_2)
+		team2Player2 = &player2
+	}
+
+	if dbMatch.UpdatedAt.Valid {
+		updatedAt = &dbMatch.UpdatedAt.Time
+	}
+
+	createdByPlayer := getPlayerFromJson(dbMatch.CreatedBy_2)
+
+	return MatchByIdRow{
+		ID:              dbMatch.ID,
+		MatchDate:       dbMatch.MatchDate.Format(time.RFC3339),
+		DurationMinutes: dbMatch.DurationMinutes,
+		CreatedBy:       createdByPlayer,
+		Team1Score:      dbMatch.Team1Score,
+		Team1Player1:    team1Player1,
+		Team1Player2:    team1Player2,
+		Team2Score:      dbMatch.Team2Score,
+		Team2Player1:    team2Player1,
+		Team2Player2:    team2Player2,
+		CreatedAt:       dbMatch.CreatedAt,
+		UpdatedAt:       updatedAt,
+	}
+}
+
+func DatabaseMatchForUserRowsToMatches(dbMatches []database.GetMatchesForUserIdRow) []MatchByIdRow {
+	matches := []MatchByIdRow{}
+
+	for _, dbMatch := range dbMatches {
+		matches = append(matches, DatabaseMatchByIdRowToMatch(database.GetMatchByIdRow{
+			ID:              dbMatch.ID,
+			MatchDate:       dbMatch.MatchDate,
+			DurationMinutes: dbMatch.DurationMinutes,
+			CreatedBy:       dbMatch.CreatedBy,
+			Team1Score:      dbMatch.Team1Score,
+			Team1Player1:    dbMatch.Team1Player1,
+			Team1Player2:    dbMatch.Team1Player2,
+			Team2Score:      dbMatch.Team2Score,
+			Team2Player1:    dbMatch.Team2Player1,
+			Team2Player2:    dbMatch.Team2Player2,
+			CreatedAt:       dbMatch.CreatedAt,
+			UpdatedAt:       dbMatch.UpdatedAt,
+			Team1Player1_2:  []byte(dbMatch.Team1Player1_2),
+			Team1Player2_2:  []byte(dbMatch.Team1Player2_2),
+			Team2Player1_2:  []byte(dbMatch.Team2Player1_2),
+			Team2Player2_2:  []byte(dbMatch.Team2Player2_2),
+			CreatedBy_2:     []byte(dbMatch.CreatedBy_2),
+		}))
 	}
 
 	return matches

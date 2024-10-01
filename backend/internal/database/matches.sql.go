@@ -7,6 +7,8 @@ package database
 
 import (
 	"context"
+	"database/sql"
+	"encoding/json"
 	"time"
 
 	"github.com/google/uuid"
@@ -80,38 +82,106 @@ const deleteMatch = `-- name: DeleteMatch :exec
 DELETE FROM matches
 WHERE
   id = $1
+  AND created_by = $2::uuid
 `
 
-func (q *Queries) DeleteMatch(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, deleteMatch, id)
+type DeleteMatchParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) DeleteMatch(ctx context.Context, arg DeleteMatchParams) error {
+	_, err := q.db.ExecContext(ctx, deleteMatch, arg.ID, arg.UserID)
 	return err
 }
 
 const getMatchById = `-- name: GetMatchById :one
 SELECT
-  id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
+  m.id, m.match_date, m.duration_minutes, m.created_by, m.team1_score, m.team1_player1, m.team1_player2, m.team2_score, m.team2_player1, m.team2_player2, m.created_at, m.updated_at,
+  json_build_object(
+    'id',
+    u1.id,
+    'name',
+    u1.name,
+    'email',
+    u1.email,
+    'image_url',
+    u1.image_url
+  ) AS team1_player1,
+  json_build_object(
+    'id',
+    u2.id,
+    'name',
+    u2.name,
+    'email',
+    u2.email,
+    'image_url',
+    u2.image_url
+  ) AS team1_player2,
+  json_build_object(
+    'id',
+    u3.id,
+    'name',
+    u3.name,
+    'email',
+    u3.email,
+    'image_url',
+    u3.image_url
+  ) AS team2_player1,
+  json_build_object(
+    'id',
+    u4.id,
+    'name',
+    u4.name,
+    'email',
+    u4.email,
+    'image_url',
+    u4.image_url
+  ) AS team2_player2,
+  json_build_object(
+    'id',
+    u5.id,
+    'name',
+    u5.name,
+    'email',
+    u5.email,
+    'image_url',
+    u5.image_url
+  ) AS created_by
 FROM
-  matches
+  matches m
+  LEFT JOIN users u1 ON m.team1_player1 = u1.id
+  LEFT JOIN users u2 ON m.team1_player2 = u2.id
+  LEFT JOIN users u3 ON m.team2_player1 = u3.id
+  LEFT JOIN users u4 ON m.team2_player2 = u4.id
+  LEFT JOIN users u5 ON m.created_by = u5.id
 WHERE
-  id = $1
-  AND (
-    created_by = $2::uuid
-    OR team1_player1 = $2::uuid
-    OR team1_player2 = $2::uuid
-    OR team2_player1 = $2::uuid
-    OR team2_player2 = $2::uuid
-  )
+  m.id = $1
 `
 
-type GetMatchByIdParams struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
+type GetMatchByIdRow struct {
+	ID              uuid.UUID
+	MatchDate       time.Time
+	DurationMinutes int32
+	CreatedBy       uuid.UUID
+	Team1Score      int32
+	Team1Player1    uuid.UUID
+	Team1Player2    uuid.NullUUID
+	Team2Score      int32
+	Team2Player1    uuid.NullUUID
+	Team2Player2    uuid.NullUUID
+	CreatedAt       time.Time
+	UpdatedAt       sql.NullTime
+	Team1Player1_2  json.RawMessage
+	Team1Player2_2  json.RawMessage
+	Team2Player1_2  json.RawMessage
+	Team2Player2_2  json.RawMessage
+	CreatedBy_2     json.RawMessage
 }
 
-// params: id uuid, userID uuid
-func (q *Queries) GetMatchById(ctx context.Context, arg GetMatchByIdParams) (Match, error) {
-	row := q.db.QueryRowContext(ctx, getMatchById, arg.ID, arg.UserID)
-	var i Match
+func (q *Queries) GetMatchById(ctx context.Context, id uuid.UUID) (GetMatchByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getMatchById, id)
+	var i GetMatchByIdRow
 	err := row.Scan(
 		&i.ID,
 		&i.MatchDate,
@@ -125,32 +195,114 @@ func (q *Queries) GetMatchById(ctx context.Context, arg GetMatchByIdParams) (Mat
 		&i.Team2Player2,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Team1Player1_2,
+		&i.Team1Player2_2,
+		&i.Team2Player1_2,
+		&i.Team2Player2_2,
+		&i.CreatedBy_2,
 	)
 	return i, err
 }
 
 const getMatchesForUserId = `-- name: GetMatchesForUserId :many
 SELECT
-  id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
+  m.id, m.match_date, m.duration_minutes, m.created_by, m.team1_score, m.team1_player1, m.team1_player2, m.team2_score, m.team2_player1, m.team2_player2, m.created_at, m.updated_at,
+  json_build_object(
+    'id',
+    u1.id,
+    'name',
+    u1.name,
+    'email',
+    u1.email,
+    'image_url',
+    u1.image_url
+  ) AS team1_player1,
+  json_build_object(
+    'id',
+    u2.id,
+    'name',
+    u2.name,
+    'email',
+    u2.email,
+    'image_url',
+    u2.image_url
+  ) AS team1_player2,
+  json_build_object(
+    'id',
+    u3.id,
+    'name',
+    u3.name,
+    'email',
+    u3.email,
+    'image_url',
+    u3.image_url
+  ) AS team2_player1,
+  json_build_object(
+    'id',
+    u4.id,
+    'name',
+    u4.name,
+    'email',
+    u4.email,
+    'image_url',
+    u4.image_url
+  ) AS team2_player2,
+  json_build_object(
+    'id',
+    u5.id,
+    'name',
+    u5.name,
+    'email',
+    u5.email,
+    'image_url',
+    u5.image_url
+  ) AS created_by
 FROM
-  matches
+  matches m
+  LEFT JOIN users u1 ON m.team1_player1 = u1.id
+  LEFT JOIN users u2 ON m.team1_player2 = u2.id
+  LEFT JOIN users u3 ON m.team2_player1 = u3.id
+  LEFT JOIN users u4 ON m.team2_player2 = u4.id
+  LEFT JOIN users u5 ON m.created_by = u5.id
 WHERE
-  created_by = $1
-  OR team1_player1 = $1
-  OR team1_player2 = $1
-  OR team2_player1 = $1
-  OR team2_player2 = $1
+  m.created_by = $1
+  OR m.team1_player1 = $1
+  OR m.team1_player2 = $1
+  OR m.team2_player1 = $1
+  OR m.team2_player2 = $1
+ORDER BY
+  m.match_date DESC
 `
 
-func (q *Queries) GetMatchesForUserId(ctx context.Context, createdBy uuid.UUID) ([]Match, error) {
+type GetMatchesForUserIdRow struct {
+	ID              uuid.UUID
+	MatchDate       time.Time
+	DurationMinutes int32
+	CreatedBy       uuid.UUID
+	Team1Score      int32
+	Team1Player1    uuid.UUID
+	Team1Player2    uuid.NullUUID
+	Team2Score      int32
+	Team2Player1    uuid.NullUUID
+	Team2Player2    uuid.NullUUID
+	CreatedAt       time.Time
+	UpdatedAt       sql.NullTime
+	Team1Player1_2  json.RawMessage
+	Team1Player2_2  json.RawMessage
+	Team2Player1_2  json.RawMessage
+	Team2Player2_2  json.RawMessage
+	CreatedBy_2     json.RawMessage
+}
+
+func (q *Queries) GetMatchesForUserId(ctx context.Context, createdBy uuid.UUID) ([]GetMatchesForUserIdRow, error) {
 	rows, err := q.db.QueryContext(ctx, getMatchesForUserId, createdBy)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Match
+	var items []GetMatchesForUserIdRow
 	for rows.Next() {
-		var i Match
+		var i GetMatchesForUserIdRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.MatchDate,
@@ -164,6 +316,11 @@ func (q *Queries) GetMatchesForUserId(ctx context.Context, createdBy uuid.UUID) 
 			&i.Team2Player2,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Team1Player1_2,
+			&i.Team1Player2_2,
+			&i.Team2Player1_2,
+			&i.Team2Player2_2,
+			&i.CreatedBy_2,
 		); err != nil {
 			return nil, err
 		}
@@ -178,28 +335,110 @@ func (q *Queries) GetMatchesForUserId(ctx context.Context, createdBy uuid.UUID) 
 	return items, nil
 }
 
-const getRecentMatches = `-- name: GetRecentMatches :many
+const getRecentMatchesForUserId = `-- name: GetRecentMatchesForUserId :many
 SELECT
-  id, match_date, duration_minutes, created_by, team1_score, team1_player1, team1_player2, team2_score, team2_player1, team2_player2, created_at, updated_at
+  m.id, m.match_date, m.duration_minutes, m.created_by, m.team1_score, m.team1_player1, m.team1_player2, m.team2_score, m.team2_player1, m.team2_player2, m.created_at, m.updated_at,
+  json_build_object(
+    'id',
+    u1.id,
+    'name',
+    u1.name,
+    'email',
+    u1.email,
+    'image_url',
+    u1.image_url
+  ) AS team1_player1,
+  json_build_object(
+    'id',
+    u2.id,
+    'name',
+    u2.name,
+    'email',
+    u2.email,
+    'image_url',
+    u2.image_url
+  ) AS team1_player2,
+  json_build_object(
+    'id',
+    u3.id,
+    'name',
+    u3.name,
+    'email',
+    u3.email,
+    'image_url',
+    u3.image_url
+  ) AS team2_player1,
+  json_build_object(
+    'id',
+    u4.id,
+    'name',
+    u4.name,
+    'email',
+    u4.email,
+    'image_url',
+    u4.image_url
+  ) AS team2_player2,
+  json_build_object(
+    'id',
+    u5.id,
+    'name',
+    u5.name,
+    'email',
+    u5.email,
+    'image_url',
+    u5.image_url
+  ) AS created_by
 FROM
-  matches
+  matches m
+  LEFT JOIN users u1 ON m.team1_player1 = u1.id
+  LEFT JOIN users u2 ON m.team1_player2 = u2.id
+  LEFT JOIN users u3 ON m.team2_player1 = u3.id
+  LEFT JOIN users u4 ON m.team2_player2 = u4.id
+  LEFT JOIN users u5 ON m.created_by = u5.id
 WHERE
   match_date > NOW() - INTERVAL '1 week'
+  AND (
+    m.created_by = $1::uuid
+    OR m.team1_player1 = $1::uuid
+    OR m.team1_player2 = $1::uuid
+    OR m.team2_player1 = $1::uuid
+    OR m.team2_player2 = $1::uuid
+  )
 ORDER BY
   match_date DESC
 LIMIT
   10
 `
 
-func (q *Queries) GetRecentMatches(ctx context.Context) ([]Match, error) {
-	rows, err := q.db.QueryContext(ctx, getRecentMatches)
+type GetRecentMatchesForUserIdRow struct {
+	ID              uuid.UUID
+	MatchDate       time.Time
+	DurationMinutes int32
+	CreatedBy       uuid.UUID
+	Team1Score      int32
+	Team1Player1    uuid.UUID
+	Team1Player2    uuid.NullUUID
+	Team2Score      int32
+	Team2Player1    uuid.NullUUID
+	Team2Player2    uuid.NullUUID
+	CreatedAt       time.Time
+	UpdatedAt       sql.NullTime
+	Team1Player1_2  json.RawMessage
+	Team1Player2_2  json.RawMessage
+	Team2Player1_2  json.RawMessage
+	Team2Player2_2  json.RawMessage
+	CreatedBy_2     json.RawMessage
+}
+
+func (q *Queries) GetRecentMatchesForUserId(ctx context.Context, userID uuid.UUID) ([]GetRecentMatchesForUserIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getRecentMatchesForUserId, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Match
+	var items []GetRecentMatchesForUserIdRow
 	for rows.Next() {
-		var i Match
+		var i GetRecentMatchesForUserIdRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.MatchDate,
@@ -213,6 +452,11 @@ func (q *Queries) GetRecentMatches(ctx context.Context) ([]Match, error) {
 			&i.Team2Player2,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.Team1Player1_2,
+			&i.Team1Player2_2,
+			&i.Team2Player1_2,
+			&i.Team2Player2_2,
+			&i.CreatedBy_2,
 		); err != nil {
 			return nil, err
 		}
@@ -241,6 +485,7 @@ SET
   updated_at = NOW()
 WHERE
   id = $1
+  AND created_by = $10::uuid
 `
 
 type UpdateMatchParams struct {
@@ -253,6 +498,7 @@ type UpdateMatchParams struct {
 	Team2Score      int32
 	Team2Player1    uuid.NullUUID
 	Team2Player2    uuid.NullUUID
+	UserID          uuid.UUID
 }
 
 func (q *Queries) UpdateMatch(ctx context.Context, arg UpdateMatchParams) error {
@@ -266,6 +512,7 @@ func (q *Queries) UpdateMatch(ctx context.Context, arg UpdateMatchParams) error 
 		arg.Team2Score,
 		arg.Team2Player1,
 		arg.Team2Player2,
+		arg.UserID,
 	)
 	return err
 }

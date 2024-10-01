@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -26,10 +27,24 @@ func (u *User) GetAll(w http.ResponseWriter, r *http.Request, user database.User
 }
 
 func (u *User) Create(w http.ResponseWriter, r *http.Request) {
+	type parameters struct {
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		responseWithError(w, 400, fmt.Sprint("Error parsing JSON:", err))
+		return
+	}
+
 	user, err := u.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID:    uuid.New(),
-		Name:  "John Doe",
-		Email: "test@test.com",
+		Name:  params.Name,
+		Email: params.Email,
 	})
 	if err != nil {
 		responseWithError(w, 500, "Failed to create user")
