@@ -133,3 +133,13 @@ func (m *Match) UpdateMatch(w http.ResponseWriter, r *http.Request, user databas
 		Message string `json:"message"`
 	}{Message: "Match updated successfully"})
 }
+
+func (m *Match) GetRecent(w http.ResponseWriter, r *http.Request, user database.User) {
+	matches, err := m.DB.GetRecentMatchesForUserId(r.Context(), user.ID)
+	if err != nil {
+		responseWithError(w, 500, fmt.Sprintf("Error getting matches: %v", err))
+		return
+	}
+
+	responseWithJSON(w, 200, util.DatabaseRecentMatchesForUserIdRowToMatches(matches))
+}

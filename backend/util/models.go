@@ -225,6 +225,34 @@ func DatabaseMatchForUserRowsToMatches(dbMatches []database.GetMatchesForUserIdR
 	return matches
 }
 
+func DatabaseRecentMatchesForUserIdRowToMatches(dbMatches []database.GetRecentMatchesForUserIdRow) []MatchByIdRow {
+	matches := []MatchByIdRow{}
+
+	for _, dbMatch := range dbMatches {
+		matches = append(matches, DatabaseMatchByIdRowToMatch(database.GetMatchByIdRow{
+			ID:              dbMatch.ID,
+			MatchDate:       dbMatch.MatchDate,
+			DurationMinutes: dbMatch.DurationMinutes,
+			CreatedBy:       dbMatch.CreatedBy,
+			Team1Score:      dbMatch.Team1Score,
+			Team1Player1:    dbMatch.Team1Player1,
+			Team1Player2:    dbMatch.Team1Player2,
+			Team2Score:      dbMatch.Team2Score,
+			Team2Player1:    dbMatch.Team2Player1,
+			Team2Player2:    dbMatch.Team2Player2,
+			CreatedAt:       dbMatch.CreatedAt,
+			UpdatedAt:       dbMatch.UpdatedAt,
+			Team1Player1_2:  []byte(dbMatch.Team1Player1_2),
+			Team1Player2_2:  []byte(dbMatch.Team1Player2_2),
+			Team2Player1_2:  []byte(dbMatch.Team2Player1_2),
+			Team2Player2_2:  []byte(dbMatch.Team2Player2_2),
+			CreatedBy_2:     []byte(dbMatch.CreatedBy_2),
+		}))
+	}
+
+	return matches
+}
+
 func DatabaseFriendshipToFriendship(dbFriendship database.Friendship) Friendship {
 	var acceptedOn *time.Time
 	var updatedAt *time.Time

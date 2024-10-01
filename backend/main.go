@@ -77,6 +77,7 @@ func main() {
 	v1Router.Post("/matches", handler.MiddlewareAuth(handler.Match.Create))
 	v1Router.Get("/matches/{id}", handler.MiddlewareAuth(handler.Match.GetById))
 	v1Router.Put("/matches/{id}", handler.MiddlewareAuth(handler.Match.UpdateMatch))
+	v1Router.Get("/matches/recent", handler.MiddlewareAuth(handler.Match.GetRecent))
 
 	v1Router.Get("/friends", handler.MiddlewareAuth(handler.Friendship.GetAll))
 	v1Router.Post("/friends", handler.MiddlewareAuth(handler.Friendship.SendFriendRequest))
