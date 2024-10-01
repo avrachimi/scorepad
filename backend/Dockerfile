@@ -12,7 +12,7 @@ RUN go build -o myapp
 
 FROM alpine:latest
 
-RUN apk --no-cache add curl
+RUN apk --no-cache add wget
 
 WORKDIR /app
 
