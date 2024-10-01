@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -58,6 +59,85 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getFriendProfileByUserId = `-- name: GetFriendProfileByUserId :one
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  u.image_url,
+  u.created_at,
+  u.updated_at,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      friendships
+    WHERE
+      (
+        friendships.member1_id = u.id
+        OR friendships.member2_id = u.id
+      )
+      AND friendships.status = 'accepted'
+  ) AS total_friends,
+  (
+    SELECT
+      COUNT(DISTINCT matches.id)
+    FROM
+      matches
+    WHERE
+      matches.created_by = u.id
+      OR matches.team1_player1 = u.id
+      OR matches.team1_player2 = u.id
+      OR matches.team2_player1 = u.id
+      OR matches.team2_player2 = u.id
+  ) AS matches_played
+FROM
+  users u
+  JOIN friendships f ON (
+    f.member1_id = $1::uuid
+    AND u.id = f.member2_id
+  )
+  OR (
+    f.member2_id = $1::uuid
+    AND u.id = f.member1_id
+  )
+WHERE
+  f.status = 'accepted'
+  AND u.id = $2::uuid
+`
+
+type GetFriendProfileByUserIdParams struct {
+	UserID   uuid.UUID
+	FriendID uuid.UUID
+}
+
+type GetFriendProfileByUserIdRow struct {
+	ID            uuid.UUID
+	Name          string
+	Email         string
+	ImageUrl      sql.NullString
+	CreatedAt     time.Time
+	UpdatedAt     sql.NullTime
+	TotalFriends  int64
+	MatchesPlayed int64
+}
+
+func (q *Queries) GetFriendProfileByUserId(ctx context.Context, arg GetFriendProfileByUserIdParams) (GetFriendProfileByUserIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getFriendProfileByUserId, arg.UserID, arg.FriendID)
+	var i GetFriendProfileByUserIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.ImageUrl,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.TotalFriends,
+		&i.MatchesPlayed,
+	)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
   id, name, email, image_url, created_at, updated_at
@@ -106,16 +186,56 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 
 const getUserProfileById = `-- name: GetUserProfileById :one
 SELECT
-  id, name, email, image_url, created_at, updated_at
+  u.id,
+  u.name,
+  u.email,
+  u.image_url,
+  u.created_at,
+  u.updated_at,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      friendships
+    WHERE
+      (
+        friendships.member1_id = u.id
+        OR friendships.member2_id = u.id
+      )
+      AND friendships.status = 'accepted'
+  ) AS total_friends,
+  (
+    SELECT
+      COUNT(DISTINCT matches.id)
+    FROM
+      matches
+    WHERE
+      matches.created_by = u.id
+      OR matches.team1_player1 = u.id
+      OR matches.team1_player2 = u.id
+      OR matches.team2_player1 = u.id
+      OR matches.team2_player2 = u.id
+  ) AS matches_played
 FROM
-  users
+  users u
 WHERE
-  id = $1
+  u.id = $1
 `
 
-func (q *Queries) GetUserProfileById(ctx context.Context, id uuid.UUID) (User, error) {
+type GetUserProfileByIdRow struct {
+	ID            uuid.UUID
+	Name          string
+	Email         string
+	ImageUrl      sql.NullString
+	CreatedAt     time.Time
+	UpdatedAt     sql.NullTime
+	TotalFriends  int64
+	MatchesPlayed int64
+}
+
+func (q *Queries) GetUserProfileById(ctx context.Context, id uuid.UUID) (GetUserProfileByIdRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserProfileById, id)
-	var i User
+	var i GetUserProfileByIdRow
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
@@ -123,6 +243,8 @@ func (q *Queries) GetUserProfileById(ctx context.Context, id uuid.UUID) (User, e
 		&i.ImageUrl,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.TotalFriends,
+		&i.MatchesPlayed,
 	)
 	return i, err
 }
@@ -136,6 +258,60 @@ FROM
 
 func (q *Queries) GetUsers(ctx context.Context) ([]User, error) {
 	rows, err := q.db.QueryContext(ctx, getUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.ImageUrl,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUsersExcludingFriends = `-- name: GetUsersExcludingFriends :many
+SELECT
+  id, name, email, image_url, created_at, updated_at
+FROM
+  users
+WHERE
+  id NOT IN (
+    SELECT
+      CASE
+        WHEN member1_id = $1 THEN member2_id
+        WHEN member2_id = $1 THEN member1_id
+      END
+    FROM
+      friendships
+    WHERE
+      (
+        member1_id = $1
+        OR member2_id = $1
+      )
+      AND status = 'accepted'
+  )
+  AND id != $1
+`
+
+func (q *Queries) GetUsersExcludingFriends(ctx context.Context, member1ID uuid.UUID) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getUsersExcludingFriends, member1ID)
 	if err != nil {
 		return nil, err
 	}

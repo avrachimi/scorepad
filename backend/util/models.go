@@ -17,6 +17,17 @@ type User struct {
 	UpdatedAt *time.Time `json:"updated_at"`
 }
 
+type UserProfile struct {
+	ID            uuid.UUID  `json:"id"`
+	Name          string     `json:"name"`
+	Email         string     `json:"email"`
+	ImageUrl      *string    `json:"image_url"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     *time.Time `json:"updated_at"`
+	TotalFriends  int64      `json:"total_friends"`
+	MatchesPlayed int64      `json:"total_matches"`
+}
+
 type Player struct {
 	ID       uuid.UUID `json:"id"`
 	Name     string    `json:"name"`
@@ -64,6 +75,16 @@ type Friendship struct {
 	UpdatedAt  *time.Time `json:"updated_at"`
 }
 
+type FriendRequest struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	ImageUrl     *string   `json:"image_url"`
+	FriendshipID uuid.UUID `json:"friendship_id"`
+	RequestedBy  uuid.UUID `json:"requested_by"`
+	RequestedOn  time.Time `json:"requested_on"`
+}
+
 func DatabaseUserToUser(dbUser database.User) User {
 	var imageUrl *string
 	var updatedAt *time.Time
@@ -93,6 +114,30 @@ func DatabaseUsersToUsers(dbUsers []database.User) []User {
 	}
 
 	return users
+}
+
+func DatabaseUserProfileToUserProfile(dbUser database.GetUserProfileByIdRow) UserProfile {
+	var imageUrl *string
+	var updatedAt *time.Time
+
+	if dbUser.ImageUrl.Valid {
+		imageUrl = &dbUser.ImageUrl.String
+	}
+
+	if dbUser.UpdatedAt.Valid {
+		updatedAt = &dbUser.UpdatedAt.Time
+	}
+
+	return UserProfile{
+		ID:            dbUser.ID,
+		Name:          dbUser.Name,
+		Email:         dbUser.Email,
+		ImageUrl:      imageUrl,
+		CreatedAt:     dbUser.CreatedAt,
+		UpdatedAt:     updatedAt,
+		TotalFriends:  dbUser.TotalFriends,
+		MatchesPlayed: dbUser.MatchesPlayed,
+	}
 }
 
 func getPlayerFromJson(playerJson []byte) Player {
@@ -287,10 +332,14 @@ func DatabaseFriendshipsToFriendships(dbFriendships []database.Friendship) []Fri
 }
 
 type Friend struct {
-	ID       uuid.UUID `json:"id"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	ImageUrl *string   `json:"image_url"`
+	ID            uuid.UUID  `json:"id"`
+	Name          string     `json:"name"`
+	Email         string     `json:"email"`
+	ImageUrl      *string    `json:"image_url"`
+	CreatedAt     time.Time  `json:"created_at"`
+	FriendsSince  *time.Time `json:"friends_since"`
+	TotalFriends  int64      `json:"total_friends"`
+	MatchesPlayed int64      `json:"total_matches"`
 }
 
 func DatabaseFriendsToFriends(dbFriends []database.GetFriendsRow) []Friend {
@@ -298,18 +347,112 @@ func DatabaseFriendsToFriends(dbFriends []database.GetFriendsRow) []Friend {
 
 	for _, dbFriendship := range dbFriends {
 		var imageUrl *string
+		var friendsSince *time.Time
 
 		if dbFriendship.ImageUrl.Valid {
 			imageUrl = &dbFriendship.ImageUrl.String
 		}
 
+		if dbFriendship.FriendsSince.Valid {
+			friendsSince = &dbFriendship.FriendsSince.Time
+		}
+
 		friends = append(friends, Friend{
-			ID:       dbFriendship.ID,
-			Name:     dbFriendship.Name,
-			Email:    dbFriendship.Email,
-			ImageUrl: imageUrl,
+			ID:            dbFriendship.ID,
+			Name:          dbFriendship.Name,
+			Email:         dbFriendship.Email,
+			ImageUrl:      imageUrl,
+			CreatedAt:     dbFriendship.CreatedAt,
+			FriendsSince:  friendsSince,
+			TotalFriends:  dbFriendship.TotalFriends,
+			MatchesPlayed: dbFriendship.MatchesPlayed,
 		})
 	}
 
 	return friends
+}
+
+func DatabaseFriendRequestToFriendRequest(dbFriendRequest database.GetFriendRequestsRow) FriendRequest {
+	var imageUrl *string
+
+	if dbFriendRequest.ImageUrl.Valid {
+		imageUrl = &dbFriendRequest.ImageUrl.String
+	}
+
+	return FriendRequest{
+		ID:           dbFriendRequest.ID,
+		Name:         dbFriendRequest.Name,
+		Email:        dbFriendRequest.Email,
+		ImageUrl:     imageUrl,
+		FriendshipID: dbFriendRequest.FriendshipID,
+		RequestedBy:  dbFriendRequest.RequestedBy,
+		RequestedOn:  dbFriendRequest.RequestedOn,
+	}
+}
+
+func DatabaseFriendRequestsToFriendRequests(dbFriendRequests []database.GetFriendRequestsRow) []FriendRequest {
+	friendRequests := []FriendRequest{}
+
+	for _, dbFriendRequest := range dbFriendRequests {
+		friendRequests = append(friendRequests, DatabaseFriendRequestToFriendRequest(dbFriendRequest))
+	}
+
+	return friendRequests
+}
+
+type MatchesByMonth struct {
+	Month   time.Time `json:"month"`
+	Matches int64     `json:"matches"`
+}
+
+type LeaderboardRow struct {
+	ID            uuid.UUID `json:"id"`
+	Rank          int64     `json:"rank"`
+	Name          string    `json:"name"`
+	Matches       int64     `json:"matches"`
+	Wins          int64     `json:"wins"`
+	Losses        int64     `json:"losses"`
+	WinPercentage float64   `json:"win_percentage"`
+}
+
+type Stats struct {
+	TotalMatches   int64            `json:"total_matches"`
+	MatchesByMonth []MatchesByMonth `json:"matches_by_month"`
+	Leaderboard    []LeaderboardRow `json:"leaderboard"`
+}
+
+func DatabaseStatsToStats(dbTotalMatches int64, dbMatchesByMonth []database.GetMatchesByMonthRow, dbLeaderboard []database.GetLeaderboardRow) []Stats {
+	stats := []Stats{}
+
+	matchesByMonth := []MatchesByMonth{}
+	for _, dbMatchesByMonth := range dbMatchesByMonth {
+		matchesByMonth = append(matchesByMonth, MatchesByMonth{
+			Month:   dbMatchesByMonth.Month,
+			Matches: dbMatchesByMonth.MatchesPlayed,
+		})
+	}
+
+	leaderboard := []LeaderboardRow{}
+	var counter int64 = 1
+	for _, dbLeaderboard := range dbLeaderboard {
+		leaderboard = append(leaderboard, LeaderboardRow{
+			ID: dbLeaderboard.ID,
+			// TODO: Fix this
+			Rank:          counter,
+			Name:          dbLeaderboard.Name,
+			Matches:       dbLeaderboard.Wins + dbLeaderboard.Losses,
+			Wins:          dbLeaderboard.Wins,
+			Losses:        dbLeaderboard.Losses,
+			WinPercentage: dbLeaderboard.WinLoseRatio,
+		})
+		counter++
+	}
+
+	stats = append(stats, Stats{
+		TotalMatches:   dbTotalMatches,
+		MatchesByMonth: matchesByMonth,
+		Leaderboard:    leaderboard,
+	})
+
+	return stats
 }

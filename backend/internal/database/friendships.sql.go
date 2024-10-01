@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -26,13 +27,41 @@ func (q *Queries) AcceptFriendRequest(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const deleteFriendRequest = `-- name: DeleteFriendRequest :exec
+DELETE FROM friendships
+WHERE
+  id = $1
+  AND (
+    member1_id = $2::uuid
+    OR member2_id = $2::uuid
+  )
+  AND status = 'pending'
+`
+
+type DeleteFriendRequestParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) DeleteFriendRequest(ctx context.Context, arg DeleteFriendRequestParams) error {
+	_, err := q.db.ExecContext(ctx, deleteFriendRequest, arg.ID, arg.UserID)
+	return err
+}
+
 const getFriendRequests = `-- name: GetFriendRequests :many
 SELECT
   u.id,
   u.name,
   u.email,
   u.image_url,
-  f.id AS friendship_id
+  f.id AS friendship_id,
+  CAST(
+    CASE
+      WHEN f.member1_id = $1 THEN f.member2_id
+      ELSE f.member1_id
+    END AS uuid
+  ) AS requested_by,
+  f.created_at AS requested_on
 FROM
   friendships f
   JOIN users u ON (
@@ -54,6 +83,8 @@ type GetFriendRequestsRow struct {
 	Email        string
 	ImageUrl     sql.NullString
 	FriendshipID uuid.UUID
+	RequestedBy  uuid.UUID
+	RequestedOn  time.Time
 }
 
 func (q *Queries) GetFriendRequests(ctx context.Context, member1ID uuid.UUID) ([]GetFriendRequestsRow, error) {
@@ -71,6 +102,8 @@ func (q *Queries) GetFriendRequests(ctx context.Context, member1ID uuid.UUID) ([
 			&i.Email,
 			&i.ImageUrl,
 			&i.FriendshipID,
+			&i.RequestedBy,
+			&i.RequestedOn,
 		); err != nil {
 			return nil, err
 		}
@@ -90,31 +123,63 @@ SELECT
   u.id,
   u.name,
   u.email,
-  u.image_url
+  u.image_url,
+  u.created_at,
+  f.updated_at AS friends_since,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      friendships
+    WHERE
+      (
+        friendships.member1_id = u.id
+        OR friendships.member2_id = u.id
+      )
+      AND friendships.status = 'accepted'
+  ) AS total_friends,
+  (
+    SELECT
+      COUNT(DISTINCT m.id)
+    FROM
+      matches m
+    WHERE
+      m.created_by = u.id
+      OR m.team1_player1 = u.id
+      OR m.team1_player2 = u.id
+      OR m.team2_player1 = u.id
+      OR m.team2_player2 = u.id
+  ) AS matches_played
 FROM
   friendships f
   JOIN users u ON (
-    u.id = f.member1_id
-    OR u.id = f.member2_id
+    (
+      u.id = f.member1_id
+      AND f.member2_id = $1::uuid
+    )
+    OR (
+      u.id = f.member2_id
+      AND f.member1_id = $1::uuid
+    )
   )
 WHERE
-  (
-    f.member1_id = $1
-    OR f.member2_id = $1
-  )
-  AND f.status = 'accepted'
-  AND u.id != $1
+  f.status = 'accepted'
+  AND u.id != $1::uuid
 `
 
 type GetFriendsRow struct {
-	ID       uuid.UUID
-	Name     string
-	Email    string
-	ImageUrl sql.NullString
+	ID            uuid.UUID
+	Name          string
+	Email         string
+	ImageUrl      sql.NullString
+	CreatedAt     time.Time
+	FriendsSince  sql.NullTime
+	TotalFriends  int64
+	MatchesPlayed int64
 }
 
-func (q *Queries) GetFriends(ctx context.Context, member1ID uuid.UUID) ([]GetFriendsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getFriends, member1ID)
+func (q *Queries) GetFriends(ctx context.Context, userID uuid.UUID) ([]GetFriendsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFriends, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -127,6 +192,10 @@ func (q *Queries) GetFriends(ctx context.Context, member1ID uuid.UUID) ([]GetFri
 			&i.Name,
 			&i.Email,
 			&i.ImageUrl,
+			&i.CreatedAt,
+			&i.FriendsSince,
+			&i.TotalFriends,
+			&i.MatchesPlayed,
 		); err != nil {
 			return nil, err
 		}

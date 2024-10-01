@@ -16,8 +16,7 @@ type User struct {
 }
 
 func (u *User) GetAll(w http.ResponseWriter, r *http.Request, user database.User) {
-	// FIX: should be admin only or just deleted
-	users, err := u.DB.GetUsers(r.Context())
+	users, err := u.DB.GetUsersExcludingFriends(r.Context(), user.ID)
 	if err != nil {
 		responseWithError(w, 500, "Failed to get users")
 		return
@@ -27,6 +26,7 @@ func (u *User) GetAll(w http.ResponseWriter, r *http.Request, user database.User
 }
 
 func (u *User) Create(w http.ResponseWriter, r *http.Request) {
+	// FIX: should not be used
 	type parameters struct {
 		Name  string `json:"name"`
 		Email string `json:"email"`
@@ -83,11 +83,10 @@ func (u *User) GetProfile(w http.ResponseWriter, r *http.Request, user database.
 		return
 	}
 
-	responseWithJSON(w, 200, util.DatabaseUserToUser(dbUser))
+	responseWithJSON(w, 200, util.DatabaseUserProfileToUserProfile(dbUser))
 }
 
-func (u *User) GetProfileById(w http.ResponseWriter, r *http.Request, user database.User) {
-	// TODO: Profile should return more data than just the user object
+func (u *User) GetFriendProfile(w http.ResponseWriter, r *http.Request, user database.User) {
 	// NOTE: this endpoint might not be needed??
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
@@ -96,11 +95,14 @@ func (u *User) GetProfileById(w http.ResponseWriter, r *http.Request, user datab
 		return
 	}
 
-	dbUser, err := u.DB.GetUserProfileById(r.Context(), id)
+	dbUser, err := u.DB.GetFriendProfileByUserId(r.Context(), database.GetFriendProfileByUserIdParams{
+		UserID:   user.ID,
+		FriendID: id,
+	})
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error getting user profile: %v", err))
 		return
 	}
 
-	responseWithJSON(w, 200, util.DatabaseUserToUser(dbUser))
+	responseWithJSON(w, 200, util.DatabaseUserProfileToUserProfile(database.GetUserProfileByIdRow(dbUser)))
 }

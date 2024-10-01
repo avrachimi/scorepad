@@ -85,7 +85,7 @@ func (m *Match) GetById(w http.ResponseWriter, r *http.Request, user database.Us
 	responseWithJSON(w, 200, util.DatabaseMatchByIdRowToMatch(match))
 }
 
-func (m *Match) UpdateMatch(w http.ResponseWriter, r *http.Request, user database.User) {
+func (m *Match) Update(w http.ResponseWriter, r *http.Request, user database.User) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
@@ -132,6 +132,26 @@ func (m *Match) UpdateMatch(w http.ResponseWriter, r *http.Request, user databas
 	responseWithJSON(w, 200, struct {
 		Message string `json:"message"`
 	}{Message: "Match updated successfully"})
+}
+
+func (m *Match) Delete(w http.ResponseWriter, r *http.Request, user database.User) {
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		responseWithError(w, 400, fmt.Sprintf("Error parsing user ID: %v", err))
+		return
+	}
+
+	err = m.DB.DeleteMatch(r.Context(), database.DeleteMatchParams{
+		ID:     id,
+		UserID: user.ID,
+	})
+	if err != nil {
+		responseWithError(w, 500, fmt.Sprintf("Error deleting match: %v", err))
+		return
+	}
+
+	responseWithJSON(w, 204, struct{}{})
 }
 
 func (m *Match) GetRecent(w http.ResponseWriter, r *http.Request, user database.User) {

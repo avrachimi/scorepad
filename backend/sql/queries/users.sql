@@ -12,6 +12,29 @@ SELECT
 FROM
   users;
 
+-- name: GetUsersExcludingFriends :many
+SELECT
+  *
+FROM
+  users
+WHERE
+  id NOT IN (
+    SELECT
+      CASE
+        WHEN member1_id = $1 THEN member2_id
+        WHEN member2_id = $1 THEN member1_id
+      END
+    FROM
+      friendships
+    WHERE
+      (
+        member1_id = $1
+        OR member2_id = $1
+      )
+      AND status = 'accepted'
+  )
+  AND id != $1;
+
 -- name: GetUserById :one
 SELECT
   *
@@ -30,11 +53,86 @@ WHERE
 
 -- name: GetUserProfileById :one
 SELECT
-  *
+  u.id,
+  u.name,
+  u.email,
+  u.image_url,
+  u.created_at,
+  u.updated_at,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      friendships
+    WHERE
+      (
+        friendships.member1_id = u.id
+        OR friendships.member2_id = u.id
+      )
+      AND friendships.status = 'accepted'
+  ) AS total_friends,
+  (
+    SELECT
+      COUNT(DISTINCT matches.id)
+    FROM
+      matches
+    WHERE
+      matches.created_by = u.id
+      OR matches.team1_player1 = u.id
+      OR matches.team1_player2 = u.id
+      OR matches.team2_player1 = u.id
+      OR matches.team2_player2 = u.id
+  ) AS matches_played
 FROM
-  users
+  users u
 WHERE
-  id = $1;
+  u.id = $1;
+
+-- name: GetFriendProfileByUserId :one
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  u.image_url,
+  u.created_at,
+  u.updated_at,
+  (
+    SELECT
+      COUNT(*)
+    FROM
+      friendships
+    WHERE
+      (
+        friendships.member1_id = u.id
+        OR friendships.member2_id = u.id
+      )
+      AND friendships.status = 'accepted'
+  ) AS total_friends,
+  (
+    SELECT
+      COUNT(DISTINCT matches.id)
+    FROM
+      matches
+    WHERE
+      matches.created_by = u.id
+      OR matches.team1_player1 = u.id
+      OR matches.team1_player2 = u.id
+      OR matches.team2_player1 = u.id
+      OR matches.team2_player2 = u.id
+  ) AS matches_played
+FROM
+  users u
+  JOIN friendships f ON (
+    f.member1_id = sqlc.arg (user_id)::uuid
+    AND u.id = f.member2_id
+  )
+  OR (
+    f.member2_id = sqlc.arg (user_id)::uuid
+    AND u.id = f.member1_id
+  )
+WHERE
+  f.status = 'accepted'
+  AND u.id = sqlc.arg (friend_id)::uuid;
 
 -- name: DeleteUser :exec
 DELETE FROM users

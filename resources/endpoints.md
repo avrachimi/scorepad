@@ -4,17 +4,24 @@ This is to help me create the initial endpoints. This document might not be upda
 
 Most of these endpoints will be behind auth.
 
-<!-- ignoring auth related endpoints for now -->
+## Auth
+
+| Method | Endpoint                  | Description                 |
+| ------ | ------------------------- | --------------------------- |
+| GET    | /auth/signin              | Start oAuth sign in process |
+| GET    | /auth/signout             | Logout user                 |
+| GET    | /auth/refresh             | Generate new access token   |
+| GET    | /auth/[provider]/callback | Auth callback fn            |
 
 ## Users
 
-| Method | Endpoint            | Description                     |
-| ------ | ------------------- | ------------------------------- |
-| GET    | /users              | Get all users excluding friends |
-| POST   | /users              | Create user account             |
-| DELETE | /users/[id]         | Delete user account             |
-| GET    | /users/profile      | Get user's profile              |
-| GET    | /users/profile/[id] | Get friends' profile            |
+| Method | Endpoint            | Description                                                                |
+| ------ | ------------------- | -------------------------------------------------------------------------- |
+| GET    | /users              | Get all users excluding friends                                            |
+| POST   | /users              | Create user account (should be removed, acct is created through auth flow) |
+| DELETE | /users/[id]         | Delete user account                                                        |
+| GET    | /users/profile      | Get user's profile                                                         |
+| GET    | /users/profile/[id] | Get friends' profile                                                       |
 
 ## Friends
 

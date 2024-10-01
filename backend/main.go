@@ -41,6 +41,7 @@ func main() {
 		Friendship: api.Friendship{DB: db},
 		Match:      api.Match{DB: db},
 		Auth:       auth.Auth{DB: db},
+		Stats:      api.Stats{DB: db},
 	}
 
 	router := chi.NewRouter()
@@ -71,16 +72,22 @@ func main() {
 	v1Router.Post("/users", handler.User.Create)
 	v1Router.Delete("/users/{id}", handler.MiddlewareAuth(handler.User.Delete))
 	v1Router.Get("/users/profile", handler.MiddlewareAuth(handler.User.GetProfile))
-	v1Router.Get("/users/profile/{id}", handler.MiddlewareAuth(handler.User.GetProfileById))
+	v1Router.Get("/users/profile/{id}", handler.MiddlewareAuth(handler.User.GetFriendProfile))
+
+	v1Router.Get("/friends", handler.MiddlewareAuth(handler.Friendship.GetAllFriends))
+	v1Router.Post("/friends", handler.MiddlewareAuth(handler.Friendship.SendFriendRequest))
+	v1Router.Patch("/friends/{id}", handler.MiddlewareAuth(handler.Friendship.AcceptFriendRequest))
+	v1Router.Delete("/friends/{id}", handler.MiddlewareAuth(handler.Friendship.DeleteFriendRequest))
+	v1Router.Get("/friends/requests", handler.MiddlewareAuth(handler.Friendship.GetFriendRequests))
 
 	v1Router.Get("/matches", handler.MiddlewareAuth(handler.Match.GetAll))
 	v1Router.Post("/matches", handler.MiddlewareAuth(handler.Match.Create))
 	v1Router.Get("/matches/{id}", handler.MiddlewareAuth(handler.Match.GetById))
-	v1Router.Put("/matches/{id}", handler.MiddlewareAuth(handler.Match.UpdateMatch))
+	v1Router.Put("/matches/{id}", handler.MiddlewareAuth(handler.Match.Update))
+	v1Router.Delete("/matches/{id}", handler.MiddlewareAuth(handler.Match.Delete))
 	v1Router.Get("/matches/recent", handler.MiddlewareAuth(handler.Match.GetRecent))
 
-	v1Router.Get("/friends", handler.MiddlewareAuth(handler.Friendship.GetAll))
-	v1Router.Post("/friends", handler.MiddlewareAuth(handler.Friendship.SendFriendRequest))
+	v1Router.Get("/stats", handler.MiddlewareAuth(handler.Stats.GetStats))
 
 	router.Mount("/v1", v1Router)
 

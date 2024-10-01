@@ -7,4 +7,5 @@ type API struct {
 	Friendship Friendship
 	Match      Match
 	Auth       auth.Auth
+	Stats      Stats
 }
