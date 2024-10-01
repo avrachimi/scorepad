@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -45,18 +46,28 @@ func SetupAuth() {
 }
 
 func (a *Auth) SignIn(w http.ResponseWriter, r *http.Request) {
-	if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
-		response, err := createUserTokens(r, a.DB, gothUser)
-		if err != nil {
-			http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(response)
+	// if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
+	// 	response, err := createUserTokens(r, a.DB, gothUser)
+	// 	if err != nil {
+	// 		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
+	// 	}
+	//
+	// 	w.Header().Set("Content-Type", "application/json")
+	// 	json.NewEncoder(w).Encode(response)
+	// 	return
+	// } else {
+	//
+	// }
+	// gothic.BeginAuthHandler(w, r)
+	authUrl, err := gothic.GetAuthURL(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
-	} else {
-		gothic.BeginAuthHandler(w, r)
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"auth_url": authUrl})
+	return
 }
 
 func (a *Auth) SignOut(w http.ResponseWriter, r *http.Request, dbUser database.User) {
@@ -78,8 +89,13 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	// w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(response)
+	// return
+
+	url := fmt.Sprintf("https://scorepad.general.avrachimi.com?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
+	w.Header().Set("Location", url)
+	w.WriteHeader(http.StatusTemporaryRedirect)
 	return
 }
 
