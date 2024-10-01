@@ -1,22 +1,16 @@
-FROM golang:1.21.1-alpine AS build
+FROM golang:1.21.1-bullseye
 
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set the working directory
 WORKDIR /app
-
-COPY go.mod go.sum ./
-
-RUN go mod download
 
 COPY . .
 
-RUN go build -o myapp
-
-FROM alpine:latest
-
-RUN apk --no-cache add curl wget
-
-WORKDIR /app
-
-COPY --from=build /app/myapp .
+RUN go build -o myapp .
 
 EXPOSE 3000
 
