@@ -407,6 +407,7 @@ type MatchesByMonth struct {
 
 type LeaderboardRow struct {
 	ID            uuid.UUID `json:"id"`
+	ImageUrl      *string   `json:"image_url"`
 	Rank          int64     `json:"rank"`
 	Name          string    `json:"name"`
 	Matches       int64     `json:"matches"`
@@ -425,19 +426,25 @@ func DatabaseStatsToStats(dbTotalMatches int64, dbMatchesByMonth []database.GetM
 	stats := Stats{}
 
 	matchesByMonth := []MatchesByMonth{}
-	for _, dbMatchesByMonth := range dbMatchesByMonth {
+	for _, dbMatchByMonth := range dbMatchesByMonth {
 		matchesByMonth = append(matchesByMonth, MatchesByMonth{
-			Month:   dbMatchesByMonth.Month,
-			Matches: dbMatchesByMonth.MatchesPlayed,
+			Month:   dbMatchByMonth.Month,
+			Matches: dbMatchByMonth.MatchesPlayed,
 		})
 	}
 
 	leaderboard := []LeaderboardRow{}
 	var counter int64 = 1
 	for _, dbLeaderboard := range dbLeaderboard {
+		var imageUrl *string
+		if dbLeaderboard.ImageUrl.Valid {
+			imageUrl = &dbLeaderboard.ImageUrl.String
+		}
+
 		leaderboard = append(leaderboard, LeaderboardRow{
 			ID: dbLeaderboard.ID,
 			// TODO: Fix this
+			ImageUrl:      imageUrl,
 			Rank:          counter,
 			Name:          dbLeaderboard.Name,
 			Matches:       dbLeaderboard.Wins + dbLeaderboard.Losses,

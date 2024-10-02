@@ -24,7 +24,7 @@ func (s *Stats) GetStats(w http.ResponseWriter, r *http.Request, user database.U
 
 	switch queryType {
 	case "leaderboard":
-		leaderboard, err := s.DB.GetLeaderboard(r.Context())
+		leaderboard, err := s.DB.GetLeaderboard(r.Context(), user.ID)
 		if err != nil {
 			fmt.Printf("Failed to get stats: %v\n", err)
 			responseWithError(w, 500, "Failed to get stats")
@@ -48,7 +48,7 @@ func (s *Stats) GetStats(w http.ResponseWriter, r *http.Request, user database.U
 			return
 		}
 
-		leaderboard, err := s.DB.GetLeaderboard(r.Context())
+		leaderboard, err := s.DB.GetLeaderboard(r.Context(), user.ID)
 		if err != nil {
 			fmt.Printf("Failed to get stats: %v\n", err)
 			responseWithError(w, 500, "Failed to get stats")

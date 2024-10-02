@@ -32,6 +32,7 @@ ORDER BY
 SELECT
   u.id,
   u.name,
+  u.image_url,
   COUNT(
     CASE
       WHEN (
@@ -111,6 +112,23 @@ FROM
   OR m.team1_player2 = u.id
   OR m.team2_player1 = u.id
   OR m.team2_player2 = u.id
+WHERE
+  u.id IN (
+    SELECT
+      CASE
+        WHEN f.member1_id = sqlc.arg (user_id)::uuid THEN f.member2_id
+        WHEN f.member2_id = sqlc.arg (user_id)::uuid THEN f.member1_id
+      END
+    FROM
+      friendships f
+    WHERE
+      (
+        f.member1_id = sqlc.arg (user_id)::uuid
+        OR f.member2_id = sqlc.arg (user_id)::uuid
+      )
+      AND f.status = 'accepted'
+  )
+  OR u.id = sqlc.arg (user_id)::uuid
 GROUP BY
   u.id
 ORDER BY

@@ -7,6 +7,7 @@ package database
 
 import (
 	"context"
+	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,6 +17,7 @@ const getLeaderboard = `-- name: GetLeaderboard :many
 SELECT
   u.id,
   u.name,
+  u.image_url,
   COUNT(
     CASE
       WHEN (
@@ -95,6 +97,23 @@ FROM
   OR m.team1_player2 = u.id
   OR m.team2_player1 = u.id
   OR m.team2_player2 = u.id
+WHERE
+  u.id IN (
+    SELECT
+      CASE
+        WHEN f.member1_id = $1::uuid THEN f.member2_id
+        WHEN f.member2_id = $1::uuid THEN f.member1_id
+      END
+    FROM
+      friendships f
+    WHERE
+      (
+        f.member1_id = $1::uuid
+        OR f.member2_id = $1::uuid
+      )
+      AND f.status = 'accepted'
+  )
+  OR u.id = $1::uuid
 GROUP BY
   u.id
 ORDER BY
@@ -104,13 +123,14 @@ ORDER BY
 type GetLeaderboardRow struct {
 	ID           uuid.UUID
 	Name         string
+	ImageUrl     sql.NullString
 	Wins         int64
 	Losses       int64
 	WinLoseRatio float64
 }
 
-func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, error) {
-	rows, err := q.db.QueryContext(ctx, getLeaderboard)
+func (q *Queries) GetLeaderboard(ctx context.Context, userID uuid.UUID) ([]GetLeaderboardRow, error) {
+	rows, err := q.db.QueryContext(ctx, getLeaderboard, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -121,6 +141,7 @@ func (q *Queries) GetLeaderboard(ctx context.Context) ([]GetLeaderboardRow, erro
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.ImageUrl,
 			&i.Wins,
 			&i.Losses,
 			&i.WinLoseRatio,
