@@ -83,16 +83,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
                     console.log("Auth Tokens saved");
 
-                    const user = await axios.get<User>(
-                        API_ENDPOINT + "/v1/users/profile",
-                        {
-                            headers: {
-                                Authorization: `Bearer ${access_token}`,
-                            },
-                        }
-                    );
+                    const user = await getUserProfile();
 
-                    setUser(user.data);
+                    setUser(user);
                     setIsSignedIn(true);
 
                     router.replace("/(authenticated)/(tabs)/home");
@@ -227,23 +220,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 
             if (accessToken && refreshToken) {
-                const user = await axios.get<User>(
-                    API_ENDPOINT + "/v1/users/profile",
-                    {
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                        },
-                    }
-                );
-
+                const user = await getUserProfile();
                 setAccessToken(accessToken);
-                setUser(user.data);
+                setUser(user);
                 setIsSignedIn(true);
             }
         } catch (error) {
             console.error("Failed to load tokens", (error as any).message);
         } finally {
             setIsLoaded(true);
+        }
+    }, [router]);
+
+    const getUserProfile = useCallback(async () => {
+        try {
+            const accessToken =
+                await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+
+            const user = await axios.get<User>(
+                API_ENDPOINT + "/v1/users/profile",
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            return user.data;
+        } catch (error) {
+            console.error("Failed to fetch user profile: ", error);
+            return null;
         }
     }, [router]);
 
