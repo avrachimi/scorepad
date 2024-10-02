@@ -58,16 +58,16 @@ func (a *Auth) SignIn(w http.ResponseWriter, r *http.Request) {
 	// } else {
 	//
 	// }
-	gothic.BeginAuthHandler(w, r)
-	// authUrl, err := gothic.GetAuthURL(w, r)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	//
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(map[string]string{"auth_url": authUrl})
-	// return
+	// gothic.BeginAuthHandler(w, r)
+	authUrl, err := gothic.GetAuthURL(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"auth_url": authUrl})
+	return
 }
 
 func (a *Auth) SignOut(w http.ResponseWriter, r *http.Request, dbUser database.User) {
