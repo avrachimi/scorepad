@@ -41,4 +41,9 @@ export const globalStyles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
+    subHeading: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: Colors.accent,
+    },
 });

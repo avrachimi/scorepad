@@ -190,9 +190,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
                 console.log("Access token expired. Refreshing...");
 
-                // TODO: Call your API to refresh the access token
-                const newAccessToken = "newFakeAccessToken123";
-                const newAccessTokenExpiry = Date.now() + 60 * 60 * 1000; // 1 hour
+                const res = await axios.get<{ access_token: string }>(
+                    "/auth/refresh",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${refreshToken}`,
+                        },
+                    }
+                );
+                const newAccessToken = res.data.access_token;
+                const newAccessTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
 
                 await SecureStore.setItemAsync(
                     ACCESS_TOKEN_KEY,

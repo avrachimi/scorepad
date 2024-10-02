@@ -2,6 +2,7 @@ import {
     QueryClientProvider,
     QueryClientProviderProps,
     useQuery,
+    useQueryClient,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { Match, Stats, User } from "~/lib/types";
@@ -36,7 +37,7 @@ export const useDatabase = () => {
         queryKey: ["users"],
         queryFn: async () => {
             const response = await get<User[]>("/users", accessToken!);
-            console.log(response.data);
+            console.warn("getUsersQuery");
             return response.data;
         },
     });
@@ -49,6 +50,7 @@ export const useDatabase = () => {
                 "/matches/recent",
                 accessToken!
             );
+            console.warn("recentMatchesQuery");
             return response.data;
         },
     });
@@ -61,13 +63,37 @@ export const useDatabase = () => {
                 "/stats?type=matches",
                 accessToken!
             );
+            console.warn("statsMatchesQuery");
             return response.data;
         },
     });
+
+    const statsLeaderboardQuery = useQuery({
+        queryKey: ["statsLeaderboard"],
+        queryFn: async () => {
+            const response = await get<Stats>(
+                "/stats?type=leaderboard",
+                accessToken!
+            );
+            console.warn("statsMatchesQuery");
+            return response.data;
+        },
+    });
+
+    // Invalidations
+    const queryClient = useQueryClient();
+    const invalidateHomeScreenQueries = async () => {
+        console.warn("invalidateHomeScreenQueries");
+        await queryClient.invalidateQueries({
+            queryKey: ["statsMatches", "recentMatches"],
+        });
+    };
 
     return {
         getUsersQuery,
         recentMatchesQuery,
         statsMatchesQuery,
+        statsLeaderboardQuery,
+        invalidateHomeScreenQueries,
     };
 };

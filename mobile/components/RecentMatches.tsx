@@ -1,6 +1,5 @@
 import dayjs from "dayjs";
 import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
-import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
 
@@ -18,12 +17,20 @@ const getDayWithSuffix = (day: number) => {
     }
 };
 
+const formatName = (name: string) => {
+    const firstName = name.split(" ")[0];
+    if (firstName.length > 10) return firstName.slice(0, 10) + "...";
+
+    const lastName = name.split(" ")[1];
+    return firstName + (lastName ? ` ${lastName[0]}.` : "");
+};
+
 function RecentMatches() {
     const { recentMatchesQuery } = useDatabase();
 
     return (
         <View style={styles.container}>
-            <Text style={styles.heading}>Recent Matches</Text>
+            <Text style={globalStyles.subHeading}>Recent Matches</Text>
             <ScrollView
                 style={{ width: "100%" }}
                 directionalLockEnabled
@@ -32,57 +39,17 @@ function RecentMatches() {
                 <FlatList
                     data={recentMatchesQuery.data}
                     keyExtractor={(item) => item.id}
+                    style={{
+                        flexDirection: "row",
+                        width: "100%",
+                        padding: 5,
+                    }}
                     renderItem={({ item }) => {
                         const day = dayjs(item.match_date).date();
                         const suffix = getDayWithSuffix(day);
 
                         return (
                             <View style={styles.matchCard}>
-                                <View
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        borderRadius: 10,
-                                        backgroundColor: Colors.background,
-                                        position: "absolute",
-                                    }}
-                                >
-                                    <Svg
-                                        height="100%"
-                                        width="100%"
-                                        style={{
-                                            position: "absolute",
-                                        }}
-                                    >
-                                        <Defs>
-                                            <LinearGradient
-                                                id="grad"
-                                                x1="50%"
-                                                y1="0"
-                                                x2="50%"
-                                                y2="100%"
-                                            >
-                                                <Stop
-                                                    offset="0%"
-                                                    stopColor={Colors.primary}
-                                                    stopOpacity="1"
-                                                />
-                                                <Stop
-                                                    offset="60%"
-                                                    stopColor={Colors.secondary}
-                                                    stopOpacity="1"
-                                                />
-                                            </LinearGradient>
-                                        </Defs>
-                                        <Rect
-                                            width="99%"
-                                            height={"100%"}
-                                            rx={10}
-                                            ry={10}
-                                            fill="url(#grad)"
-                                        />
-                                    </Svg>
-                                </View>
                                 <View style={styles.matchCardTop}>
                                     <View style={styles.dateContainer}>
                                         <Text style={styles.textDate}>
@@ -99,7 +66,7 @@ function RecentMatches() {
                                         style={{
                                             flexDirection: "row",
                                             width: "100%",
-                                            justifyContent: "space-evenly",
+                                            justifyContent: "space-around",
                                         }}
                                     >
                                         <Text style={styles.textScore}>
@@ -111,35 +78,35 @@ function RecentMatches() {
                                     </View>
                                 </View>
                                 <View style={styles.matchCardBottom}>
-                                    <View
-                                        style={{
-                                            flexDirection: "column",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            gap: 5,
-                                        }}
-                                    >
+                                    <View style={styles.playerTextContainer}>
                                         <Text style={styles.textPlayer}>
-                                            {item.team1_player1.name}
+                                            {formatName(
+                                                item.team1_player1.name
+                                            )}
                                         </Text>
                                         <Text style={styles.textPlayer}>
-                                            {item.team1_player2?.name ?? "-"}
+                                            {formatName(
+                                                item.team1_player2?.name ?? "-"
+                                            )}
                                         </Text>
                                     </View>
                                     <View
                                         style={{
-                                            flexDirection: "column",
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            gap: 5,
+                                            height: "80%",
+                                            borderLeftWidth: 1,
+                                            borderLeftColor: "#B0B0B0",
                                         }}
-                                    >
+                                    />
+                                    <View style={styles.playerTextContainer}>
                                         <Text style={styles.textPlayer}>
-                                            {item.team2_player2?.name ?? "-"}
+                                            {formatName(
+                                                item.team2_player2?.name ?? "-"
+                                            )}
                                         </Text>
                                         <Text style={styles.textPlayer}>
-                                            {item.team2_player2?.name ??
-                                                "Andreas Vrachimi"}
+                                            {formatName(
+                                                item.team2_player2?.name ?? "-"
+                                            )}
                                         </Text>
                                     </View>
                                 </View>
@@ -156,44 +123,45 @@ export default RecentMatches;
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         justifyContent: "center",
         alignItems: "flex-start",
         width: "100%",
         gap: 5,
     },
     matchCard: {
+        minWidth: 150,
         position: "relative",
         flexDirection: "column",
         justifyContent: "space-between",
         alignItems: "center",
-        height: 120,
-        width: "100%",
         backgroundColor: Colors.card_bg,
         borderRadius: 10,
         margin: 5,
+        width: "100%",
         ...globalStyles.shadow,
     },
     matchCardTop: {
         flexDirection: "column",
         justifyContent: "space-between",
         alignItems: "center",
-        width: "100%",
-        height: 55,
         padding: 5,
+        width: "100%",
+        backgroundColor: Colors.primary,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
+        gap: 5,
     },
     matchCardBottom: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         width: "100%",
-        height: 65,
         padding: 10,
+        paddingHorizontal: 20,
         backgroundColor: Colors.card_bg,
         borderBottomLeftRadius: 10,
         borderBottomRightRadius: 10,
+        gap: 10,
     },
     textScore: {
         color: "white",
@@ -213,12 +181,14 @@ const styles = StyleSheet.create({
         lineHeight: 16,
         verticalAlign: "top",
     },
+    playerTextContainer: {
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        gap: 10,
+        width: "45%",
+    },
     textPlayer: {
         fontSize: 10,
-    },
-    heading: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: Colors.accent,
     },
 });
