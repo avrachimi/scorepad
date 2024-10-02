@@ -1,18 +1,17 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useHeaderHeight } from "@react-navigation/elements";
 import { Tabs } from "expo-router";
 import React from "react";
+import { Colors } from "~/lib/theme";
 
 export default function TabLayout() {
-    const headerHeight = useHeaderHeight();
-
     return (
         <Tabs
             screenOptions={{
                 headerShown: false,
-                headerTitleContainerStyle: {
-                    marginTop: headerHeight,
+                tabBarIconStyle: {
+                    color: Colors.error,
                 },
+                tabBarActiveTintColor: Colors.primary,
             }}
         >
             <Tabs.Screen
