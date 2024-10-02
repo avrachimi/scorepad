@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
@@ -88,14 +90,18 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
-	return
-
-	// url := fmt.Sprintf("com.scorepad://(authenticated)/(tabs)/home?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
-	// w.Header().Set("Location", url)
-	// w.WriteHeader(http.StatusTemporaryRedirect)
+	// w.Header().Set("Content-Type", "application/json")
+	// json.NewEncoder(w).Encode(response)
 	// return
+
+	deepLink := fmt.Sprintf("com.scorepad://(authenticated)/(tabs)/home?access_token=%s&refresh_token=%s",
+		url.QueryEscape(response["access_token"]),
+		url.QueryEscape(response["refresh_token"]),
+	)
+
+	w.Header().Set("Location", deepLink)
+	w.WriteHeader(http.StatusTemporaryRedirect)
+	return
 }
 
 func createUserTokens(r *http.Request, db *database.Queries, user goth.User) (map[string]string, error) {
