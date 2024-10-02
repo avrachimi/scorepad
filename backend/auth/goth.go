@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"time"
 
@@ -94,13 +93,10 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	// json.NewEncoder(w).Encode(response)
 	// return
 
-	deepLink := fmt.Sprintf("com.scorepad://?access_token=%s&refresh_token=%s",
-		url.QueryEscape(response["access_token"]),
-		url.QueryEscape(response["refresh_token"]),
-	)
-	fmt.Println(deepLink)
+	url := fmt.Sprintf("com.scorepad://?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
 
-	w.Header().Set("Location", "com.scorepad://")
+	// Set the Location header to redirect the browser to the deep link
+	w.Header().Set("Location", url)
 	w.WriteHeader(http.StatusTemporaryRedirect)
 	return
 }
