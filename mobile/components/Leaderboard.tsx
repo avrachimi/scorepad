@@ -117,6 +117,7 @@ export default Leaderboard;
 
 const styles = StyleSheet.create({
     container: {
+        paddingHorizontal: 21,
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",

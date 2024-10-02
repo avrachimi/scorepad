@@ -58,11 +58,11 @@ const styles = StyleSheet.create({
         ...globalStyles.shadow,
         justifyContent: "center",
         position: "relative",
+        paddingHorizontal: 21,
         height: 150,
         width: "100%",
         alignItems: "center",
         borderRadius: 10,
-        backgroundColor: Colors.card_bg,
         gap: 10,
     },
     text: {

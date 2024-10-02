@@ -82,10 +82,10 @@ export const useDatabase = () => {
 
     // Invalidations
     const queryClient = useQueryClient();
-    const invalidateHomeScreenQueries = async () => {
+    const invalidateQueries = async (queries: string[]) => {
         // console.warn("invalidateHomeScreenQueries");
         await queryClient.invalidateQueries({
-            queryKey: ["statsMatches", "recentMatches"],
+            queryKey: queries,
         });
     };
 
@@ -94,6 +94,6 @@ export const useDatabase = () => {
         recentMatchesQuery,
         statsMatchesQuery,
         statsLeaderboardQuery,
-        invalidateHomeScreenQueries,
+        invalidateQueries,
     };
 };

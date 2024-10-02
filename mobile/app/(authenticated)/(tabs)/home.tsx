@@ -12,14 +12,15 @@ import { Colors, globalStyles } from "~/lib/theme";
 function Page() {
     const headerHeight = useHeaderHeight();
     const [refreshing, setRefreshing] = useState(false);
-    const { invalidateHomeScreenQueries } = useDatabase();
+    const { invalidateQueries } = useDatabase();
 
     return (
         <ScrollView
+            scrollEnabled={true}
+            showsVerticalScrollIndicator={false}
             contentContainerStyle={{
                 paddingTop: headerHeight + 50,
-                padding: 21,
-                flex: 1,
+                width: "100%",
                 justifyContent: "flex-start",
                 alignItems: "center",
                 gap: 20,
@@ -28,13 +29,19 @@ function Page() {
                 <RefreshControl
                     refreshing={refreshing}
                     onRefresh={async () =>
-                        await invalidateHomeScreenQueries().catch(console.error)
+                        await invalidateQueries([
+                            "recentMatches",
+                            "statsLeaderboard",
+                            "statsMatches",
+                        ]).catch(console.error)
                     }
                 />
             }
         >
             <View
                 style={{
+                    marginTop: 10,
+                    paddingHorizontal: 21,
                     justifyContent: "center",
                     alignItems: "flex-end",
                     width: "100%",
