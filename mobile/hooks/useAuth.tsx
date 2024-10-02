@@ -228,7 +228,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
             if (accessToken && refreshToken) {
                 const user = await axios.get<User>(
-                    API_ENDPOINT + "v1/users/profile",
+                    API_ENDPOINT + "/v1/users/profile",
                     {
                         headers: {
                             Authorization: `Bearer ${accessToken}`,
@@ -241,7 +241,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 setIsSignedIn(true);
             }
         } catch (error) {
-            console.error("Failed to load tokens", error);
+            console.error("Failed to load tokens", (error as any).message);
         } finally {
             setIsLoaded(true);
         }
