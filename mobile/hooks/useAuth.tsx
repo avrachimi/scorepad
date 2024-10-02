@@ -9,11 +9,7 @@ import {
     useEffect,
     useState,
 } from "react";
-
-interface User {
-    id: number;
-    name: string;
-}
+import { User } from "~/lib/types";
 
 interface AuthContextType {
     user: User | null;
@@ -43,8 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const [accessToken, setAccessToken] = useState<string | null>(null);
 
     const signIn = useCallback(async () => {
-        const mockUser: User = { id: 1, name: "John Doe" };
-
         try {
             const endpoint = new URL(
                 API_ENDPOINT + "/auth/signin?provider=google"
@@ -89,7 +83,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
                     console.log("Auth Tokens saved");
 
-                    setUser(mockUser);
+                    const user = await axios.get<User>(
+                        API_ENDPOINT + "/v1/users/profile",
+                        {
+                            headers: {
+                                Authorization: `Bearer ${access_token}`,
+                            },
+                        }
+                    );
+
+                    setUser(user.data);
                     setIsSignedIn(true);
 
                     router.replace("/(authenticated)/(tabs)/home");
@@ -224,10 +227,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 
             if (accessToken && refreshToken) {
-                const savedUser: User = { id: 1, name: "John Doe" }; // TODO: Replace with actual API call
+                const user = await axios.get<User>(
+                    API_ENDPOINT + "v1/users/profile",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
 
                 setAccessToken(accessToken);
-                setUser(savedUser);
+                setUser(user.data);
                 setIsSignedIn(true);
             }
         } catch (error) {

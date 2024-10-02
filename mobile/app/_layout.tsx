@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
@@ -6,6 +6,7 @@ import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { AuthProvider, useAuth } from "~/hooks/useAuth";
+import { DatabaseProvider } from "~/hooks/useDatabase";
 import { Colors } from "~/lib/theme";
 
 export default function RootLayout() {
@@ -13,12 +14,12 @@ export default function RootLayout() {
 
     return (
         <AuthProvider>
-            <QueryClientProvider client={queryClient}>
+            <DatabaseProvider client={queryClient}>
                 <StatusBar style="dark" />
                 <GestureHandlerRootView style={{ flex: 1 }}>
                     <InitialLayout />
                 </GestureHandlerRootView>
-            </QueryClientProvider>
+            </DatabaseProvider>
         </AuthProvider>
     );
 }

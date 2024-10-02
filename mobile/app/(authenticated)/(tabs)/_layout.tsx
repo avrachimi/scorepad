@@ -1,9 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 import React from "react";
+import { Image } from "react-native";
+import { useAuth } from "~/hooks/useAuth";
 import { Colors } from "~/lib/theme";
 
 export default function TabLayout() {
+    const { user } = useAuth();
+
     return (
         <Tabs
             screenOptions={{
@@ -45,14 +49,29 @@ export default function TabLayout() {
                 name="profile"
                 options={{
                     title: "Profile",
-                    tabBarIcon: ({ size, color }) => (
-                        // TODO: Replace with user's profile picture
-                        <Ionicons
-                            name="person-circle"
-                            size={size}
-                            color={color}
-                        />
-                    ),
+                    tabBarIcon: ({ size, color }) => {
+                        if (user?.image_url) {
+                            return (
+                                <Image
+                                    source={{ uri: user.image_url }}
+                                    style={{
+                                        width: size,
+                                        height: size,
+                                        borderRadius: size / 2,
+                                        borderColor: color,
+                                        borderWidth: 1,
+                                    }}
+                                />
+                            );
+                        }
+                        return (
+                            <Ionicons
+                                name="person-circle"
+                                size={size}
+                                color={color}
+                            />
+                        );
+                    },
                 }}
             />
         </Tabs>
