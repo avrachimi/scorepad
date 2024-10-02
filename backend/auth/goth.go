@@ -46,35 +46,16 @@ func SetupAuth() {
 }
 
 func (a *Auth) SignIn(w http.ResponseWriter, r *http.Request) {
-	// if gothUser, err := gothic.CompleteUserAuth(w, r); err == nil {
-	// 	response, err := createUserTokens(r, a.DB, gothUser)
-	// 	if err != nil {
-	// 		http.Error(w, "Failed to generate tokens", http.StatusInternalServerError)
-	// 	}
-	//
-	// 	w.Header().Set("Content-Type", "application/json")
-	// 	json.NewEncoder(w).Encode(response)
-	// 	return
-	// } else {
-	//
-	// }
 	gothic.BeginAuthHandler(w, r)
-	// authUrl, err := gothic.GetAuthURL(w, r)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	//
-	// w.Header().Set("Content-Type", "application/json")
-	// json.NewEncoder(w).Encode(map[string]string{"auth_url": authUrl})
-	// return
 }
 
 func (a *Auth) SignOut(w http.ResponseWriter, r *http.Request, dbUser database.User) {
 	a.DB.DeleteRefreshTokensByUserId(r.Context(), dbUser.ID)
 	gothic.Logout(w, r)
-	w.Header().Set("Location", "/")
-	w.WriteHeader(http.StatusTemporaryRedirect)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Successfully signed out"})
+	return
 }
 
 func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
@@ -93,7 +74,8 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	// json.NewEncoder(w).Encode(response)
 	// return
 
-	url := fmt.Sprintf("com.scorepad://?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
+	url := fmt.Sprintf("exp://?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
+	fmt.Println("URL: ", url)
 
 	// Set the Location header to redirect the browser to the deep link
 	w.Header().Set("Location", url)
