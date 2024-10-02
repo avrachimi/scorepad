@@ -1,14 +1,14 @@
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useRouter } from "expo-router";
 import { Image, Text, View, useWindowDimensions } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import CarouselScreen from "~/components/WelcomeCarousel";
+import { useAuth } from "~/hooks/useAuth";
 import { Colors } from "~/lib/theme";
 
 function Index() {
+    const { signIn } = useAuth();
     const headerHeight = useHeaderHeight();
-    const { width, height } = useWindowDimensions();
-    const router = useRouter();
+    const { height } = useWindowDimensions();
 
     return (
         <View
@@ -35,7 +35,7 @@ function Index() {
             >
                 <TouchableOpacity
                     onPress={() => {
-                        router.push("/(authenticated)/(tabs)/home");
+                        signIn();
                     }}
                     style={{
                         flexDirection: "column",

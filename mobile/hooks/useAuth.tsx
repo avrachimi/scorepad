@@ -1,0 +1,267 @@
+import axios, { AxiosError } from "axios";
+import { useRouter } from "expo-router";
+import * as SecureStore from "expo-secure-store";
+import * as WebBrowser from "expo-web-browser";
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useState,
+} from "react";
+
+interface User {
+    id: number;
+    name: string;
+}
+
+interface AuthContextType {
+    user: User | null;
+    accessToken: string | null;
+    isSignedIn: boolean;
+    isLoaded: boolean;
+    signIn: () => Promise<void>;
+    signOut: () => Promise<void>;
+    refreshAccessToken: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+const ACCESS_TOKEN_KEY = "access_token";
+const REFRESH_TOKEN_KEY = "refresh_token";
+const ACCESS_TOKEN_EXPIRY_KEY = "access_token_expiry";
+const REFRESH_TOKEN_EXPIRY_KEY = "refresh_token_expiry";
+
+const API_ENDPOINT = process.env.EXPO_PUBLIC_API_ENDPOINT;
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+    children,
+}) => {
+    const router = useRouter();
+    const [user, setUser] = useState<User | null>(null);
+    const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+    const [isLoaded, setIsLoaded] = useState<boolean>(false);
+    const [accessToken, setAccessToken] = useState<string | null>(null);
+
+    const signIn = useCallback(async () => {
+        const mockUser: User = { id: 1, name: "John Doe" };
+
+        try {
+            const endpoint = new URL(
+                API_ENDPOINT + "/auth/signin?provider=google"
+            );
+            const result = await WebBrowser.openAuthSessionAsync(
+                endpoint.toString()
+            );
+
+            console.log(result);
+
+            if (result.type === "success") {
+                const parsedUrl = new URL(result.url);
+
+                const access_token = parsedUrl.searchParams.get("access_token");
+                const refresh_token =
+                    parsedUrl.searchParams.get("refresh_token");
+
+                if (access_token && refresh_token) {
+                    // TODO: Get expiry from actual API response
+                    const accessTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minute expiry
+                    const refreshTokenExpiry =
+                        Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 day expiry
+
+                    await SecureStore.setItemAsync(
+                        ACCESS_TOKEN_KEY,
+                        access_token
+                    );
+                    await SecureStore.setItemAsync(
+                        REFRESH_TOKEN_KEY,
+                        refresh_token
+                    );
+                    await SecureStore.setItemAsync(
+                        ACCESS_TOKEN_EXPIRY_KEY,
+                        accessTokenExpiry.toString()
+                    );
+                    await SecureStore.setItemAsync(
+                        REFRESH_TOKEN_EXPIRY_KEY,
+                        refreshTokenExpiry.toString()
+                    );
+
+                    setAccessToken(access_token);
+
+                    console.log("Auth Tokens saved");
+
+                    setUser(mockUser);
+                    setIsSignedIn(true);
+
+                    router.replace("/(authenticated)/(tabs)/home");
+                }
+            } else if (result.type === "cancel") {
+                console.log("User canceled the sign-in flow.");
+            }
+            return;
+        } catch (error) {
+            console.error("Failed to sign in:", error);
+            return;
+        }
+    }, [router]);
+
+    const signOut = useCallback(async () => {
+        try {
+            const accessToken =
+                await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+
+            if (!accessToken) {
+                await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+                await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+                await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
+                await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
+
+                setAccessToken(null);
+                setUser(null);
+                setIsSignedIn(false);
+                router.replace("/");
+                console.log("No access token found. Already signed out.");
+                return;
+            }
+
+            const res = await axios.get<{ message: string }>(
+                API_ENDPOINT + "/auth/signout",
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            if (res.status !== 200) {
+                console.error("Failed to sign out:", res.data);
+                return;
+            }
+
+            await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+            await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+            await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
+            await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
+
+            setAccessToken(null);
+            setUser(null);
+            setIsSignedIn(false);
+            router.replace("/");
+            console.log("Signed out successfully");
+        } catch (error) {
+            const err = error as AxiosError;
+
+            await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+            await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+            await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
+            await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
+
+            setAccessToken(null);
+            setUser(null);
+            setIsSignedIn(false);
+            router.replace("/");
+            console.error("Failed to sign out:", err.message);
+        }
+    }, [router]);
+
+    const refreshAccessToken = useCallback(async () => {
+        try {
+            const accessTokenExpiry = await SecureStore.getItemAsync(
+                ACCESS_TOKEN_EXPIRY_KEY
+            );
+            const refreshTokenExpiry = await SecureStore.getItemAsync(
+                REFRESH_TOKEN_EXPIRY_KEY
+            );
+
+            if (!accessTokenExpiry || !refreshTokenExpiry) {
+                signOut();
+                return;
+            }
+
+            const now = Date.now();
+            if (now >= parseInt(refreshTokenExpiry)) {
+                console.log("Refresh token expired. Signing out...");
+                signOut();
+                return;
+            }
+
+            if (now >= parseInt(accessTokenExpiry)) {
+                const refreshToken =
+                    await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+                if (!refreshToken) {
+                    signOut();
+                    return;
+                }
+
+                console.log("Access token expired. Refreshing...");
+
+                // TODO: Call your API to refresh the access token
+                const newAccessToken = "newFakeAccessToken123";
+                const newAccessTokenExpiry = Date.now() + 60 * 60 * 1000; // 1 hour
+
+                await SecureStore.setItemAsync(
+                    ACCESS_TOKEN_KEY,
+                    newAccessToken
+                );
+                await SecureStore.setItemAsync(
+                    ACCESS_TOKEN_EXPIRY_KEY,
+                    newAccessTokenExpiry.toString()
+                );
+            } else {
+                console.log("Access token is still valid");
+            }
+        } catch (error) {
+            console.error("Failed to refresh access token:", error);
+            signOut();
+        }
+    }, [signOut]);
+
+    const loadUserFromTokens = useCallback(async () => {
+        try {
+            refreshAccessToken();
+            const accessToken =
+                await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+            const refreshToken =
+                await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+
+            if (accessToken && refreshToken) {
+                const savedUser: User = { id: 1, name: "John Doe" }; // TODO: Replace with actual API call
+
+                setAccessToken(accessToken);
+                setUser(savedUser);
+                setIsSignedIn(true);
+            }
+        } catch (error) {
+            console.error("Failed to load tokens", error);
+        } finally {
+            setIsLoaded(true);
+        }
+    }, [router]);
+
+    useEffect(() => {
+        loadUserFromTokens();
+    }, [loadUserFromTokens]);
+
+    return (
+        <AuthContext.Provider
+            value={{
+                user,
+                signIn,
+                signOut,
+                isSignedIn,
+                isLoaded,
+                refreshAccessToken,
+                accessToken,
+            }}
+        >
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+export const useAuth = (): AuthContextType => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
+};
