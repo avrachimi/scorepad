@@ -98,6 +98,7 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 		url.QueryEscape(response["access_token"]),
 		url.QueryEscape(response["refresh_token"]),
 	)
+	fmt.Println(deepLink)
 
 	w.Header().Set("Location", "/")
 	w.WriteHeader(http.StatusTemporaryRedirect)
