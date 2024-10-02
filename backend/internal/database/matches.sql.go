@@ -396,7 +396,7 @@ FROM
   LEFT JOIN users u4 ON m.team2_player2 = u4.id
   LEFT JOIN users u5 ON m.created_by = u5.id
 WHERE
-  match_date > NOW() - INTERVAL '1 week'
+  match_date > NOW() - INTERVAL '1 month'
   AND (
     m.created_by = $1::uuid
     OR m.team1_player1 = $1::uuid
