@@ -94,12 +94,13 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	// json.NewEncoder(w).Encode(response)
 	// return
 
-	deepLink := fmt.Sprintf("com.scorepad://(authenticated)/(tabs)/home?access_token=%s&refresh_token=%s",
+	deepLink := fmt.Sprintf("com.scorepad://?access_token=%s&refresh_token=%s",
 		url.QueryEscape(response["access_token"]),
 		url.QueryEscape(response["refresh_token"]),
 	)
+	fmt.Println(deepLink)
 
-	w.Header().Set("Location", deepLink)
+	w.Header().Set("Location", "com.scorepad://")
 	w.WriteHeader(http.StatusTemporaryRedirect)
 	return
 }
