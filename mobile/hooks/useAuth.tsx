@@ -13,7 +13,7 @@ import { User } from "~/lib/types";
 
 interface AuthContextType {
     user: User | null;
-    accessToken: string | null;
+    accessToken?: string;
     isSignedIn: boolean;
     isLoaded: boolean;
     signIn: () => Promise<void>;
@@ -265,7 +265,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 isSignedIn,
                 isLoaded,
                 refreshAccessToken,
-                accessToken,
+                accessToken: accessToken || undefined,
             }}
         >
             {children}

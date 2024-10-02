@@ -421,8 +421,8 @@ type Stats struct {
 	Leaderboard    []LeaderboardRow `json:"leaderboard"`
 }
 
-func DatabaseStatsToStats(dbTotalMatches int64, dbMatchesByMonth []database.GetMatchesByMonthRow, dbLeaderboard []database.GetLeaderboardRow) []Stats {
-	stats := []Stats{}
+func DatabaseStatsToStats(dbTotalMatches int64, dbMatchesByMonth []database.GetMatchesByMonthRow, dbLeaderboard []database.GetLeaderboardRow) Stats {
+	stats := Stats{}
 
 	matchesByMonth := []MatchesByMonth{}
 	for _, dbMatchesByMonth := range dbMatchesByMonth {
@@ -448,11 +448,11 @@ func DatabaseStatsToStats(dbTotalMatches int64, dbMatchesByMonth []database.GetM
 		counter++
 	}
 
-	stats = append(stats, Stats{
+	stats = Stats{
 		TotalMatches:   dbTotalMatches,
 		MatchesByMonth: matchesByMonth,
 		Leaderboard:    leaderboard,
-	})
+	}
 
 	return stats
 }

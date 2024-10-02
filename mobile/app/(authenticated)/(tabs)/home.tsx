@@ -1,28 +1,27 @@
 import { useHeaderHeight } from "@react-navigation/elements";
 import { Link } from "expo-router";
 import { Text, TouchableOpacity, View } from "react-native";
+import MatchesPlayed from "~/components/MatchesPlayed";
+import RecentMatches from "~/components/RecentMatches";
 import { useAuth } from "~/hooks/useAuth";
-import { useDatabase } from "~/hooks/useDatabase";
 
 function Page() {
-    const { getUsersQuery } = useDatabase();
-
-    console.log(getUsersQuery.data);
-
     const headerHeight = useHeaderHeight();
     const { signOut } = useAuth();
 
     return (
         <View
             style={{
-                paddingTop: headerHeight + 30,
+                paddingTop: headerHeight + 50,
+                padding: 21,
                 flex: 1,
-                justifyContent: "center",
+                justifyContent: "flex-start",
                 alignItems: "center",
                 gap: 20,
             }}
         >
-            <Text>Home Page</Text>
+            <MatchesPlayed />
+            <RecentMatches />
             <Link href={"/"}>Index</Link>
             <TouchableOpacity onPress={signOut}>
                 <Text>Sign Out</Text>
