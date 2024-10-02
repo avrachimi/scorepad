@@ -1,6 +1,5 @@
 import { useHeaderHeight } from "@react-navigation/elements";
-import { Link } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
 import MatchesPlayed from "~/components/MatchesPlayed";
 import RecentMatches from "~/components/RecentMatches";
 import { useAuth } from "~/hooks/useAuth";
@@ -22,10 +21,6 @@ function Page() {
         >
             <MatchesPlayed />
             <RecentMatches />
-            <Link href={"/"}>Index</Link>
-            <TouchableOpacity onPress={signOut}>
-                <Text>Sign Out</Text>
-            </TouchableOpacity>
         </View>
     );
 }

@@ -9,10 +9,10 @@ import {
     useEffect,
     useState,
 } from "react";
-import { User } from "~/lib/types";
+import { UserProfile } from "~/lib/types";
 
 interface AuthContextType {
-    user: User | null;
+    user: UserProfile | null;
     accessToken?: string;
     isSignedIn: boolean;
     isLoaded: boolean;
@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
     const router = useRouter();
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<UserProfile | null>(null);
     const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [accessToken, setAccessToken] = useState<string | null>(null);
@@ -237,7 +237,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             const accessToken =
                 await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 
-            const user = await axios.get<User>(
+            const user = await axios.get<UserProfile>(
                 API_ENDPOINT + "/v1/users/profile",
                 {
                     headers: {

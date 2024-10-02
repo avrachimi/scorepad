@@ -7,6 +7,17 @@ export type User = {
     updated_at?: Date;
 };
 
+export type UserProfile = {
+    id: string;
+    name: string;
+    email: string;
+    image_url?: string;
+    created_at: Date;
+    updated_at?: Date;
+    total_friends: number;
+    total_matches: number;
+};
+
 export type Player = {
     id: string;
     name: string;

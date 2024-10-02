@@ -21,4 +21,24 @@ export const globalStyles = StyleSheet.create({
         shadowOpacity: 0.25,
         shadowRadius: 4,
     },
+    btnPrimary: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: Colors.primary,
+        minWidth: 300,
+        borderRadius: 14,
+        paddingVertical: 13,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    btnPrimaryText: {
+        color: "#fff",
+        fontWeight: "bold",
+    },
 });
