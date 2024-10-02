@@ -130,13 +130,13 @@ const styles = StyleSheet.create({
     },
     leaderboardRank: {
         textAlign: "left",
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: "semibold",
         opacity: 0.45,
     },
     leaderboardName: {
         textAlign: "left",
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: "semibold",
     },
     leaderboardMatches: {
@@ -144,13 +144,13 @@ const styles = StyleSheet.create({
         alignSelf: "center",
         textAlign: "center",
         flex: 1,
-        fontSize: 10,
+        fontSize: 12,
         opacity: 0.6,
     },
     leaderboardWinRate: {
         alignSelf: "flex-end",
         textAlign: "right",
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: "bold",
         color: Colors.primary,
     },
