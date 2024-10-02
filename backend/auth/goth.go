@@ -93,7 +93,7 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	// json.NewEncoder(w).Encode(response)
 	// return
 
-	url := fmt.Sprintf("com.scorepad:/(authenticated)/(tabs)/home?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
+	url := fmt.Sprintf("com.scorepad://(authenticated)/(tabs)/home?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
 	w.Header().Set("Location", url)
 	w.WriteHeader(http.StatusTemporaryRedirect)
 	return
