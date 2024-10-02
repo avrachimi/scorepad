@@ -44,7 +44,9 @@ function MatchesPlayed() {
             <Text style={styles.text}>
                 {statsMatchesQuery.data?.total_matches}
             </Text>
-            <Text style={styles.text}>matches played</Text>
+            <Text style={[styles.text, { fontSize: 24, fontWeight: "500" }]}>
+                total matches played
+            </Text>
         </View>
     );
 }
@@ -61,9 +63,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderRadius: 10,
         backgroundColor: Colors.card_bg,
+        gap: 10,
     },
     text: {
-        fontSize: 36,
+        fontSize: 48,
         fontWeight: "bold",
         color: "white",
     },

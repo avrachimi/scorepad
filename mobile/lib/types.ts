@@ -45,6 +45,7 @@ export type Stats = {
     matches_by_month?: { month: string; matches: number }[];
     leaderboard?: {
         id: string;
+        image_url?: string;
         rank: number;
         name: string;
         matches: number;

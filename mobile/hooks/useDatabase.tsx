@@ -37,7 +37,7 @@ export const useDatabase = () => {
         queryKey: ["users"],
         queryFn: async () => {
             const response = await get<User[]>("/users", accessToken!);
-            console.warn("getUsersQuery");
+            // console.warn("getUsersQuery");
             return response.data;
         },
     });
@@ -50,7 +50,7 @@ export const useDatabase = () => {
                 "/matches/recent",
                 accessToken!
             );
-            console.warn("recentMatchesQuery");
+            // console.warn("recentMatchesQuery");
             return response.data;
         },
     });
@@ -63,7 +63,7 @@ export const useDatabase = () => {
                 "/stats?type=matches",
                 accessToken!
             );
-            console.warn("statsMatchesQuery");
+            // console.warn("statsMatchesQuery");
             return response.data;
         },
     });
@@ -75,7 +75,7 @@ export const useDatabase = () => {
                 "/stats?type=leaderboard",
                 accessToken!
             );
-            console.warn("statsMatchesQuery");
+            // console.warn("statsMatchesQuery");
             return response.data;
         },
     });
@@ -83,7 +83,7 @@ export const useDatabase = () => {
     // Invalidations
     const queryClient = useQueryClient();
     const invalidateHomeScreenQueries = async () => {
-        console.warn("invalidateHomeScreenQueries");
+        // console.warn("invalidateHomeScreenQueries");
         await queryClient.invalidateQueries({
             queryKey: ["statsMatches", "recentMatches"],
         });

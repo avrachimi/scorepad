@@ -1,4 +1,5 @@
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
 
@@ -46,6 +47,7 @@ function Leaderboard() {
                     keyExtractor={(item) => item.id}
                     style={{ width: "100%", padding: 5 }}
                     renderItem={({ item, index }) => {
+                        console.log(item.image_url);
                         return (
                             <View style={styles.tableRow}>
                                 <View style={[styles.cell, { flex: 1 }]}>
@@ -54,9 +56,35 @@ function Leaderboard() {
                                     </Text>
                                 </View>
                                 <View style={[styles.cell, { flex: 3 }]}>
-                                    <Text style={styles.leaderboardName}>
-                                        {item.name}
-                                    </Text>
+                                    <View
+                                        style={{
+                                            flexDirection: "row",
+                                            alignItems: "center",
+                                            gap: 5,
+                                        }}
+                                    >
+                                        {item.image_url ? (
+                                            <Image
+                                                style={{
+                                                    width: 20,
+                                                    height: 20,
+                                                    borderRadius: 100,
+                                                    borderWidth: 1,
+                                                    borderColor: Colors.primary,
+                                                }}
+                                                src={item.image_url}
+                                            />
+                                        ) : (
+                                            <Ionicons
+                                                name="person-circle"
+                                                size={20}
+                                                color={Colors.primary}
+                                            />
+                                        )}
+                                        <Text style={styles.leaderboardName}>
+                                            {item.name}
+                                        </Text>
+                                    </View>
                                 </View>
                                 <View
                                     style={[
@@ -65,7 +93,7 @@ function Leaderboard() {
                                     ]}
                                 >
                                     <Text style={styles.leaderboardMatches}>
-                                        {item.matches}
+                                        {item.wins}
                                     </Text>
                                 </View>
                                 <View style={styles.cell}>
