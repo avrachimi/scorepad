@@ -74,7 +74,8 @@ func (a *Auth) AuthCallback(w http.ResponseWriter, r *http.Request) {
 	// json.NewEncoder(w).Encode(response)
 	// return
 
-	url := fmt.Sprintf("exp://?access_token=%s&refresh_token=%s", response["access_token"], response["refresh_token"])
+	deeplink_scheme := os.Getenv("DEEPLINK_SCHEME")
+	url := fmt.Sprintf("%s://?access_token=%s&refresh_token=%s", deeplink_scheme, response["access_token"], response["refresh_token"])
 	fmt.Println("URL: ", url)
 
 	// Set the Location header to redirect the browser to the deep link
