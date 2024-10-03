@@ -4,11 +4,18 @@ import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/typ
 import { useHeaderHeight } from "@react-navigation/elements";
 import { DefaultTheme } from "@react-navigation/native";
 import dayjs from "dayjs";
-import { useCallback, useMemo, useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useAuth } from "~/hooks/useAuth";
 import { Colors } from "~/lib/theme";
+
+type SelectedPlayer = {
+    id: string;
+    name: string;
+    image_url?: string;
+};
 
 interface NewMatchModalProps {
     bottomSheetRef: React.RefObject<BottomSheetModalMethods>;
@@ -16,6 +23,8 @@ interface NewMatchModalProps {
 
 function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const [team1Score, setTeam1Score] = useState(0);
+    const [team1Player1, setTeam1Player1] = useState<SelectedPlayer>();
+
     const [team2Score, setTeam2Score] = useState(0);
     const [duration, setDuration] = useState<number>(30);
     const [openDatePicker, setOpenDatePicker] = useState(false);
@@ -34,6 +43,8 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const headerHeight = useHeaderHeight();
     const snapPoints = useMemo(() => ["92%"], []);
 
+    const { user } = useAuth();
+
     const handleSheetChanges = useCallback((index: number) => {
         console.log("handleSheetChanges", index);
     }, []);
@@ -50,6 +61,12 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
         ),
         []
     );
+
+    useEffect(() => {
+        if (user) {
+            setTeam1Player1(user);
+        }
+    }, [user]);
 
     return (
         <BottomSheetModal
@@ -129,6 +146,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                             <TextInput
                                 style={styles.scoreInput}
                                 keyboardType="numeric"
+                                returnKeyType="done"
                                 value={team1Score.toString()}
                                 onChangeText={(text) =>
                                     setTeam1Score(Number(text))
@@ -138,16 +156,55 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                         <BottomLine />
                     </View>
                     <View>
-                        <TouchableOpacity style={styles.playerSelector}>
-                            <Text style={styles.playerSelectorTextEmpty}>
-                                Select player
-                            </Text>
-                            <Ionicons
-                                name="chevron-forward"
-                                size={20}
-                                color={DefaultTheme.colors.primary}
-                            />
-                        </TouchableOpacity>
+                        {team1Player1 ? (
+                            <TouchableOpacity style={styles.playerSelector}>
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        gap: 10,
+                                    }}
+                                >
+                                    {team1Player1.image_url ? (
+                                        <Image
+                                            src={team1Player1.image_url}
+                                            style={{
+                                                width: 24,
+                                                height: 24,
+                                                borderRadius: 12,
+                                                borderWidth: 1,
+                                                borderColor: Colors.primary,
+                                            }}
+                                        />
+                                    ) : (
+                                        <Ionicons
+                                            name="person-circle"
+                                            size={24}
+                                            color={DefaultTheme.colors.primary}
+                                        />
+                                    )}
+                                    <Text style={styles.playerSelectorText}>
+                                        {team1Player1.name}
+                                    </Text>
+                                </View>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={20}
+                                    color={DefaultTheme.colors.primary}
+                                />
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity style={styles.playerSelector}>
+                                <Text style={styles.playerSelectorTextEmpty}>
+                                    Select player
+                                </Text>
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={20}
+                                    color={DefaultTheme.colors.primary}
+                                />
+                            </TouchableOpacity>
+                        )}
                         <BottomLine />
                     </View>
                     <View>
@@ -175,9 +232,10 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                             <TextInput
                                 style={styles.scoreInput}
                                 keyboardType="numeric"
-                                value={team1Score.toString()}
+                                returnKeyType="done"
+                                value={team2Score.toString()}
                                 onChangeText={(text) =>
-                                    setTeam1Score(Number(text))
+                                    setTeam2Score(Number(text))
                                 }
                             />
                         </View>
@@ -351,6 +409,7 @@ const styles = StyleSheet.create({
     },
     playerSelectorText: {
         fontSize: 17,
+        fontWeight: "500",
     },
     playerSelectorTextEmpty: {
         fontSize: 17,
