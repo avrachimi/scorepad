@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useRef, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { RefreshControl, TouchableOpacity } from "react-native-gesture-handler";
 import Leaderboard from "~/components/Leaderboard";
 import MatchesPlayed from "~/components/MatchesPlayed";
@@ -47,13 +47,22 @@ function Page() {
         >
             <View
                 style={{
-                    marginTop: 10,
+                    marginTop: 20,
                     paddingHorizontal: 21,
-                    justifyContent: "center",
-                    alignItems: "flex-end",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                     width: "100%",
                 }}
             >
+                <Text
+                    style={{
+                        fontSize: 24,
+                        fontWeight: "bold",
+                    }}
+                >
+                    Home
+                </Text>
                 <TouchableOpacity onPress={showBottomSheet}>
                     <Ionicons name="add" size={30} color={Colors.primary} />
                 </TouchableOpacity>

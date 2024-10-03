@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
     FlatList,
     RefreshControl,
@@ -10,6 +11,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import NewMatchModal from "~/components/modals/NewMatchModal";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
 import { formatDuration, formatName, getDayWithSuffix } from "~/util/format";
@@ -18,6 +20,11 @@ function Page() {
     const headerHeight = useHeaderHeight();
     const { allMatchesQuery, invalidateQueries } = useDatabase();
     const [refreshing, setRefreshing] = useState(false);
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+    const showBottomSheet = () => {
+        bottomSheetRef.current?.present();
+    };
 
     return (
         <View
@@ -40,9 +47,10 @@ function Page() {
                 }}
             >
                 <Text style={styles.heading}>All Matches</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={showBottomSheet}>
                     <Ionicons name="add" size={30} color={Colors.primary} />
                 </TouchableOpacity>
+                <NewMatchModal bottomSheetRef={bottomSheetRef} />
             </View>
             <FlatList
                 scrollEnabled={true}
