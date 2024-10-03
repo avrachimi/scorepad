@@ -2,28 +2,7 @@ import dayjs from "dayjs";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
-
-const getDayWithSuffix = (day: number) => {
-    if (day > 3 && day < 21) return "th"; // for 11th to 19th
-    switch (day % 10) {
-        case 1:
-            return "st";
-        case 2:
-            return "nd";
-        case 3:
-            return "rd";
-        default:
-            return "th";
-    }
-};
-
-const formatName = (name: string) => {
-    const firstName = name.split(" ")[0];
-    if (firstName.length > 10) return firstName.slice(0, 10) + "...";
-
-    const lastName = name.split(" ")[1];
-    return firstName + (lastName ? ` ${lastName[0]}.` : "");
-};
+import { formatName, getDayWithSuffix } from "~/util/format";
 
 function RecentMatches() {
     const { recentMatchesQuery } = useDatabase();

@@ -43,6 +43,14 @@ export const useDatabase = () => {
     });
 
     // Matches
+    const allMatchesQuery = useQuery({
+        queryKey: ["allMatches"],
+        queryFn: async () => {
+            const response = await get<Match[]>("/matches", accessToken!);
+            return response.data;
+        },
+    });
+
     const recentMatchesQuery = useQuery({
         queryKey: ["recentMatches"],
         queryFn: async () => {
@@ -94,6 +102,7 @@ export const useDatabase = () => {
 
     return {
         getUsersQuery,
+        allMatchesQuery,
         recentMatchesQuery,
         statsMatchesQuery,
         statsLeaderboardQuery,
