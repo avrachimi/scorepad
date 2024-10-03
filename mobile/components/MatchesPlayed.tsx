@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useDatabase } from "~/hooks/useDatabase";
-import { Colors, globalStyles } from "~/lib/theme";
+import { Colors } from "~/lib/theme";
 
 function MatchesPlayed() {
     const { statsMatchesQuery } = useDatabase();
@@ -55,7 +55,6 @@ export default MatchesPlayed;
 
 const styles = StyleSheet.create({
     container: {
-        ...globalStyles.shadow,
         justifyContent: "center",
         position: "relative",
         paddingHorizontal: 21,

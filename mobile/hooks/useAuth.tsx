@@ -47,8 +47,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 endpoint.toString()
             );
 
-            console.log(result);
-
             if (result.type === "success") {
                 const parsedUrl = new URL(result.url);
 

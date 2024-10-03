@@ -15,7 +15,15 @@ function Leaderboard() {
             </Text>
             <View style={styles.table}>
                 <View style={styles.tableRow}>
-                    <View style={[styles.cell, { flex: 1, opacity: 0.75 }]}>
+                    <View
+                        style={[
+                            styles.cell,
+                            {
+                                flex: 1,
+                                opacity: 0.75,
+                            },
+                        ]}
+                    >
                         <Text style={styles.leaderboardRank}>#</Text>
                     </View>
                     <View style={[styles.cell, { flex: 3, opacity: 0.75 }]}>
@@ -122,7 +130,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         width: "100%",
-        gap: 5,
+        gap: 10,
     },
     tableRow: {
         flexDirection: "row",

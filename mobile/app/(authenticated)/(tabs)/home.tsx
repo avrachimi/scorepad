@@ -7,7 +7,7 @@ import Leaderboard from "~/components/Leaderboard";
 import MatchesPlayed from "~/components/MatchesPlayed";
 import RecentMatches from "~/components/RecentMatches";
 import { useDatabase } from "~/hooks/useDatabase";
-import { Colors, globalStyles } from "~/lib/theme";
+import { Colors } from "~/lib/theme";
 
 function Page() {
     const headerHeight = useHeaderHeight();
@@ -47,14 +47,8 @@ function Page() {
                     width: "100%",
                 }}
             >
-                <TouchableOpacity
-                    style={{
-                        backgroundColor: Colors.card_bg,
-                        borderRadius: 3,
-                        ...globalStyles.shadow,
-                    }}
-                >
-                    <Ionicons name="add" size={28} color={Colors.primary} />
+                <TouchableOpacity>
+                    <Ionicons name="add" size={30} color={Colors.primary} />
                 </TouchableOpacity>
             </View>
             <MatchesPlayed />

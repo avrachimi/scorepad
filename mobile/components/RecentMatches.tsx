@@ -39,6 +39,7 @@ function RecentMatches() {
                 scrollEnabled={true}
                 data={recentMatchesQuery.data}
                 keyExtractor={(item) => item.id}
+                style={{ marginTop: -15 }}
                 contentContainerStyle={{
                     flexDirection: "row",
                     justifyContent: "flex-start",
