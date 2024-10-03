@@ -108,10 +108,12 @@ SELECT
   ) AS win_lose_ratio
 FROM
   users u
-  LEFT JOIN matches m ON m.team1_player1 = u.id
-  OR m.team1_player2 = u.id
-  OR m.team2_player1 = u.id
-  OR m.team2_player2 = u.id
+  LEFT JOIN matches m ON (
+    m.team1_player1 = u.id
+    OR m.team1_player2 = u.id
+    OR m.team2_player1 = u.id
+    OR m.team2_player2 = u.id
+  )
 WHERE
   u.id IN (
     SELECT
