@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { Link } from "expo-router";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
@@ -33,66 +34,70 @@ function RecentMatches() {
                     const suffix = getDayWithSuffix(day);
 
                     return (
-                        <View style={styles.matchCard}>
-                            <View style={styles.matchCardTop}>
-                                <View style={styles.dateContainer}>
-                                    <Text style={styles.textDate}>
-                                        {dayjs(item.match_date).format(
-                                            "dddd, MMMM "
-                                        )}
-                                        {day}
-                                        <Text style={styles.superscript}>
-                                            {suffix}
+                        <Link href={`/(authenticated)/match/${item.id}`}>
+                            <View style={styles.matchCard}>
+                                <View style={styles.matchCardTop}>
+                                    <View style={styles.dateContainer}>
+                                        <Text style={styles.textDate}>
+                                            {dayjs(item.match_date).format(
+                                                "dddd, MMMM "
+                                            )}
+                                            {day}
+                                            <Text style={styles.superscript}>
+                                                {suffix}
+                                            </Text>
                                         </Text>
-                                    </Text>
+                                    </View>
+                                    <View
+                                        style={{
+                                            flexDirection: "row",
+                                            width: "100%",
+                                            justifyContent: "space-around",
+                                        }}
+                                    >
+                                        <Text style={styles.textScore}>
+                                            {item.team1_score}
+                                        </Text>
+                                        <Text style={styles.textScore}>
+                                            {item.team2_score}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <View
-                                    style={{
-                                        flexDirection: "row",
-                                        width: "100%",
-                                        justifyContent: "space-around",
-                                    }}
-                                >
-                                    <Text style={styles.textScore}>
-                                        {item.team1_score}
-                                    </Text>
-                                    <Text style={styles.textScore}>
-                                        {item.team2_score}
-                                    </Text>
+                                <View style={styles.matchCardBottom}>
+                                    <View style={styles.playerTextContainer}>
+                                        <Text style={styles.textPlayer}>
+                                            {formatName(
+                                                item.team1_player1.name
+                                            )}
+                                        </Text>
+                                        <Text style={styles.textPlayer}>
+                                            {formatName(
+                                                item.team1_player2?.name ?? "-"
+                                            )}
+                                        </Text>
+                                    </View>
+                                    <View
+                                        style={{
+                                            height: "80%",
+                                            borderLeftWidth: 1,
+                                            borderLeftColor: "#B0B0B0",
+                                        }}
+                                    />
+                                    <View style={styles.playerTextContainer}>
+                                        <Text style={styles.textPlayer}>
+                                            {formatName(
+                                                item.team2_player1?.name ?? "-"
+                                            )}
+                                        </Text>
+                                        <Text style={styles.textPlayer}>
+                                            {formatName(
+                                                item.team2_player2?.name ?? "-"
+                                            )}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
-                            <View style={styles.matchCardBottom}>
-                                <View style={styles.playerTextContainer}>
-                                    <Text style={styles.textPlayer}>
-                                        {formatName(item.team1_player1.name)}
-                                    </Text>
-                                    <Text style={styles.textPlayer}>
-                                        {formatName(
-                                            item.team1_player2?.name ?? "-"
-                                        )}
-                                    </Text>
-                                </View>
-                                <View
-                                    style={{
-                                        height: "80%",
-                                        borderLeftWidth: 1,
-                                        borderLeftColor: "#B0B0B0",
-                                    }}
-                                />
-                                <View style={styles.playerTextContainer}>
-                                    <Text style={styles.textPlayer}>
-                                        {formatName(
-                                            item.team2_player2?.name ?? "-"
-                                        )}
-                                    </Text>
-                                    <Text style={styles.textPlayer}>
-                                        {formatName(
-                                            item.team2_player2?.name ?? "-"
-                                        )}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
+                        </Link>
                     );
                 }}
             />

@@ -46,4 +46,16 @@ export const globalStyles = StyleSheet.create({
         fontWeight: "bold",
         color: Colors.accent,
     },
+    tag: {
+        backgroundColor: Colors.primary,
+        color: "white",
+        paddingHorizontal: 5,
+        paddingVertical: 2,
+        borderRadius: 6,
+    },
+    tagText: {
+        color: "white",
+        fontSize: 11,
+        fontWeight: "500",
+    },
 });

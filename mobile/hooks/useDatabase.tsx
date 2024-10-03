@@ -43,6 +43,18 @@ export const useDatabase = () => {
     });
 
     // Matches
+    const singleMatchQuery = (id: string) =>
+        useQuery({
+            queryKey: ["singleMatches"],
+            queryFn: async () => {
+                const response = await get<Match>(
+                    "/matches/" + id,
+                    accessToken!
+                );
+                return response.data;
+            },
+        });
+
     const allMatchesQuery = useQuery({
         queryKey: ["allMatches"],
         queryFn: async () => {
@@ -91,12 +103,12 @@ export const useDatabase = () => {
     // Invalidations
     const queryClient = useQueryClient();
     const invalidateQueries = async (queries: string[]) => {
-        // console.warn("invalidateHomeScreenQueries");
         for (const key of queries) {
-            await queryClient.invalidateQueries({
-                queryKey: [key],
-                refetchType: "active",
-            });
+            // await queryClient.invalidateQueries({
+            //     queryKey: [key],
+            //     refetchType: "all",
+            // });
+            await queryClient.refetchQueries();
         }
     };
 
@@ -105,6 +117,7 @@ export const useDatabase = () => {
         allMatchesQuery,
         recentMatchesQuery,
         statsMatchesQuery,
+        singleMatchQuery,
         statsLeaderboardQuery,
         invalidateQueries,
     };

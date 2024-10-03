@@ -62,6 +62,28 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
         []
     );
 
+    const clearState = () => {
+        setTeam1Score(0);
+        setTeam1Player1(undefined);
+
+        setTeam2Score(0);
+
+        setDuration(30);
+        setDate(new Date());
+    };
+
+    const onSave = () => {
+        console.log("Save");
+        bottomSheetRef.current?.close();
+        clearState();
+    };
+
+    const onCancel = () => {
+        console.log("Cancel");
+        bottomSheetRef.current?.close();
+        clearState();
+    };
+
     useEffect(() => {
         if (user) {
             setTeam1Player1(user);
@@ -95,13 +117,12 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                     },
                 }}
             >
-                <TouchableOpacity
-                    onPress={() => bottomSheetRef.current?.close()}
-                >
+                <TouchableOpacity onPress={onCancel}>
                     <Text
                         style={{
                             color: DefaultTheme.colors.primary,
                             fontSize: 17,
+                            width: 60,
                         }}
                     >
                         Cancel
@@ -111,18 +132,20 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                     style={{
                         fontSize: 17,
                         fontWeight: "600",
+                        flex: 1,
+                        textAlign: "center",
                     }}
                 >
                     New Match
                 </Text>
-                <TouchableOpacity
-                    onPress={() => bottomSheetRef.current?.close()}
-                >
+                <TouchableOpacity onPress={onSave}>
                     <Text
                         style={{
                             color: DefaultTheme.colors.primary,
                             fontSize: 17,
                             fontWeight: "600",
+                            width: 60,
+                            textAlign: "right",
                         }}
                     >
                         Save
@@ -157,7 +180,10 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                     </View>
                     <View>
                         {team1Player1 ? (
-                            <TouchableOpacity style={styles.playerSelector}>
+                            <TouchableOpacity
+                                disabled={true}
+                                style={styles.playerSelector}
+                            >
                                 <View
                                     style={{
                                         flexDirection: "row",
@@ -448,7 +474,7 @@ const styles = StyleSheet.create({
     },
     durationTagContainer: {
         flexDirection: "row",
-        justifyContent: "center",
+        justifyContent: "flex-end",
         alignItems: "center",
         flexWrap: "wrap",
         width: "60%",
@@ -457,8 +483,8 @@ const styles = StyleSheet.create({
     durationButton: {
         backgroundColor: Colors.secondary,
         color: "white",
-        paddingHorizontal: 5,
-        paddingVertical: 2,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
         borderRadius: 6,
     },
     selectedDurationButton: {

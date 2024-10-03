@@ -104,7 +104,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 
             if (!accessToken) {
-                await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
                 await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
                 await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
                 await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
@@ -159,6 +158,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const refreshAccessToken = useCallback(async () => {
         try {
+            const accessToken =
+                await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+
+            if (!accessToken) {
+                console.log("(refresh) No access token found. Signing out...");
+                setAccessToken(null);
+                setUser(null);
+                setIsSignedIn(false);
+                router.replace("/");
+                return;
+            }
             const accessTokenExpiry = await SecureStore.getItemAsync(
                 ACCESS_TOKEN_EXPIRY_KEY
             );
