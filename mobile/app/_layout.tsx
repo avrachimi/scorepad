@@ -1,3 +1,4 @@
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClient } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
@@ -16,7 +17,9 @@ export default function RootLayout() {
             <DatabaseProvider client={queryClient}>
                 <StatusBar barStyle={"dark-content"} />
                 <GestureHandlerRootView style={{ flex: 1 }}>
-                    <InitialLayout />
+                    <BottomSheetModalProvider>
+                        <InitialLayout />
+                    </BottomSheetModalProvider>
                 </GestureHandlerRootView>
             </DatabaseProvider>
         </AuthProvider>

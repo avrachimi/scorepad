@@ -1,10 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ScrollView, View } from "react-native";
 import { RefreshControl, TouchableOpacity } from "react-native-gesture-handler";
 import Leaderboard from "~/components/Leaderboard";
 import MatchesPlayed from "~/components/MatchesPlayed";
+import NewMatchModal from "~/components/modals/NewMatchModal";
 import RecentMatches from "~/components/RecentMatches";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors } from "~/lib/theme";
@@ -13,6 +15,11 @@ function Page() {
     const headerHeight = useHeaderHeight();
     const [refreshing, setRefreshing] = useState(false);
     const { invalidateQueries } = useDatabase();
+    const bottomSheetRef = useRef<BottomSheetModal>(null);
+
+    const showBottomSheet = () => {
+        bottomSheetRef.current?.present();
+    };
 
     return (
         <ScrollView
@@ -47,13 +54,14 @@ function Page() {
                     width: "100%",
                 }}
             >
-                <TouchableOpacity>
+                <TouchableOpacity onPress={showBottomSheet}>
                     <Ionicons name="add" size={30} color={Colors.primary} />
                 </TouchableOpacity>
             </View>
             <MatchesPlayed />
             <RecentMatches />
             <Leaderboard />
+            <NewMatchModal bottomSheetRef={bottomSheetRef} />
         </ScrollView>
     );
 }
