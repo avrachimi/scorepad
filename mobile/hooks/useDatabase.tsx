@@ -84,9 +84,12 @@ export const useDatabase = () => {
     const queryClient = useQueryClient();
     const invalidateQueries = async (queries: string[]) => {
         // console.warn("invalidateHomeScreenQueries");
-        await queryClient.invalidateQueries({
-            queryKey: queries,
-        });
+        for (const key of queries) {
+            await queryClient.invalidateQueries({
+                queryKey: [key],
+                refetchType: "active",
+            });
+        }
     };
 
     return {

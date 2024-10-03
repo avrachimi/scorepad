@@ -51,11 +51,11 @@ function Leaderboard() {
                     </View>
                 </View>
                 <FlatList
+                    scrollEnabled={false}
                     data={statsLeaderboardQuery.data?.leaderboard}
                     keyExtractor={(item) => item.id}
                     style={{ width: "100%", padding: 5 }}
                     renderItem={({ item, index }) => {
-                        console.log(item.image_url);
                         return (
                             <View style={styles.tableRow}>
                                 <View style={[styles.cell, { flex: 1 }]}>
