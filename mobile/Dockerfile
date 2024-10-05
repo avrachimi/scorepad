@@ -23,4 +23,4 @@ COPY . .
 EXPOSE 19000 19001 19002 8081
 
 # Step 6: Start the Expo development server using the `--tunnel` option for remote access
-CMD ["npx", "expo", "start", "--tunnel"]
+CMD ["npx", "expo", "start"]
