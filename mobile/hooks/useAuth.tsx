@@ -71,9 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
                 if (access_token && refresh_token) {
                     // TODO: Get expiry from actual API response
-                    const accessTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minute expiry
-                    const refreshTokenExpiry =
-                        Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 day expiry
+                    const accessTokenExpiry = dayjs().add(15, "minutes");
+                    const refreshTokenExpiry = dayjs().add(30, "days");
 
                     await SecureStore.setItemAsync(
                         ACCESS_TOKEN_KEY,
@@ -138,8 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
-            const now = Date.now();
-            if (now >= parseInt(accessTokenExpiry)) {
+            if (dayjs().isAfter(dayjs(parseInt(accessTokenExpiry)))) {
                 console.log("Access token expired. Signing out...");
                 await deleteStoredTokens();
                 resetState();
@@ -199,8 +197,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return false;
             }
 
-            const now = Date.now();
-            if (now >= parseInt(refreshTokenExpiry)) {
+            if (dayjs().isAfter(dayjs(parseInt(refreshTokenExpiry)))) {
                 console.log("Refresh token expired. Signing out...");
                 await signOut();
                 return false;
@@ -225,7 +222,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     }
                 );
                 const newAccessToken = res.data.access_token;
-                const newAccessTokenExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
+                const newAccessTokenExpiry = dayjs().add(15, "minutes"); // 15 minutes
 
                 await SecureStore.setItemAsync(
                     ACCESS_TOKEN_KEY,

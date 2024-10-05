@@ -35,7 +35,7 @@ function Page() {
             <StatusBar style="light" />
             <Stack.Screen
                 options={{
-                    title: "Test",
+                    headerShown: false,
                     headerTransparent: true,
                     contentStyle: {
                         paddingTop: headerHeight + 50,
@@ -56,7 +56,17 @@ function Page() {
                         />
                         <Text style={styles.btnBackText}>Back</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.btnEdit}>
+                    <TouchableOpacity
+                        style={styles.btnEdit}
+                        onPress={() => {
+                            router.push({
+                                pathname: "/(authenticated)/match/edit",
+                                params: {
+                                    id: match.id,
+                                },
+                            });
+                        }}
+                    >
                         <Ionicons
                             name="create-outline"
                             size={24}
@@ -86,7 +96,7 @@ function Page() {
                             fontWeight: "600",
                         }}
                     >
-                        {dayjs(match.match_date).format("MMMM DD")}
+                        {dayjs(match.match_date).format("MMMM D")}
                         {getDayWithSuffix(dayjs(match.match_date).date())}
                         {", "}
                         {dayjs(match.match_date).format("YYYY")}

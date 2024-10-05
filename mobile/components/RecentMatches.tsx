@@ -31,7 +31,7 @@ function RecentMatches() {
                     marginLeft: 10,
                     paddingRight: 31,
                     padding: 5,
-                    gap: 10,
+                    gap: 5,
                 }}
                 renderItem={({ item }) => {
                     const day = dayjs(item.match_date).date();
