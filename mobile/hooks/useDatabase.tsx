@@ -31,31 +31,50 @@ export const DatabaseProvider = ({
 };
 
 export const useDatabase = () => {
-    const { accessToken } = useAuth();
+    const { accessToken, refreshAccessToken } = useAuth();
+
+    const handleAxiosError = (error: unknown) => {
+        const err = error as AxiosError;
+        if (err.response?.status === 403) {
+            refreshAccessToken();
+        } else {
+            console.error(err);
+        }
+    };
 
     // Users
     const getUsersQuery = useQuery({
         queryKey: ["users"],
         queryFn: async () => {
-            const response = await get<User[]>("/users", accessToken!);
-            // console.warn("getUsersQuery");
-            return response.data;
+            try {
+                const response = await get<User[]>("/users", accessToken!);
+                // console.warn("getUsersQuery");
+                return response.data;
+            } catch (error) {
+                handleAxiosError(error);
+                return null;
+            }
         },
     });
 
     // Matches
     const createMatchQuery = useMutation({
         mutationFn: async (match: CreateMatchParams) => {
-            const createdMatch = await apiClient.post<Match>(
-                "/matches",
-                match,
-                {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                }
-            );
-            return createdMatch.data;
+            try {
+                const createdMatch = await apiClient.post<Match>(
+                    "/matches",
+                    match,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                    }
+                );
+                return createdMatch.data;
+            } catch (error) {
+                handleAxiosError(error);
+                return null;
+            }
         },
         onSuccess: () => {
             queryClient.invalidateQueries();
@@ -69,31 +88,46 @@ export const useDatabase = () => {
         useQuery({
             queryKey: ["singleMatches"],
             queryFn: async () => {
-                const response = await get<Match>(
-                    "/matches/" + id,
-                    accessToken!
-                );
-                return response.data;
+                try {
+                    const response = await get<Match>(
+                        "/matches/" + id,
+                        accessToken!
+                    );
+                    return response.data;
+                } catch (error) {
+                    handleAxiosError(error);
+                    return null;
+                }
             },
         });
 
     const allMatchesQuery = useQuery({
         queryKey: ["allMatches"],
         queryFn: async () => {
-            const response = await get<Match[]>("/matches", accessToken!);
-            return response.data;
+            try {
+                const response = await get<Match[]>("/matches", accessToken!);
+                return response.data;
+            } catch (error) {
+                handleAxiosError(error);
+                return null;
+            }
         },
     });
 
     const recentMatchesQuery = useQuery({
         queryKey: ["recentMatches"],
         queryFn: async () => {
-            const response = await get<Match[]>(
-                "/matches/recent",
-                accessToken!
-            );
-            // console.warn("recentMatchesQuery");
-            return response.data;
+            try {
+                const response = await get<Match[]>(
+                    "/matches/recent",
+                    accessToken!
+                );
+                // console.warn("recentMatchesQuery");
+                return response.data;
+            } catch (error) {
+                handleAxiosError(error);
+                return null;
+            }
         },
     });
 
@@ -101,12 +135,17 @@ export const useDatabase = () => {
     const statsMatchesQuery = useQuery({
         queryKey: ["statsMatches"],
         queryFn: async () => {
-            const response = await get<Stats>(
-                "/stats?type=matches",
-                accessToken!
-            );
-            // console.warn("statsMatchesQuery");
-            return response.data;
+            try {
+                const response = await get<Stats>(
+                    "/stats?type=matches",
+                    accessToken!
+                );
+                // console.warn("statsMatchesQuery");
+                return response.data;
+            } catch (error) {
+                handleAxiosError(error);
+                return null;
+            }
         },
     });
 
@@ -121,8 +160,7 @@ export const useDatabase = () => {
                 console.log("statsLeaderboardQuery", response.data);
                 return response.data;
             } catch (error) {
-                const err = error as AxiosError;
-                console.error("Failed to get leaderboard stats:", err.message);
+                handleAxiosError(error);
                 return null;
             }
         },

@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import dayjs from "dayjs";
 import { useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as WebBrowser from "expo-web-browser";
@@ -134,7 +135,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     "Access/Refresh token expiry not found. Signing out..."
                 );
                 await signOut();
-                return false;
+                return;
             }
 
             const now = Date.now();
@@ -142,7 +143,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 console.log("Access token expired. Signing out...");
                 await deleteStoredTokens();
                 resetState();
-                return false;
+                return;
             }
 
             const res = await axios.get<{ message: string }>(
@@ -205,7 +206,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return false;
             }
 
-            if (now >= parseInt(accessTokenExpiry)) {
+            if (dayjs().isAfter(dayjs(parseInt(accessTokenExpiry)))) {
                 const refreshToken =
                     await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
                 if (!refreshToken) {
@@ -216,7 +217,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 console.log("Access token expired. Refreshing...");
 
                 const res = await axios.get<{ access_token: string }>(
-                    "/auth/refresh",
+                    API_ENDPOINT + "/auth/refresh",
                     {
                         headers: {
                             Authorization: `Bearer ${refreshToken}`,
@@ -238,11 +239,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return true;
             } else {
                 console.log("Access token is still valid");
+                console.log(accessTokenExpiry);
                 return true;
             }
         } catch (error) {
             const err = error as AxiosError;
-            console.error("Failed to refresh access token:", err.message);
+            console.error(
+                "Failed to refresh access token:",
+                JSON.stringify(err)
+            );
             await deleteStoredTokens();
             resetState();
             return false;
@@ -255,10 +260,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             if (refreshed) {
                 const accessToken =
                     await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-                const refreshToken =
-                    await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 
-                if (accessToken && refreshToken) {
+                if (accessToken) {
                     const user = await getUserProfile();
                     setAccessToken(accessToken);
                     setUser(user);

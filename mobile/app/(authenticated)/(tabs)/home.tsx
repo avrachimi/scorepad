@@ -27,6 +27,7 @@ function Page() {
             style={{
                 paddingTop: headerHeight + 50,
                 width: "100%",
+                height: "100%",
                 justifyContent: "flex-start",
                 alignItems: "center",
                 gap: 20,
@@ -63,10 +64,10 @@ function Page() {
                     justifyContent: "flex-start",
                     alignItems: "center",
                     gap: 20,
+                    paddingBottom: 50,
                 }}
                 style={{
                     width: "100%",
-                    height: "100%",
                 }}
                 refreshControl={
                     <RefreshControl

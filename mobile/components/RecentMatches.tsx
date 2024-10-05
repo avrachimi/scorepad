@@ -1,11 +1,15 @@
+import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { Link } from "expo-router";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
-import { formatName, getDayWithSuffix } from "~/util/format";
+import { getDayWithSuffix } from "~/util/format";
 
 function RecentMatches() {
+    const router = useRouter();
     const { recentMatchesQuery } = useDatabase();
 
     return (
@@ -19,7 +23,7 @@ function RecentMatches() {
                 scrollEnabled={true}
                 data={recentMatchesQuery.data}
                 keyExtractor={(item) => item.id}
-                style={{ marginTop: -15 }}
+                style={{ maxHeight: 120 }}
                 contentContainerStyle={{
                     flexDirection: "row",
                     justifyContent: "flex-start",
@@ -27,77 +31,179 @@ function RecentMatches() {
                     marginLeft: 10,
                     paddingRight: 31,
                     padding: 5,
-                    gap: 20,
+                    gap: 10,
                 }}
                 renderItem={({ item }) => {
                     const day = dayjs(item.match_date).date();
                     const suffix = getDayWithSuffix(day);
+                    const players = [
+                        item.team1_player1,
+                        item.team1_player2,
+                        item.team2_player1,
+                        item.team2_player2,
+                    ].filter(
+                        (item): item is NonNullable<typeof item> => item != null
+                    );
 
                     return (
-                        <Link href={`/(authenticated)/match/${item.id}`}>
-                            <View style={styles.matchCard}>
-                                <View style={styles.matchCardTop}>
-                                    <View style={styles.dateContainer}>
-                                        <Text style={styles.textDate}>
-                                            {dayjs(item.match_date).format(
-                                                "dddd, MMMM "
-                                            )}
-                                            {day}
-                                            <Text style={styles.superscript}>
-                                                {suffix}
-                                            </Text>
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            width: "100%",
-                                            justifyContent: "space-around",
-                                        }}
+                        <TouchableOpacity
+                            style={styles.matchCard}
+                            onPress={() =>
+                                router.push(`/(authenticated)/match/${item.id}`)
+                            }
+                        >
+                            <Svg
+                                height="100%"
+                                width="100%"
+                                style={{
+                                    position: "absolute",
+                                    width: "100%",
+                                    height: "100%",
+                                }}
+                            >
+                                <Defs>
+                                    <LinearGradient
+                                        id="grad"
+                                        x1="50%"
+                                        y1="0"
+                                        x2="50%"
+                                        y2="100%"
                                     >
-                                        <Text style={styles.textScore}>
-                                            {item.team1_score}
+                                        <Stop
+                                            offset="0%"
+                                            stopColor={Colors.primary}
+                                            stopOpacity="1"
+                                        />
+                                        <Stop
+                                            offset="100%"
+                                            stopColor={Colors.secondary}
+                                            stopOpacity="1"
+                                        />
+                                    </LinearGradient>
+                                </Defs>
+                                <Rect
+                                    width="100%"
+                                    height="100%"
+                                    rx={10}
+                                    ry={10}
+                                    fill="url(#grad)"
+                                />
+                            </Svg>
+                            <View style={styles.matchCardTop}>
+                                <View style={styles.dateContainer}>
+                                    <Text style={styles.textDate}>
+                                        {dayjs(item.match_date).format(
+                                            "ddd, MMM "
+                                        )}
+                                        {day}
+                                        <Text style={styles.superscript}>
+                                            {suffix}
                                         </Text>
-                                        <Text style={styles.textScore}>
-                                            {item.team2_score}
-                                        </Text>
-                                    </View>
+                                    </Text>
                                 </View>
-                                <View style={styles.matchCardBottom}>
-                                    <View style={styles.playerTextContainer}>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team1_player1.name
-                                            )}
-                                        </Text>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team1_player2?.name ?? "-"
-                                            )}
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={{
-                                            height: "80%",
-                                            borderLeftWidth: 1,
-                                            borderLeftColor: "#B0B0B0",
-                                        }}
-                                    />
-                                    <View style={styles.playerTextContainer}>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team2_player1?.name ?? "-"
-                                            )}
-                                        </Text>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team2_player2?.name ?? "-"
-                                            )}
-                                        </Text>
-                                    </View>
+                                <View
+                                    style={{
+                                        flexDirection: "row",
+                                        width: "100%",
+                                        justifyContent: "center",
+                                        gap: 8,
+                                    }}
+                                >
+                                    <Text style={styles.textScore}>
+                                        {item.team1_score}
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.textScore,
+                                            { opacity: 0.8 },
+                                        ]}
+                                    >
+                                        ·
+                                    </Text>
+                                    <Text style={styles.textScore}>
+                                        {item.team2_score}
+                                    </Text>
                                 </View>
                             </View>
-                        </Link>
+                            <View style={styles.matchCardBottom}>
+                                <View
+                                    style={{
+                                        gap: 15,
+                                    }}
+                                >
+                                    <FlatList
+                                        scrollEnabled={false}
+                                        data={players.reverse()}
+                                        keyExtractor={(item) => item.id}
+                                        contentContainerStyle={{
+                                            flexDirection: "row",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            left:
+                                                ((players.length - 1) * 10) / 2,
+                                        }}
+                                        renderItem={({
+                                            item: player,
+                                            index,
+                                        }) => {
+                                            const leftPos =
+                                                index === 0
+                                                    ? index
+                                                    : -10 * index;
+
+                                            return (
+                                                <>
+                                                    {player.image_url ? (
+                                                        <View
+                                                            style={{
+                                                                padding: 0.5,
+                                                                backgroundColor:
+                                                                    Colors.card_bg,
+                                                                borderRadius: 10,
+                                                                zIndex:
+                                                                    5 - index,
+                                                                left: leftPos,
+                                                            }}
+                                                        >
+                                                            <Image
+                                                                style={{
+                                                                    width: 20,
+                                                                    height: 20,
+                                                                    borderRadius: 10,
+                                                                }}
+                                                                src={
+                                                                    player.image_url
+                                                                }
+                                                            />
+                                                        </View>
+                                                    ) : (
+                                                        <View
+                                                            style={{
+                                                                padding: 0.5,
+                                                                backgroundColor:
+                                                                    Colors.card_bg,
+                                                                borderRadius: 10,
+                                                                zIndex:
+                                                                    5 - index,
+                                                                left: leftPos,
+                                                            }}
+                                                        >
+                                                            <Ionicons
+                                                                name="person-circle"
+                                                                size={20}
+                                                                color={
+                                                                    Colors.primary
+                                                                }
+                                                            />
+                                                        </View>
+                                                    )}
+                                                </>
+                                            );
+                                        }}
+                                    />
+                                </View>
+                            </View>
+                        </TouchableOpacity>
                     );
                 }}
             />
@@ -109,39 +215,37 @@ export default RecentMatches;
 
 const styles = StyleSheet.create({
     container: {
-        height: 160,
         justifyContent: "center",
         alignItems: "flex-start",
     },
     matchCard: {
+        position: "relative",
+        width: 120,
         flexDirection: "column",
         justifyContent: "space-between",
         alignItems: "center",
-        backgroundColor: Colors.card_bg,
         borderRadius: 10,
         margin: 5,
-        width: 200,
         ...globalStyles.shadow,
     },
     matchCardTop: {
         flexDirection: "column",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: 5,
+        paddingHorizontal: 15,
+        paddingVertical: 5,
         width: "100%",
-        backgroundColor: Colors.primary,
         borderTopLeftRadius: 10,
         borderTopRightRadius: 10,
         gap: 5,
     },
     matchCardBottom: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "center",
         alignItems: "center",
-        padding: 10,
-        paddingHorizontal: 20,
+        padding: 7,
+        paddingHorizontal: 15,
         width: "100%",
-        backgroundColor: Colors.card_bg,
         borderBottomLeftRadius: 10,
         borderBottomRightRadius: 10,
         gap: 10,
@@ -154,7 +258,7 @@ const styles = StyleSheet.create({
     textDate: {
         color: "white",
         fontSize: 10,
-        fontWeight: "semibold",
+        fontWeight: "500",
     },
     dateContainer: {
         flexDirection: "row",
