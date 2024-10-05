@@ -1,10 +1,10 @@
 # pull base image
-FROM node:20.18-slim
+FROM node:18-slim
 
 # set our node environment, either development or production
 # defaults to production, compose overrides this to development on build and run
 ARG EXPO_PUBLIC_API_ENDPOINT=https://scorepad.general.avrachimi.com
-ENV EXPO_PUBLIC_API_ENDPOINT $EXPO_PUBLIC_API_ENDPOINT
+ENV EXPO_PUBLIC_API_ENDPOINT=$EXPO_PUBLIC_API_ENDPOINT
 
 # Step 2: Set the working directory inside the container
 WORKDIR /app
