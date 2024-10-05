@@ -6,6 +6,8 @@ FROM node:18-alpine
 ARG EXPO_PUBLIC_API_ENDPOINT=https://scorepad.general.avrachimi.com
 ENV EXPO_PUBLIC_API_ENDPOINT=$EXPO_PUBLIC_API_ENDPOINT
 
+ENV CI=1
+
 # Step 2: Set the working directory inside the container
 WORKDIR /app
 
@@ -19,4 +21,4 @@ COPY . .
 EXPOSE 19000 19001 19002 8081
 
 # Step 6: Start the Expo development server using the `--tunnel` option for remote access
-CMD npx expo start --non-interactive
+CMD ["npx", "expo", "start", "--tunnel"]
