@@ -22,4 +22,4 @@ RUN npm install -g expo-cli
 EXPOSE 19000 19001 19002
 
 # Step 6: Start the Expo development server using the `--tunnel` option for remote access
-CMD ["expo", "start"]
+RUN npx expo start
