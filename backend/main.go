@@ -63,7 +63,7 @@ func main() {
 	auth.SetupAuth()
 	router.Get("/auth/signin", handler.Auth.SignIn)
 	router.Get("/auth/signout", handler.MiddlewareAuth(handler.Auth.SignOut))
-	router.Get("/auth/refresh", handler.Auth.RefreshToken)
+	router.Get("/auth/refresh", handler.Auth.RefreshToken) // No middleware here, but the refresh token is used as bearer token
 	router.Get("/auth/{provider}/callback", handler.Auth.AuthCallback)
 
 	v1Router := chi.NewRouter()

@@ -76,18 +76,11 @@ SELECT
           AND m.team2_score > m.team1_score THEN 1
         END
       )::float / COUNT(
-        CASE
-          WHEN (
-            m.team1_player1 = u.id
-            OR m.team1_player2 = u.id
-          )
-          AND m.team1_score < m.team2_score THEN 1
-          WHEN (
-            m.team2_player1 = u.id
-            OR m.team2_player2 = u.id
-          )
-          AND m.team2_score < m.team1_score THEN 1
-        END
+        m.created_by = u.id
+        OR m.team1_player1 = u.id
+        OR m.team1_player2 = u.id
+        OR m.team2_player1 = u.id
+        OR m.team2_player2 = u.id
       )
     END AS float
   ) AS win_lose_ratio
