@@ -1,5 +1,5 @@
 # pull base image
-FROM node:18-slim
+FROM node:18-alpine
 
 # set our node environment, either development or production
 # defaults to production, compose overrides this to development on build and run
@@ -19,4 +19,4 @@ COPY . .
 EXPOSE 19000 19001 19002 8081
 
 # Step 6: Start the Expo development server using the `--tunnel` option for remote access
-RUN npx expo start
+CMD npx expo start --non-interactive
