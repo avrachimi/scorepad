@@ -15,9 +15,6 @@ RUN npm install --silent
 
 COPY . .
 
-# Step 4: Install Expo CLI globally
-RUN npm install -g expo-cli
-
 # Step 5: Expose the ports used by Expo
 EXPOSE 19000 19001 19002
 
