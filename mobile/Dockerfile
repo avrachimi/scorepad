@@ -16,7 +16,7 @@ RUN npm install --silent
 COPY . .
 
 # Step 5: Expose the ports used by Expo
-EXPOSE 19000 19001 19002
+EXPOSE 19000 19001 19002 8081
 
 # Step 6: Start the Expo development server using the `--tunnel` option for remote access
 RUN npx expo start
