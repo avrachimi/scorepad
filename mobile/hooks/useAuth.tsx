@@ -117,12 +117,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             const accessToken =
                 await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 
+            const accessTokenExpiry = await SecureStore.getItemAsync(
+                ACCESS_TOKEN_EXPIRY_KEY
+            );
+
             if (!accessToken) {
                 await deleteStoredTokens();
                 resetState();
                 router.replace("/");
                 console.log("No access token found. Already signed out.");
                 return;
+            }
+
+            if (!accessTokenExpiry) {
+                console.log(
+                    "Access/Refresh token expiry not found. Signing out..."
+                );
+                await signOut();
+                return false;
+            }
+
+            const now = Date.now();
+            if (now >= parseInt(accessTokenExpiry)) {
+                console.log("Access token expired. Signing out...");
+                await deleteStoredTokens();
+                resetState();
+                return false;
             }
 
             const res = await axios.get<{ message: string }>(

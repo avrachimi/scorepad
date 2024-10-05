@@ -32,8 +32,9 @@ function Page() {
             style={{
                 paddingTop: headerHeight + 50,
                 width: "100%",
+                height: "100%",
                 flexDirection: "column",
-                justifyContent: "center",
+                justifyContent: "flex-start",
                 alignItems: "center",
             }}
         >
@@ -59,14 +60,14 @@ function Page() {
                 showsVerticalScrollIndicator={false}
                 data={allMatchesQuery.data}
                 keyExtractor={(item) => item.id}
-                style={{ padding: 21 }}
+                style={{ padding: 21, paddingBottom: 0, height: "100%" }}
                 contentContainerStyle={{
                     flexDirection: "column",
                     justifyContent: "flex-start",
                     alignItems: "center",
                     width: "100%",
-                    height: "100%",
                     gap: 25,
+                    paddingBottom: 30,
                 }}
                 renderItem={({ item }) => {
                     const day = dayjs(item.match_date).date();

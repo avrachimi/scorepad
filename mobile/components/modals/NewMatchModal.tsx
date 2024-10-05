@@ -66,7 +66,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
 
     const clearState = () => {
         setTeam1Score(0);
-        setTeam1Player1(undefined);
+        if (!user) setTeam1Player1(undefined);
 
         setTeam2Score(0);
 
