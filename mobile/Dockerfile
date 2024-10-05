@@ -15,6 +15,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --silent
 
+RUN npm install -g @expo/ngrok@^4.1.0
+
 COPY . .
 
 # Step 5: Expose the ports used by Expo
