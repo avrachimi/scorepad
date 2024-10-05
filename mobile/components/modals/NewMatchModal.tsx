@@ -9,6 +9,7 @@ import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useAuth } from "~/hooks/useAuth";
+import { useDatabase } from "~/hooks/useDatabase";
 import { Colors } from "~/lib/theme";
 
 type SelectedPlayer = {
@@ -44,6 +45,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const snapPoints = useMemo(() => ["92%"], []);
 
     const { user } = useAuth();
+    const { createMatchQuery } = useDatabase();
 
     const handleSheetChanges = useCallback((index: number) => {
         console.log("handleSheetChanges", index);
@@ -73,7 +75,19 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     };
 
     const onSave = () => {
-        console.log("Save");
+        if (user && team1Player1) {
+            createMatchQuery.mutate({
+                match_date: date,
+                duration_minutes: duration,
+                created_by: user.id,
+                team1_score: team1Score,
+                team1_player1: team1Player1.id,
+                team1_player2: undefined,
+                team2_score: team2Score,
+                team2_player1: undefined,
+                team2_player2: undefined,
+            });
+        }
         bottomSheetRef.current?.close();
         clearState();
     };

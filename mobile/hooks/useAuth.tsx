@@ -18,7 +18,8 @@ interface AuthContextType {
     isLoaded: boolean;
     signIn: () => Promise<void>;
     signOut: () => Promise<void>;
-    refreshAccessToken: () => Promise<void>;
+    refreshAccessToken: () => Promise<boolean>;
+    loadAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -37,6 +38,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [accessToken, setAccessToken] = useState<string | null>(null);
+
+    const resetState = () => {
+        setAccessToken(null);
+        setUser(null);
+        setIsSignedIn(false);
+    };
+
+    const deleteStoredTokens = async () => {
+        await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+        await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
+        await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
+    };
 
     const signIn = useCallback(async () => {
         try {
@@ -104,13 +118,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 
             if (!accessToken) {
-                await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-                await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
-                await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
-
-                setAccessToken(null);
-                setUser(null);
-                setIsSignedIn(false);
+                await deleteStoredTokens();
+                resetState();
                 router.replace("/");
                 console.log("No access token found. Already signed out.");
                 return;
@@ -130,45 +139,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
-            await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-            await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-            await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
-            await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
-
-            setAccessToken(null);
-            setUser(null);
-            setIsSignedIn(false);
+            await deleteStoredTokens();
+            resetState();
             router.replace("/");
             console.log("Signed out successfully");
         } catch (error) {
             const err = error as AxiosError;
-
-            await SecureStore.deleteItemAsync(ACCESS_TOKEN_KEY);
-            await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
-            await SecureStore.deleteItemAsync(ACCESS_TOKEN_EXPIRY_KEY);
-            await SecureStore.deleteItemAsync(REFRESH_TOKEN_EXPIRY_KEY);
-
-            setAccessToken(null);
-            setUser(null);
-            setIsSignedIn(false);
-            router.replace("/");
-            console.error("Failed to sign out:", err.message);
+            console.error("Failed to sign out:", error, err);
         }
     }, [router]);
 
     const refreshAccessToken = useCallback(async () => {
         try {
-            const accessToken =
-                await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+            const refreshToken = await SecureStore.getItemAsync(
+                REFRESH_TOKEN_EXPIRY_KEY
+            );
 
-            if (!accessToken) {
-                console.log("(refresh) No access token found. Signing out...");
-                setAccessToken(null);
-                setUser(null);
-                setIsSignedIn(false);
+            if (!refreshToken) {
+                console.log("No refresh token found. Signing out...");
+                await deleteStoredTokens();
+                resetState();
                 router.replace("/");
-                return;
+                return false;
             }
+
             const accessTokenExpiry = await SecureStore.getItemAsync(
                 ACCESS_TOKEN_EXPIRY_KEY
             );
@@ -177,23 +171,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             );
 
             if (!accessTokenExpiry || !refreshTokenExpiry) {
-                signOut();
-                return;
+                console.log(
+                    "Access/Refresh token expiry not found. Signing out..."
+                );
+                await signOut();
+                return false;
             }
 
             const now = Date.now();
             if (now >= parseInt(refreshTokenExpiry)) {
                 console.log("Refresh token expired. Signing out...");
-                signOut();
-                return;
+                await signOut();
+                return false;
             }
 
             if (now >= parseInt(accessTokenExpiry)) {
                 const refreshToken =
                     await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
                 if (!refreshToken) {
-                    signOut();
-                    return;
+                    await signOut();
+                    return false;
                 }
 
                 console.log("Access token expired. Refreshing...");
@@ -217,28 +214,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     ACCESS_TOKEN_EXPIRY_KEY,
                     newAccessTokenExpiry.toString()
                 );
+
+                return true;
             } else {
                 console.log("Access token is still valid");
+                return true;
             }
         } catch (error) {
-            console.error("Failed to refresh access token:", error);
-            signOut();
+            const err = error as AxiosError;
+            console.error("Failed to refresh access token:", err.message);
+            await deleteStoredTokens();
+            resetState();
+            return false;
         }
     }, [signOut]);
 
-    const loadUserFromTokens = useCallback(async () => {
+    const loadAuth = useCallback(async () => {
         try {
-            refreshAccessToken();
-            const accessToken =
-                await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
-            const refreshToken =
-                await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
+            const refreshed = await refreshAccessToken();
+            if (refreshed) {
+                const accessToken =
+                    await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+                const refreshToken =
+                    await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 
-            if (accessToken && refreshToken) {
-                const user = await getUserProfile();
-                setAccessToken(accessToken);
-                setUser(user);
-                setIsSignedIn(true);
+                if (accessToken && refreshToken) {
+                    const user = await getUserProfile();
+                    setAccessToken(accessToken);
+                    setUser(user);
+                    setIsSignedIn(true);
+                }
             }
         } catch (error) {
             console.error("Failed to load tokens", (error as any).message);
@@ -268,8 +273,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }, [router]);
 
     useEffect(() => {
-        loadUserFromTokens();
-    }, [loadUserFromTokens]);
+        loadAuth();
+    }, [loadAuth]);
 
     return (
         <AuthContext.Provider
@@ -281,6 +286,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 isLoaded,
                 refreshAccessToken,
                 accessToken: accessToken || undefined,
+                loadAuth,
             }}
         >
             {children}

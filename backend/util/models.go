@@ -434,25 +434,25 @@ func DatabaseStatsToStats(dbTotalMatches int64, dbMatchesByMonth []database.GetM
 	}
 
 	leaderboard := []LeaderboardRow{}
-	var counter int64 = 1
+	var rank int64 = 1
 	for _, dbLeaderboard := range dbLeaderboard {
 		var imageUrl *string
+
 		if dbLeaderboard.ImageUrl.Valid {
 			imageUrl = &dbLeaderboard.ImageUrl.String
 		}
 
 		leaderboard = append(leaderboard, LeaderboardRow{
-			ID: dbLeaderboard.ID,
-			// TODO: Fix this
+			ID:            dbLeaderboard.ID,
 			ImageUrl:      imageUrl,
-			Rank:          counter,
+			Rank:          rank,
 			Name:          dbLeaderboard.Name,
 			Matches:       dbLeaderboard.Wins + dbLeaderboard.Losses,
 			Wins:          dbLeaderboard.Wins,
 			Losses:        dbLeaderboard.Losses,
 			WinPercentage: dbLeaderboard.WinLoseRatio,
 		})
-		counter++
+		rank++
 	}
 
 	stats = Stats{

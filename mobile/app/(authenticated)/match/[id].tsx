@@ -314,7 +314,7 @@ function Page() {
                                             { opacity: 0.5 },
                                         ]}
                                     >
-                                        No Player
+                                        No Player Set
                                     </Text>
                                 </>
                             )}

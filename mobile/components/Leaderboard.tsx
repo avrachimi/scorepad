@@ -6,6 +6,10 @@ import { Colors, globalStyles } from "~/lib/theme";
 function Leaderboard() {
     const { statsLeaderboardQuery } = useDatabase();
 
+    // if (!statsLeaderboardQuery.data) {
+    //     return null;
+    // }
+
     return (
         <View style={styles.container}>
             <Text
@@ -108,7 +112,9 @@ function Leaderboard() {
                                     <Text style={styles.leaderboardWinRate}>
                                         {(
                                             item.win_percentage * 100
-                                        ).toLocaleString()}
+                                        ).toLocaleString("en-US", {
+                                            maximumFractionDigits: 1,
+                                        })}
                                         %
                                     </Text>
                                 </View>

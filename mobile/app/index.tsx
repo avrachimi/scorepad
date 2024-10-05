@@ -1,4 +1,5 @@
 import { useHeaderHeight } from "@react-navigation/elements";
+import { StatusBar } from "expo-status-bar";
 import { Image, Text, View, useWindowDimensions } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import CarouselScreen from "~/components/WelcomeCarousel";
@@ -23,6 +24,7 @@ function Index() {
                 backgroundColor: Colors.background,
             }}
         >
+            <StatusBar style="dark" />
             <CarouselScreen />
             <View
                 style={{

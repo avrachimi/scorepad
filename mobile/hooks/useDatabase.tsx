@@ -1,11 +1,12 @@
 import {
     QueryClientProvider,
     QueryClientProviderProps,
+    useMutation,
     useQuery,
     useQueryClient,
 } from "@tanstack/react-query";
-import axios from "axios";
-import { Match, Stats, User } from "~/lib/types";
+import axios, { AxiosError } from "axios";
+import { CreateMatchParams, Match, Stats, User } from "~/lib/types";
 import { useAuth } from "./useAuth";
 
 const apiClient = axios.create({
@@ -43,6 +44,27 @@ export const useDatabase = () => {
     });
 
     // Matches
+    const createMatchQuery = useMutation({
+        mutationFn: async (match: CreateMatchParams) => {
+            const createdMatch = await apiClient.post<Match>(
+                "/matches",
+                match,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            return createdMatch.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries();
+        },
+        onError: (e) => {
+            console.log("Failed to create match: ", e);
+        },
+    });
+
     const singleMatchQuery = (id: string) =>
         useQuery({
             queryKey: ["singleMatches"],
@@ -91,12 +113,18 @@ export const useDatabase = () => {
     const statsLeaderboardQuery = useQuery({
         queryKey: ["statsLeaderboard"],
         queryFn: async () => {
-            const response = await get<Stats>(
-                "/stats?type=leaderboard",
-                accessToken!
-            );
-            // console.warn("statsMatchesQuery");
-            return response.data;
+            try {
+                const response = await get<Stats>(
+                    "/stats?type=leaderboard",
+                    accessToken!
+                );
+                console.log("statsLeaderboardQuery", response.data);
+                return response.data;
+            } catch (error) {
+                const err = error as AxiosError;
+                console.error("Failed to get leaderboard stats:", err.message);
+                return null;
+            }
         },
     });
 
@@ -104,15 +132,16 @@ export const useDatabase = () => {
     const queryClient = useQueryClient();
     const invalidateQueries = async (queries: string[]) => {
         for (const key of queries) {
-            // await queryClient.invalidateQueries({
-            //     queryKey: [key],
-            //     refetchType: "all",
-            // });
-            await queryClient.refetchQueries();
+            await queryClient.invalidateQueries({
+                queryKey: [key],
+                refetchType: "active",
+            });
+            // await queryClient.refetchQueries();
         }
     };
 
     return {
+        createMatchQuery,
         getUsersQuery,
         allMatchesQuery,
         recentMatchesQuery,

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { StatusBar } from "expo-status-bar";
 import { useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { RefreshControl, TouchableOpacity } from "react-native-gesture-handler";
@@ -22,29 +23,16 @@ function Page() {
     };
 
     return (
-        <ScrollView
-            scrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{
+        <View
+            style={{
                 paddingTop: headerHeight + 50,
                 width: "100%",
                 justifyContent: "flex-start",
                 alignItems: "center",
                 gap: 20,
             }}
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={async () =>
-                        await invalidateQueries([
-                            "recentMatches",
-                            "statsLeaderboard",
-                            "statsMatches",
-                        ]).catch(console.error)
-                    }
-                />
-            }
         >
+            <StatusBar style="dark" />
             <View
                 style={{
                     marginTop: 20,
@@ -67,11 +55,38 @@ function Page() {
                     <Ionicons name="add" size={30} color={Colors.primary} />
                 </TouchableOpacity>
             </View>
-            <MatchesPlayed />
-            <RecentMatches />
-            <Leaderboard />
-            <NewMatchModal bottomSheetRef={bottomSheetRef} />
-        </ScrollView>
+            <ScrollView
+                scrollEnabled={true}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{
+                    width: "100%",
+                    justifyContent: "flex-start",
+                    alignItems: "center",
+                    gap: 20,
+                }}
+                style={{
+                    width: "100%",
+                    height: "100%",
+                }}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={async () =>
+                            await invalidateQueries([
+                                "recentMatches",
+                                "statsLeaderboard",
+                                "statsMatches",
+                            ]).catch(console.error)
+                        }
+                    />
+                }
+            >
+                <MatchesPlayed />
+                <RecentMatches />
+                <Leaderboard />
+                <NewMatchModal bottomSheetRef={bottomSheetRef} />
+            </ScrollView>
+        </View>
     );
 }
 
