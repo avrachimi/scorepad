@@ -164,7 +164,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             console.log("Signed out successfully");
         } catch (error) {
             const err = error as AxiosError;
-            console.error("Failed to sign out:", error, err);
+            console.error("Failed to sign out through backend:", error, err);
+            await deleteStoredTokens();
+            resetState();
         }
     }, [router]);
 
