@@ -44,7 +44,18 @@ FROM
   )
 WHERE
   f.status = 'accepted'
-  AND u.id != sqlc.arg (user_id)::uuid;
+  AND u.id != sqlc.arg (user_id)::uuid
+  AND (
+    sqlc.arg (excluded_ids)::uuid [] IS NULL
+    OR (
+      f.member1_id != ANY (sqlc.arg (excluded_ids)::uuid [])
+      AND f.member2_id != ANY (sqlc.arg (excluded_ids)::uuid [])
+    )
+  )
+  AND (
+    sqlc.arg (search_query)::text IS NULL
+    OR u.name ILIKE '%' || sqlc.arg (search_query)::text || '%'
+  );
 
 -- name: SendFriendRequest :one
 INSERT INTO

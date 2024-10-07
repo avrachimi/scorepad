@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 )
 
 const acceptFriendRequest = `-- name: AcceptFriendRequest :exec
@@ -165,7 +166,24 @@ FROM
 WHERE
   f.status = 'accepted'
   AND u.id != $1::uuid
+  AND (
+    $2::uuid [] IS NULL
+    OR (
+      f.member1_id != ANY ($2::uuid [])
+      AND f.member2_id != ANY ($2::uuid [])
+    )
+  )
+  AND (
+    $3::text IS NULL
+    OR u.name ILIKE '%' || $3::text || '%'
+  )
 `
+
+type GetFriendsParams struct {
+	UserID      uuid.UUID
+	ExcludedIds []uuid.UUID
+	SearchQuery string
+}
 
 type GetFriendsRow struct {
 	ID            uuid.UUID
@@ -178,8 +196,8 @@ type GetFriendsRow struct {
 	MatchesPlayed int64
 }
 
-func (q *Queries) GetFriends(ctx context.Context, userID uuid.UUID) ([]GetFriendsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getFriends, userID)
+func (q *Queries) GetFriends(ctx context.Context, arg GetFriendsParams) ([]GetFriendsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFriends, arg.UserID, pq.Array(arg.ExcludedIds), arg.SearchQuery)
 	if err != nil {
 		return nil, err
 	}
