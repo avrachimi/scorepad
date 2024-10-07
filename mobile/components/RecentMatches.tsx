@@ -215,6 +215,7 @@ export default RecentMatches;
 
 const styles = StyleSheet.create({
     container: {
+        width: "100%",
         justifyContent: "center",
         alignItems: "flex-start",
     },
