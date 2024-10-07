@@ -22,11 +22,6 @@ func (s *Stats) GetStats(w http.ResponseWriter, r *http.Request, user database.U
 		return
 	}
 
-	if totalMatches == 0 {
-		responseWithJSON(w, 200, util.DatabaseStatsToStats(0, nil, nil))
-		return
-	}
-
 	switch queryType {
 	case "leaderboard":
 		leaderboard, err := s.DB.GetLeaderboard(r.Context(), user.ID)
