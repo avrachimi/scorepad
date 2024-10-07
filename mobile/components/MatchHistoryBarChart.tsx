@@ -1,13 +1,17 @@
+import { LinearGradient, useFont, vec } from "@shopify/react-native-skia";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import dayjs from "dayjs";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Bar, CartesianChart } from "victory-native";
+import { inter } from "~/assets/fonts/Inter_18pt-Medium.ttf";
 import { useAuth } from "~/hooks/useAuth";
 import { Colors, globalStyles } from "~/lib/theme";
 import { Stats } from "~/lib/types";
 
 function MatchHistoryBarChart() {
     const { accessToken } = useAuth();
+    const font = useFont(inter, 18);
 
     const { data: matchHistory, isLoading: loadingMatchHistory } = useQuery({
         queryKey: ["statsMatchHistory"],
@@ -23,7 +27,7 @@ function MatchHistoryBarChart() {
                     },
                 }
             );
-            console.log("matchHistory", res);
+            console.log("matchHistory", res.data);
             return res.data.matches_by_month;
         },
     });
@@ -53,23 +57,46 @@ function MatchHistoryBarChart() {
                     height: 150,
                     backgroundColor: Colors.card_bg,
                     borderRadius: 10,
-                    ...globalStyles.shadow,
+                    padding: 10,
                 }}
             >
                 <CartesianChart
                     data={matchHistory}
-                    xKey="month"
+                    xKey={"month"}
                     yKeys={["matches"]}
-                    padding={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    domainPadding={{
+                        left: 30,
+                        right: 30,
+                        bottom: 30,
+                        top: 30,
+                    }}
+                    axisOptions={{
+                        font,
+                        formatXLabel: (value) => {
+                            console.log("value", value);
+                            if (!value) return "aaa";
+                            return dayjs(value).format("MMM");
+                        },
+                        lineWidth: 0,
+                    }}
+                    xAxis={{
+                        lineWidth: 0,
+                    }}
                 >
                     {({ points, chartBounds }) => (
                         <Bar
                             points={points.matches}
                             chartBounds={chartBounds}
-                            color={Colors.secondary}
                             barCount={12}
-                            roundedCorners={{ topLeft: 2, topRight: 2 }}
-                        ></Bar>
+                            roundedCorners={{ topLeft: 5, topRight: 5 }}
+                            animate={{ type: "spring" }}
+                        >
+                            <LinearGradient
+                                start={vec(0, 0)}
+                                end={vec(0, 200)}
+                                colors={[Colors.primary, Colors.primary + "0D"]}
+                            />
+                        </Bar>
                     )}
                 </CartesianChart>
             </View>
