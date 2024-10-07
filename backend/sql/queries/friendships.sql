@@ -47,10 +47,7 @@ WHERE
   AND u.id != sqlc.arg (user_id)::uuid
   AND (
     sqlc.arg (excluded_ids)::uuid [] IS NULL
-    OR (
-      f.member1_id != ANY (sqlc.arg (excluded_ids)::uuid [])
-      AND f.member2_id != ANY (sqlc.arg (excluded_ids)::uuid [])
-    )
+    OR NOT (u.id = ANY (sqlc.arg (excluded_ids)::uuid []))
   )
   AND (
     sqlc.arg (search_query)::text IS NULL

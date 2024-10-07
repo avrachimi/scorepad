@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/avrachimi/scorepad/backend/internal/database"
 	"github.com/avrachimi/scorepad/backend/util"
@@ -17,24 +16,23 @@ type Friendship struct {
 }
 
 func (f *Friendship) GetAllFriends(w http.ResponseWriter, r *http.Request, user database.User) {
-	// exclude given user id's
-	excludeParam := r.URL.Query().Get("exclude[]")
-	fmt.Printf("Exclude param: %s\n", excludeParam)
 	var excludeList []uuid.UUID
-
-	searchParam := r.URL.Query().Get("search")
-
-	if excludeParam != "" {
-		excludeStrings := strings.Split(excludeParam, ",")
-		for _, s := range excludeStrings {
-			parsedUUID, err := uuid.Parse(s)
-			if err == nil {
-				excludeList = append(excludeList, parsedUUID)
-			} else {
-				fmt.Printf("Invalid UUID in exclude parameter: %s", s)
-				// responseWithError(w, http.StatusBadRequest, "Invalid UUID in exclude parameter")
-				return
+	var searchParam string
+	for k, v := range r.URL.Query() {
+		if k == "exclude[]" {
+			for _, s := range v {
+				parsedUUID, err := uuid.Parse(s)
+				if err == nil {
+					excludeList = append(excludeList, parsedUUID)
+				} else {
+					fmt.Printf("Invalid UUID in exclude parameter: %s", s)
+					// responseWithError(w, http.StatusBadRequest, "Invalid UUID in exclude parameter")
+					return
+				}
 			}
+		} else if k == "search" {
+			searchParam = v[0]
+
 		}
 	}
 
@@ -43,7 +41,6 @@ func (f *Friendship) GetAllFriends(w http.ResponseWriter, r *http.Request, user 
 	} else {
 		fmt.Println("Not excluding any users")
 	}
-	fmt.Printf("Search param: %s\n", searchParam)
 
 	friends, err := f.DB.GetFriends(r.Context(), database.GetFriendsParams{
 		UserID:      user.ID,

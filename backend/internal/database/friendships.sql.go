@@ -168,10 +168,7 @@ WHERE
   AND u.id != $1::uuid
   AND (
     $2::uuid [] IS NULL
-    OR (
-      f.member1_id != ANY ($2::uuid [])
-      AND f.member2_id != ANY ($2::uuid [])
-    )
+    OR NOT (u.id = ANY ($2::uuid []))
   )
   AND (
     $3::text IS NULL
