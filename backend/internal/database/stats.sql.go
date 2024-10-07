@@ -113,7 +113,8 @@ WHERE
 GROUP BY
   u.id
 ORDER BY
-  win_lose_ratio DESC
+  win_lose_ratio DESC,
+  wins DESC
 `
 
 type GetLeaderboardRow struct {
