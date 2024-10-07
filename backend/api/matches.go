@@ -123,6 +123,7 @@ func (m *Match) Update(w http.ResponseWriter, r *http.Request, user database.Use
 		Team2Score:      params.Team2Score,
 		Team2Player1:    params.Team2Player1,
 		Team2Player2:    params.Team2Player2,
+		CreatedBy:       user.ID,
 	})
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error updating match: %v", err))
@@ -143,8 +144,8 @@ func (m *Match) Delete(w http.ResponseWriter, r *http.Request, user database.Use
 	}
 
 	err = m.DB.DeleteMatch(r.Context(), database.DeleteMatchParams{
-		ID:     id,
-		UserID: user.ID,
+		ID:        id,
+		CreatedBy: user.ID,
 	})
 	if err != nil {
 		responseWithError(w, 500, fmt.Sprintf("Error deleting match: %v", err))

@@ -86,12 +86,12 @@ WHERE
 `
 
 type DeleteMatchParams struct {
-	ID     uuid.UUID
-	UserID uuid.UUID
+	ID        uuid.UUID
+	CreatedBy uuid.UUID
 }
 
 func (q *Queries) DeleteMatch(ctx context.Context, arg DeleteMatchParams) error {
-	_, err := q.db.ExecContext(ctx, deleteMatch, arg.ID, arg.UserID)
+	_, err := q.db.ExecContext(ctx, deleteMatch, arg.ID, arg.CreatedBy)
 	return err
 }
 
@@ -498,7 +498,7 @@ type UpdateMatchParams struct {
 	Team2Score      int32
 	Team2Player1    uuid.NullUUID
 	Team2Player2    uuid.NullUUID
-	UserID          uuid.UUID
+	CreatedBy       uuid.UUID
 }
 
 func (q *Queries) UpdateMatch(ctx context.Context, arg UpdateMatchParams) error {
@@ -512,7 +512,7 @@ func (q *Queries) UpdateMatch(ctx context.Context, arg UpdateMatchParams) error 
 		arg.Team2Score,
 		arg.Team2Player1,
 		arg.Team2Player2,
-		arg.UserID,
+		arg.CreatedBy,
 	)
 	return err
 }

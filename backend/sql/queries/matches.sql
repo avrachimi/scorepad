@@ -163,13 +163,13 @@ SET
   updated_at = NOW()
 WHERE
   id = $1
-  AND created_by = sqlc.arg (user_id)::uuid;
+  AND created_by = sqlc.arg (created_by)::uuid;
 
 -- name: DeleteMatch :exec
 DELETE FROM matches
 WHERE
   id = $1
-  AND created_by = sqlc.arg (user_id)::uuid;
+  AND created_by = sqlc.arg (created_by)::uuid;
 
 -- name: GetRecentMatchesForUserId :many
 SELECT
