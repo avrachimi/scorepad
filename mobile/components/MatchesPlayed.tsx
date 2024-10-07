@@ -6,6 +6,13 @@ import { Colors } from "~/lib/theme";
 function MatchesPlayed() {
     const { statsMatchesQuery } = useDatabase();
 
+    if (
+        !statsMatchesQuery.isLoading &&
+        (!statsMatchesQuery.data || !statsMatchesQuery.data.total_matches)
+    ) {
+        return null;
+    }
+
     return (
         <View style={styles.container}>
             <Svg

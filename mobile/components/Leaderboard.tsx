@@ -6,9 +6,14 @@ import { Colors, globalStyles } from "~/lib/theme";
 function Leaderboard() {
     const { statsLeaderboardQuery } = useDatabase();
 
-    // if (!statsLeaderboardQuery.data) {
-    //     return null;
-    // }
+    console.log(statsLeaderboardQuery.data);
+
+    if (
+        !statsLeaderboardQuery.data ||
+        statsLeaderboardQuery.data.leaderboard?.length === 0
+    ) {
+        return null;
+    }
 
     return (
         <View style={styles.container}>
