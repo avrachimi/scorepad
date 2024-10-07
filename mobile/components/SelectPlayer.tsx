@@ -14,6 +14,7 @@ import {
     View,
 } from "react-native";
 import { useAuth } from "~/hooks/useAuth";
+import { Colors } from "~/lib/theme";
 import { Friend } from "~/lib/types";
 
 type SelectedPlayer = {
@@ -27,10 +28,19 @@ interface SelectPlayerProps {
         playerNum: number;
         player?: SelectedPlayer;
     }) => void;
-    playerNum: number;
+    selectedUserIds: string[];
+    selectedPlayer: {
+        id?: string;
+        name?: string;
+        num: number;
+    };
 }
 
-function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
+function SelectPlayerPage({
+    handleToggleView,
+    selectedUserIds,
+    selectedPlayer,
+}: SelectPlayerProps) {
     const [searchQuery, setSearchQuery] = useState<string>();
     const { accessToken } = useAuth();
 
@@ -38,6 +48,8 @@ function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
         queryKey: ["getSearchFriendsList", searchQuery],
         queryFn: async () => {
             try {
+                console.log("searchQuery", searchQuery);
+                console.log("selectedUserIds", selectedUserIds);
                 const friends = await axios.get<Friend[]>(
                     process.env.EXPO_PUBLIC_API_ENDPOINT + "/v1/friends",
                     {
@@ -45,7 +57,7 @@ function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
                             Authorization: `Bearer ${accessToken}`,
                         },
                         params: {
-                            exclude: [],
+                            exclude: selectedUserIds,
                             search: searchQuery,
                         },
                     }
@@ -55,7 +67,7 @@ function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
             } catch (error) {
                 const err = error as AxiosError;
                 console.error(err);
-                return undefined;
+                return [];
             }
         },
     });
@@ -112,24 +124,30 @@ function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
                 >
                     Select Player
                 </Text>
-                <TouchableOpacity
-                    onPress={() => handleToggleView({ playerNum })}
-                    style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 2,
-                        width: 70,
-                    }}
-                >
-                    <Text
+                {selectedPlayer.id ? (
+                    <TouchableOpacity
+                        onPress={() =>
+                            handleToggleView({ playerNum: selectedPlayer.num })
+                        }
                         style={{
-                            color: DefaultTheme.colors.primary,
-                            fontSize: 17,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            gap: 2,
+                            width: 70,
                         }}
                     >
-                        Remove
-                    </Text>
-                </TouchableOpacity>
+                        <Text
+                            style={{
+                                color: DefaultTheme.colors.primary,
+                                fontSize: 17,
+                            }}
+                        >
+                            Remove
+                        </Text>
+                    </TouchableOpacity>
+                ) : (
+                    <View style={{ width: 70 }}></View>
+                )}
             </View>
             <TextInput
                 style={styles.searchBar}
@@ -165,7 +183,7 @@ function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
                             <TouchableOpacity
                                 onPress={() => {
                                     handleToggleView({
-                                        playerNum,
+                                        playerNum: selectedPlayer.num,
                                         player: {
                                             id: item.id,
                                             name: item.name,
@@ -194,8 +212,7 @@ function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
                                                 height: 40,
                                                 borderRadius: 100,
                                                 borderWidth: 1,
-                                                borderColor:
-                                                    DefaultTheme.colors.primary,
+                                                borderColor: Colors.primary,
                                             }}
                                             source={{ uri: item.image_url }}
                                         />
@@ -203,7 +220,7 @@ function SelectPlayerPage({ handleToggleView, playerNum }: SelectPlayerProps) {
                                         <Ionicons
                                             name="person-circle"
                                             size={40}
-                                            color={DefaultTheme.colors.primary}
+                                            color={Colors.primary}
                                         />
                                     )}
                                     <Text

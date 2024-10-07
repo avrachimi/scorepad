@@ -5,14 +5,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { DefaultTheme } from "@react-navigation/native";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-    Dimensions,
-    Image,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from "react-native";
+import { Image, StyleSheet, Text, TextInput, View } from "react-native";
 import DatePicker from "react-native-date-picker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useAuth } from "~/hooks/useAuth";
@@ -30,8 +23,6 @@ interface NewMatchModalProps {
     bottomSheetRef: React.RefObject<BottomSheetModalMethods>;
 }
 
-const { width } = Dimensions.get("window");
-
 function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const [team1Score, setTeam1Score] = useState(0);
     const [team1Player1, setTeam1Player1] = useState<SelectedPlayer>();
@@ -39,7 +30,13 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const [team2Player1, setTeam2Player1] = useState<SelectedPlayer>();
     const [team2Player2, setTeam2Player2] = useState<SelectedPlayer>();
 
-    const [selectPlayerNumber, setSelectPlayerNumber] = useState<number>(1);
+    const [selectedPlayer, setSelectedPlayer] = useState<{
+        id?: string;
+        name?: string;
+        num: number;
+    }>({
+        num: 2,
+    });
 
     const [team2Score, setTeam2Score] = useState(0);
     const [duration, setDuration] = useState<number>(30);
@@ -52,7 +49,6 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
         playerNum: number;
         player?: SelectedPlayer;
     }) => {
-        console.log("handleToggleView", playerSelection);
         setShowPlayerSelector((p) => !p);
 
         if (playerSelection) {
@@ -93,6 +89,9 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const renderBackdrop = useCallback(
         (props: any) => (
             <BottomSheetBackdrop
+                style={{
+                    backgroundColor: Colors.primary,
+                }}
                 appearsOnIndex={0}
                 diasappearsOnIndex={-1}
                 {...props}
@@ -104,11 +103,13 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const clearState = () => {
         setTeam1Score(0);
         if (!user) setTeam1Player1(undefined);
-
+        setTeam1Player2(undefined);
         setTeam2Score(0);
+        setTeam2Player1(undefined);
+        setTeam2Player2(undefined);
 
         setDuration(30);
-        setDate(new Date());
+        setDate(dayjs().set("minute", 0).toDate());
     };
 
     const onSave = () => {
@@ -130,10 +131,13 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     };
 
     const onCancel = () => {
-        console.log("Cancel");
         bottomSheetRef.current?.close();
         clearState();
     };
+
+    useEffect(() => {
+        clearState();
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -143,12 +147,16 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
 
     return (
         <BottomSheetModal
+            backgroundStyle={{
+                backgroundColor: Colors.background,
+            }}
             ref={bottomSheetRef}
             topInset={headerHeight}
             snapPoints={snapPoints}
             backdropComponent={renderBackdrop}
             handleComponent={null}
             enablePanDownToClose={false}
+            enableOverDrag={false}
             containerStyle={{
                 position: "relative",
             }}
@@ -156,7 +164,14 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
             {showPlayerSelector ? (
                 <SelectPlayerPage
                     handleToggleView={handleToggleView}
-                    playerNum={selectPlayerNumber}
+                    selectedPlayer={selectedPlayer}
+                    selectedUserIds={[
+                        team1Player2?.id,
+                        team2Player1?.id,
+                        team2Player2?.id,
+                    ].filter(
+                        (item): item is NonNullable<typeof item> => item != null
+                    )}
                 />
             ) : (
                 <>
@@ -175,6 +190,9 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                 width: 0,
                                 height: 1,
                             },
+                            backgroundColor: DefaultTheme.colors.card,
+                            borderTopRightRadius: 20,
+                            borderTopLeftRadius: 20,
                         }}
                     >
                         <TouchableOpacity onPress={onCancel}>
@@ -267,10 +285,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                                 <Ionicons
                                                     name="person-circle"
                                                     size={24}
-                                                    color={
-                                                        DefaultTheme.colors
-                                                            .primary
-                                                    }
+                                                    color={Colors.primary}
                                                 />
                                             )}
                                             <Text
@@ -307,7 +322,11 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                     <TouchableOpacity
                                         style={styles.playerSelector}
                                         onPress={() => {
-                                            setSelectPlayerNumber(2);
+                                            setSelectedPlayer({
+                                                num: 2,
+                                                id: team1Player2.id,
+                                                name: team1Player2.name,
+                                            });
                                             handleToggleView();
                                         }}
                                     >
@@ -334,10 +353,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                                 <Ionicons
                                                     name="person-circle"
                                                     size={24}
-                                                    color={
-                                                        DefaultTheme.colors
-                                                            .primary
-                                                    }
+                                                    color={Colors.primary}
                                                 />
                                             )}
                                             <Text
@@ -358,7 +374,9 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                     <TouchableOpacity
                                         style={styles.playerSelector}
                                         onPress={() => {
-                                            setSelectPlayerNumber(2);
+                                            setSelectedPlayer({
+                                                num: 2,
+                                            });
                                             handleToggleView();
                                         }}
                                     >
@@ -404,7 +422,11 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                     <TouchableOpacity
                                         style={styles.playerSelector}
                                         onPress={() => {
-                                            setSelectPlayerNumber(3);
+                                            setSelectedPlayer({
+                                                num: 3,
+                                                id: team2Player1.id,
+                                                name: team2Player1.name,
+                                            });
                                             handleToggleView();
                                         }}
                                     >
@@ -431,10 +453,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                                 <Ionicons
                                                     name="person-circle"
                                                     size={24}
-                                                    color={
-                                                        DefaultTheme.colors
-                                                            .primary
-                                                    }
+                                                    color={Colors.primary}
                                                 />
                                             )}
                                             <Text
@@ -455,7 +474,9 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                     <TouchableOpacity
                                         style={styles.playerSelector}
                                         onPress={() => {
-                                            setSelectPlayerNumber(3);
+                                            setSelectedPlayer({
+                                                num: 3,
+                                            });
                                             handleToggleView();
                                         }}
                                     >
@@ -480,7 +501,11 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                     <TouchableOpacity
                                         style={styles.playerSelector}
                                         onPress={() => {
-                                            setSelectPlayerNumber(4);
+                                            setSelectedPlayer({
+                                                num: 4,
+                                                id: team2Player2.id,
+                                                name: team2Player2.name,
+                                            });
                                             handleToggleView();
                                         }}
                                     >
@@ -507,10 +532,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                                 <Ionicons
                                                     name="person-circle"
                                                     size={24}
-                                                    color={
-                                                        DefaultTheme.colors
-                                                            .primary
-                                                    }
+                                                    color={Colors.primary}
                                                 />
                                             )}
                                             <Text
@@ -531,7 +553,9 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                                     <TouchableOpacity
                                         style={styles.playerSelector}
                                         onPress={() => {
-                                            setSelectPlayerNumber(4);
+                                            setSelectedPlayer({
+                                                num: 4,
+                                            });
                                             handleToggleView();
                                         }}
                                     >
@@ -758,13 +782,5 @@ const styles = StyleSheet.create({
         color: "white",
         fontSize: 15,
         fontWeight: "500",
-    },
-    slideInContent: {
-        position: "absolute",
-        top: 0,
-        bottom: 0,
-        right: 0,
-        width: width,
-        backgroundColor: "white",
     },
 });

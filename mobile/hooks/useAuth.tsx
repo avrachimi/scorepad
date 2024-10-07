@@ -71,8 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
                 if (access_token && refresh_token) {
                     // TODO: Get expiry from actual API response
-                    const accessTokenExpiry = dayjs().add(15, "minutes");
-                    const refreshTokenExpiry = dayjs().add(30, "days");
+                    const accessTokenExpiry = dayjs().add(15, "minutes").unix();
+                    const refreshTokenExpiry = dayjs().add(30, "days").unix();
 
                     await SecureStore.setItemAsync(
                         ACCESS_TOKEN_KEY,
@@ -84,11 +84,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     );
                     await SecureStore.setItemAsync(
                         ACCESS_TOKEN_EXPIRY_KEY,
-                        accessTokenExpiry.unix().toString()
+                        accessTokenExpiry.toString()
                     );
                     await SecureStore.setItemAsync(
                         REFRESH_TOKEN_EXPIRY_KEY,
-                        refreshTokenExpiry.unix().toString()
+                        refreshTokenExpiry.toString()
                     );
 
                     setAccessToken(access_token);
@@ -137,7 +137,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
-            if (dayjs().isAfter(parseInt(accessTokenExpiry) * 1000)) {
+            const currUnix = dayjs().unix();
+            if (dayjs(currUnix).isAfter(parseInt(accessTokenExpiry))) {
                 console.log("Access token expired. Signing out...");
                 await deleteStoredTokens();
                 resetState();
@@ -199,13 +200,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return false;
             }
 
-            if (dayjs().isAfter(parseInt(refreshTokenExpiry) * 1000)) {
+            const currUnix = dayjs().unix();
+            if (dayjs(currUnix).isAfter(parseInt(refreshTokenExpiry))) {
                 console.log("Refresh token expired. Signing out...");
                 await signOut();
                 return false;
             }
 
-            if (dayjs().isAfter(parseInt(accessTokenExpiry) * 1000)) {
+            if (dayjs(currUnix).isAfter(parseInt(accessTokenExpiry))) {
                 const refreshToken =
                     await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
                 if (!refreshToken) {
@@ -224,7 +226,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     }
                 );
                 const newAccessToken = res.data.access_token;
-                const newAccessTokenExpiry = dayjs().add(15, "minutes"); // 15 minutes
+                const newAccessTokenExpiry = dayjs().add(15, "minutes").unix(); // 15 minutes
 
                 await SecureStore.setItemAsync(
                     ACCESS_TOKEN_KEY,
@@ -232,13 +234,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 );
                 await SecureStore.setItemAsync(
                     ACCESS_TOKEN_EXPIRY_KEY,
-                    newAccessTokenExpiry.unix().toString()
+                    newAccessTokenExpiry.toString()
                 );
 
+                console.log("Access token refreshed");
                 return true;
             } else {
                 console.log("Access token is still valid");
-                console.log(accessTokenExpiry);
+                // await loadAuth();
                 return true;
             }
         } catch (error) {
@@ -265,6 +268,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     setAccessToken(accessToken);
                     setUser(user);
                     setIsSignedIn(true);
+                    router.replace("/(authenticated)/(tabs)/home");
                 }
             }
         } catch (error) {

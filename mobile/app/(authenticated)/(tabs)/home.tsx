@@ -14,7 +14,7 @@ import { Colors } from "~/lib/theme";
 
 function Page() {
     const headerHeight = useHeaderHeight();
-    const [refreshing, setRefreshing] = useState(false);
+    const [refreshing] = useState(false);
     const { invalidateQueries } = useDatabase();
     const bottomSheetRef = useRef<BottomSheetModal>(null);
 
