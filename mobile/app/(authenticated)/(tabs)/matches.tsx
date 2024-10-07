@@ -189,7 +189,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.card_bg,
         borderRadius: 10,
         gap: 2,
-        ...globalStyles.shadow,
+        borderColor: Colors.secondary,
+        borderWidth: 1,
     },
     matchCardTop: {
         flexDirection: "column",

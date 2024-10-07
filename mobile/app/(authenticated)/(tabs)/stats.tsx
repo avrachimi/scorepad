@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import Leaderboard from "~/components/Leaderboard";
+import MatchHistoryBarChart from "~/components/MatchHistoryBarChart";
 import MatchesPlayed from "~/components/MatchesPlayed";
 import { useDatabase } from "~/hooks/useDatabase";
 
@@ -45,6 +46,7 @@ function Page() {
                 }
             >
                 <MatchesPlayed />
+                <MatchHistoryBarChart />
                 <Leaderboard />
             </ScrollView>
         </View>

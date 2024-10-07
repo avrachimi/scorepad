@@ -6,8 +6,6 @@ import { Colors, globalStyles } from "~/lib/theme";
 function Leaderboard() {
     const { statsLeaderboardQuery } = useDatabase();
 
-    console.log(statsLeaderboardQuery.data);
-
     if (
         !statsLeaderboardQuery.data ||
         statsLeaderboardQuery.data.leaderboard?.length === 0
@@ -179,7 +177,6 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
     },
     table: {
-        ...globalStyles.shadow,
         width: "100%",
         padding: 5,
         backgroundColor: Colors.card_bg,
