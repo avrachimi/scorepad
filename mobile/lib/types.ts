@@ -25,6 +25,17 @@ export type Player = {
     image_url?: string;
 };
 
+export type Friend = {
+    id: string;
+    name: string;
+    email: string;
+    image_url?: string;
+    created_at: Date;
+    friends_since: number;
+    total_friends: number;
+    matches_played: number;
+};
+
 export type Match = {
     id: string;
     match_date: Date;

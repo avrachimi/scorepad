@@ -84,11 +84,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     );
                     await SecureStore.setItemAsync(
                         ACCESS_TOKEN_EXPIRY_KEY,
-                        accessTokenExpiry.toString()
+                        accessTokenExpiry.unix().toString()
                     );
                     await SecureStore.setItemAsync(
                         REFRESH_TOKEN_EXPIRY_KEY,
-                        refreshTokenExpiry.toString()
+                        refreshTokenExpiry.unix().toString()
                     );
 
                     setAccessToken(access_token);
@@ -137,7 +137,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return;
             }
 
-            if (dayjs().isAfter(dayjs(parseInt(accessTokenExpiry)))) {
+            if (dayjs().isAfter(parseInt(accessTokenExpiry) * 1000)) {
                 console.log("Access token expired. Signing out...");
                 await deleteStoredTokens();
                 resetState();
@@ -199,13 +199,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 return false;
             }
 
-            if (dayjs().isAfter(dayjs(parseInt(refreshTokenExpiry)))) {
+            if (dayjs().isAfter(parseInt(refreshTokenExpiry) * 1000)) {
                 console.log("Refresh token expired. Signing out...");
                 await signOut();
                 return false;
             }
 
-            if (dayjs().isAfter(dayjs(parseInt(accessTokenExpiry)))) {
+            if (dayjs().isAfter(parseInt(accessTokenExpiry) * 1000)) {
                 const refreshToken =
                     await SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
                 if (!refreshToken) {
@@ -232,7 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 );
                 await SecureStore.setItemAsync(
                     ACCESS_TOKEN_EXPIRY_KEY,
-                    newAccessTokenExpiry.toString()
+                    newAccessTokenExpiry.unix().toString()
                 );
 
                 return true;
