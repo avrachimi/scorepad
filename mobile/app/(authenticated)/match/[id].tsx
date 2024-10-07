@@ -6,11 +6,14 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { useAuth } from "~/hooks/useAuth";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
 import { formatDuration, getDayWithSuffix } from "~/util/format";
 
 function Page() {
+    const { user } = useAuth();
+
     const { id } = useLocalSearchParams<{ id?: string }>();
     const router = useRouter();
     const headerHeight = useHeaderHeight();
@@ -56,23 +59,25 @@ function Page() {
                         />
                         <Text style={styles.btnBackText}>Back</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.btnEdit}
-                        onPress={() => {
-                            router.push({
-                                pathname: "/(authenticated)/match/edit",
-                                params: {
-                                    id: match.id,
-                                },
-                            });
-                        }}
-                    >
-                        <Ionicons
-                            name="create-outline"
-                            size={24}
-                            color={"white"}
-                        />
-                    </TouchableOpacity>
+                    {match.created_by.id === user?.id && (
+                        <TouchableOpacity
+                            style={styles.btnEdit}
+                            onPress={() => {
+                                router.push({
+                                    pathname: "/(authenticated)/match/edit",
+                                    params: {
+                                        id: match.id,
+                                    },
+                                });
+                            }}
+                        >
+                            <Ionicons
+                                name="create-outline"
+                                size={24}
+                                color={"white"}
+                            />
+                        </TouchableOpacity>
+                    )}
                 </View>
                 <View style={styles.scorePairContainer}>
                     <View style={styles.scoreTeamContainer}>

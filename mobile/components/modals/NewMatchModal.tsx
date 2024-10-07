@@ -114,20 +114,24 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
 
     const onSave = () => {
         if (user && team1Player1) {
-            createMatchQuery.mutate({
-                match_date: date,
-                duration_minutes: duration,
-                created_by: user.id,
-                team1_score: team1Score,
-                team1_player1: team1Player1.id,
-                team1_player2: team1Player2?.id,
-                team2_score: team2Score,
-                team2_player1: team2Player1?.id,
-                team2_player2: team2Player2?.id,
-            });
+            if (team1Score > 0 || team2Score > 0) {
+                createMatchQuery.mutate({
+                    match_date: date,
+                    duration_minutes: duration,
+                    created_by: user.id,
+                    team1_score: team1Score,
+                    team1_player1: team1Player1.id,
+                    team1_player2: team1Player2?.id,
+                    team2_score: team2Score,
+                    team2_player1: team2Player1?.id,
+                    team2_player2: team2Player2?.id,
+                });
+                bottomSheetRef.current?.close();
+                clearState();
+            } else {
+                alert("Please enter a score");
+            }
         }
-        bottomSheetRef.current?.close();
-        clearState();
     };
 
     const onCancel = () => {

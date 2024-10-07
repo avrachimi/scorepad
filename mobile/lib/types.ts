@@ -63,6 +63,17 @@ export type CreateMatchParams = {
     team2_player2?: string;
 };
 
+export type UpdateMatchParams = {
+    match_date: Date;
+    duration_minutes: number;
+    team1_score: number;
+    team1_player1: string;
+    team1_player2?: string;
+    team2_score: number;
+    team2_player1?: string;
+    team2_player2?: string;
+};
+
 export type Stats = {
     total_matches: number;
     matches_by_month?: { month: string; matches: number }[];

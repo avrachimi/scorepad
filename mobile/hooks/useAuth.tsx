@@ -237,11 +237,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     newAccessTokenExpiry.toString()
                 );
 
+                setAccessToken(newAccessToken);
+
                 console.log("Access token refreshed");
                 return true;
             } else {
                 console.log("Access token is still valid");
-                // await loadAuth();
                 return true;
             }
         } catch (error) {
@@ -269,6 +270,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     setUser(user);
                     setIsSignedIn(true);
                     router.replace("/(authenticated)/(tabs)/home");
+                    console.log("loaded auth");
                 }
             }
         } catch (error) {

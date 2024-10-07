@@ -86,7 +86,7 @@ export const useDatabase = () => {
 
     const singleMatchQuery = (id: string) =>
         useQuery({
-            queryKey: ["singleMatches"],
+            queryKey: ["singleMatch", id],
             queryFn: async () => {
                 try {
                     const response = await get<Match>(
@@ -157,7 +157,6 @@ export const useDatabase = () => {
                     "/stats?type=leaderboard",
                     accessToken!
                 );
-                console.log("statsLeaderboardQuery", response.data);
                 return response.data;
             } catch (error) {
                 handleAxiosError(error);
