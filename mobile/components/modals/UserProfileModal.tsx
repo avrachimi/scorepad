@@ -96,6 +96,7 @@ const UserProfileModal = forwardRef<BottomSheetModal, UserProfileModalProps>(
                                 justifyContent: "space-around",
                                 alignItems: "flex-start",
                                 gap: 5,
+                                width: "55%",
                             }}
                         >
                             <Text

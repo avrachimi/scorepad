@@ -241,14 +241,24 @@ const FriendRequestsModal = forwardRef<
                                                 }}
                                             >
                                                 {userReq.image_url ? (
-                                                    <Image
+                                                    <View
                                                         style={{
+                                                            padding: 2.5,
                                                             width: 32,
                                                             height: 32,
-                                                            borderRadius: 10,
                                                         }}
-                                                        src={userReq.image_url}
-                                                    />
+                                                    >
+                                                        <Image
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "100%",
+                                                                borderRadius: 100,
+                                                            }}
+                                                            src={
+                                                                userReq.image_url
+                                                            }
+                                                        />
+                                                    </View>
                                                 ) : (
                                                     <Ionicons
                                                         name="person-circle"
@@ -436,14 +446,24 @@ const FriendRequestsModal = forwardRef<
                                                 }}
                                             >
                                                 {userReq.image_url ? (
-                                                    <Image
+                                                    <View
                                                         style={{
+                                                            padding: 2.5,
                                                             width: 32,
                                                             height: 32,
-                                                            borderRadius: 10,
                                                         }}
-                                                        src={userReq.image_url}
-                                                    />
+                                                    >
+                                                        <Image
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "100%",
+                                                                borderRadius: 100,
+                                                            }}
+                                                            src={
+                                                                userReq.image_url
+                                                            }
+                                                        />
+                                                    </View>
                                                 ) : (
                                                     <Ionicons
                                                         name="person-circle"

@@ -9,8 +9,8 @@ import { useDatabase } from "~/hooks/useDatabase";
 
 function Page() {
     const headerHeight = useHeaderHeight();
-    const [refreshing, setRefreshing] = useState(false);
-    const { invalidateQueries } = useDatabase();
+    const [refreshing] = useState(false);
+    const { invalidateQueries, statsMatchesQuery } = useDatabase();
 
     return (
         <View
@@ -45,7 +45,9 @@ function Page() {
                     />
                 }
             >
-                <MatchesPlayed />
+                <MatchesPlayed
+                    matches={statsMatchesQuery.data?.total_matches}
+                />
                 <MatchHistoryBarChart />
                 <Leaderboard />
             </ScrollView>

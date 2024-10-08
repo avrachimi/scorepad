@@ -173,14 +173,22 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                         }}
                     >
                         {item.image_url ? (
-                            <Image
+                            <View
                                 style={{
+                                    padding: 4.5,
                                     width: 50,
                                     height: 50,
-                                    borderRadius: 10,
                                 }}
-                                src={item.image_url}
-                            />
+                            >
+                                <Image
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        borderRadius: 100,
+                                    }}
+                                    src={item.image_url}
+                                />
+                            </View>
                         ) : (
                             <Ionicons
                                 name="person-circle"
@@ -213,7 +221,7 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                                 >
                                     friends since{" "}
                                     {dayjs(item.friends_since).format(
-                                        "MMMM DD, YYYY"
+                                        "MMMM D, YYYY"
                                     )}
                                 </Text>
                             )}

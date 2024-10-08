@@ -217,15 +217,22 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                                 }}
                             >
                                 {user.image_url ? (
-                                    <Image
+                                    <View
                                         style={{
+                                            padding: 4.5,
                                             width: 50,
                                             height: 50,
-                                            borderRadius: 10,
                                         }}
-                                        src={user.image_url}
-                                        resizeMode="cover"
-                                    />
+                                    >
+                                        <Image
+                                            style={{
+                                                width: "100%",
+                                                height: "100%",
+                                                borderRadius: 100,
+                                            }}
+                                            src={user.image_url}
+                                        />
+                                    </View>
                                 ) : (
                                     <Ionicons
                                         name="person-circle"

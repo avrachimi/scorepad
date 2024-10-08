@@ -169,7 +169,7 @@ function RecentMatches() {
                                                                 style={{
                                                                     width: 20,
                                                                     height: 20,
-                                                                    borderRadius: 10,
+                                                                    borderRadius: 100,
                                                                 }}
                                                                 src={
                                                                     player.image_url

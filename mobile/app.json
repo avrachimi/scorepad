@@ -1,45 +1,48 @@
 {
-    "expo": {
-        "name": "ScorePad",
-        "slug": "scorepad-avrachimi",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/images/icon.png",
-        "scheme": "com.scorepad",
-        "platforms": [
-            "ios"
-        ],
-        "deepLinking": {
-            "enbable": true
-        },
-        "userInterfaceStyle": "automatic",
-        "splash": {
-            "image": "./assets/images/splash.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
-        },
-        "ios": {
-            "supportsTablet": false,
-            "bundleIdentifier": "com.avrachimi.scorepad"
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/images/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
-            },
-            "package": "com.avrachimi.scorepad"
-        },
-        "web": {
-            "bundler": "metro",
-            "output": "static",
-            "favicon": "./assets/images/favicon.png"
-        },
-        "plugins": [
-            "expo-router",
-            "expo-secure-store"
-        ],
-        "experiments": {
-            "typedRoutes": true
-        }
+  "expo": {
+    "name": "ScorePad",
+    "slug": "scorepad-avrachimi",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/AppIcons/Assets.xcassets/AppIcon.appiconset/1024.png",
+    "scheme": "com.scorepad",
+    "platforms": [
+      "ios"
+    ],
+    "deepLinking": {
+      "enbable": true
+    },
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "backgroundColor": "#6682A9"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.avrachimi.scorepad"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.avrachimi.scorepad"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "0972db90-be5e-4cb3-9798-77d1f3715bd7"
+      }
     }
+  }
 }
