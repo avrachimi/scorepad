@@ -20,6 +20,7 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
             ref={ref}
             snapPoints={snapPoints}
             backdropComponent={renderBackdrop}
+            keyboardBehavior="extend"
         >
             <View
                 style={{
@@ -65,6 +66,8 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                             paddingHorizontal: 10,
                         }}
                         placeholder="Search"
+                        placeholderTextColor={"#A0A0A0"}
+                        returnKeyType="search"
                     />
                 </View>
                 <Text>Add Friends Modal</Text>

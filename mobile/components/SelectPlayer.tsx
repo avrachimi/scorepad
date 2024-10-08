@@ -153,6 +153,7 @@ function SelectPlayerPage({
                 style={styles.searchBar}
                 returnKeyType="search"
                 placeholder="Search"
+                placeholderTextColor={"#A0A0A0"}
                 value={searchQuery}
                 onChangeText={(text) => setSearchQuery(text)}
             />

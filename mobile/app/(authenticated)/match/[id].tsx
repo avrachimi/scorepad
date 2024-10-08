@@ -8,7 +8,7 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useAuth } from "~/hooks/useAuth";
 import { useDatabase } from "~/hooks/useDatabase";
-import { Colors, globalStyles } from "~/lib/theme";
+import { Colors } from "~/lib/theme";
 import { formatDuration, getDayWithSuffix } from "~/util/format";
 
 function Page() {
@@ -451,7 +451,6 @@ const styles = StyleSheet.create({
         borderRadius: 22,
         padding: 21,
         gap: 13,
-        ...globalStyles.shadow,
     },
     teamMemberContainer: {
         flexDirection: "row",

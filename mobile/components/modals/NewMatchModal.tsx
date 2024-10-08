@@ -161,9 +161,6 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
             handleComponent={null}
             enablePanDownToClose={false}
             enableOverDrag={false}
-            containerStyle={{
-                position: "relative",
-            }}
         >
             {showPlayerSelector ? (
                 <SelectPlayerPage
@@ -234,13 +231,6 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                             </Text>
                         </TouchableOpacity>
                     </View>
-                    <View
-                        style={{
-                            width: "100%",
-                            borderBottomWidth: 1,
-                            borderBottomColor: "lightgray",
-                        }}
-                    />
 
                     <View style={styles.teamSection}>
                         <Text style={styles.sectionTitle}>Team 1</Text>
