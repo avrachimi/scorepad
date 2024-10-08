@@ -142,6 +142,34 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                         onChangeText={(text) => setSearchQuery(text)}
                     />
                 </View>
+                {(!userList || userList.length === 0) && !loadingUserList && (
+                    <View
+                        style={{
+                            width: "100%",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: 10,
+                            marginTop: 60,
+                        }}
+                    >
+                        <Text
+                            style={{
+                                fontSize: 17,
+                                fontWeight: "600",
+                            }}
+                        >
+                            No users found
+                        </Text>
+                        <Text
+                            style={{
+                                fontSize: 12,
+                                opacity: 0.5,
+                            }}
+                        >
+                            Try searching for a different name
+                        </Text>
+                    </View>
+                )}
                 <FlatList
                     data={userList}
                     keyExtractor={(item) => item.id}

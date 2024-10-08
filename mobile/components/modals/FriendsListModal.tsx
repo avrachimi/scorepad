@@ -23,7 +23,7 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
     const { accessToken, loadAuth } = useAuth();
     const snapPoints = useMemo(() => ["35%", "92%"], []);
 
-    const { data: friends } = useQuery({
+    const { data: friends, isLoading: loadingFriends } = useQuery({
         queryKey: ["getFriends"],
         queryFn: async () => {
             const res = await axios.get<Friend[]>(
@@ -123,6 +123,34 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                     My Friends
                 </Text>
             </View>
+            {(!friends || friends.length === 0) && !loadingFriends && (
+                <View
+                    style={{
+                        width: "100%",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 10,
+                        marginTop: 60,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 17,
+                            fontWeight: "600",
+                        }}
+                    >
+                        No friends found
+                    </Text>
+                    <Text
+                        style={{
+                            fontSize: 12,
+                            opacity: 0.5,
+                        }}
+                    >
+                        Add friends to see them here
+                    </Text>
+                </View>
+            )}
             <FlatList
                 data={friends}
                 keyExtractor={(item) => item.id}
