@@ -106,6 +106,7 @@ func (f *Friendship) GetFriendRequests(w http.ResponseWriter, r *http.Request, u
 		}
 
 		responseWithJSON(w, 200, util.DatabaseSentFriendRequestsToSentFriendRequests(friendRequests))
+		return
 	}
 
 	friendRequests, err := f.DB.GetFriendRequests(r.Context(), user.ID)
