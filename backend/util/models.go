@@ -340,6 +340,7 @@ type Friend struct {
 	FriendsSince  *time.Time `json:"friends_since"`
 	TotalFriends  int64      `json:"total_friends"`
 	MatchesPlayed int64      `json:"total_matches"`
+	FrienshipID   uuid.UUID  `json:"friendship_id"`
 }
 
 func DatabaseFriendsToFriends(dbFriends []database.GetFriendsRow) []Friend {
@@ -366,6 +367,7 @@ func DatabaseFriendsToFriends(dbFriends []database.GetFriendsRow) []Friend {
 			FriendsSince:  friendsSince,
 			TotalFriends:  dbFriendship.TotalFriends,
 			MatchesPlayed: dbFriendship.MatchesPlayed,
+			FrienshipID:   dbFriendship.FriendshipID,
 		})
 	}
 

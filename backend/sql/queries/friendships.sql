@@ -5,6 +5,7 @@ SELECT
   u.email,
   u.image_url,
   u.created_at,
+  f.id AS friendship_id,
   f.updated_at AS friends_since,
   (
     SELECT

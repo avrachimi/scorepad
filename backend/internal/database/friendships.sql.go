@@ -127,6 +127,7 @@ SELECT
   u.email,
   u.image_url,
   u.created_at,
+  f.id AS friendship_id,
   f.updated_at AS friends_since,
   (
     SELECT
@@ -189,6 +190,7 @@ type GetFriendsRow struct {
 	Email         string
 	ImageUrl      sql.NullString
 	CreatedAt     time.Time
+	FriendshipID  uuid.UUID
 	FriendsSince  sql.NullTime
 	TotalFriends  int64
 	MatchesPlayed int64
@@ -209,6 +211,7 @@ func (q *Queries) GetFriends(ctx context.Context, arg GetFriendsParams) ([]GetFr
 			&i.Email,
 			&i.ImageUrl,
 			&i.CreatedAt,
+			&i.FriendshipID,
 			&i.FriendsSince,
 			&i.TotalFriends,
 			&i.MatchesPlayed,
