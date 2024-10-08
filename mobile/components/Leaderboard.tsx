@@ -181,5 +181,6 @@ const styles = StyleSheet.create({
         padding: 5,
         backgroundColor: Colors.card_bg,
         borderRadius: 10,
+        ...globalStyles.shadow,
     },
 });

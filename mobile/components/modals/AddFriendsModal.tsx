@@ -3,7 +3,7 @@ import { forwardRef, useMemo } from "react";
 import { Text, TextInput, View } from "react-native";
 
 const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
-    const snapPoints = useMemo(() => ["35%", "92%"], []);
+    const snapPoints = useMemo(() => ["92%"], []);
 
     const renderBackdrop = (props: any) => {
         return (
@@ -68,6 +68,7 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                         placeholder="Search"
                         placeholderTextColor={"#A0A0A0"}
                         returnKeyType="search"
+                        autoFocus
                     />
                 </View>
                 <Text>Add Friends Modal</Text>

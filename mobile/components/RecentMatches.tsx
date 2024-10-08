@@ -192,7 +192,7 @@ function RecentMatches() {
                                                                 name="person-circle"
                                                                 size={20}
                                                                 color={
-                                                                    Colors.primary
+                                                                    Colors.accent
                                                                 }
                                                             />
                                                         </View>

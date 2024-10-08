@@ -58,6 +58,7 @@ function MatchHistoryBarChart() {
                     backgroundColor: Colors.card_bg,
                     borderRadius: 10,
                     padding: 10,
+                    ...globalStyles.shadow,
                 }}
             >
                 <CartesianChart

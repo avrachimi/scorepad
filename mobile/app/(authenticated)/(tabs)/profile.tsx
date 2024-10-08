@@ -4,6 +4,7 @@ import axios from "axios";
 import { useRef } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import AddFriendsModal from "~/components/modals/AddFriendsModal";
+import FriendRequestsModal from "~/components/modals/FriendRequestsModal";
 import FriendsListModal from "~/components/modals/FriendsListModal";
 import { useAuth } from "~/hooks/useAuth";
 import { Colors, globalStyles } from "~/lib/theme";
@@ -30,6 +31,7 @@ function Page() {
 
     const addFriendsModalRef = useRef<BottomSheetModal>(null);
     const friendsListModalRef = useRef<BottomSheetModal>(null);
+    const friendRequestsModalRef = useRef<BottomSheetModal>(null);
 
     return (
         <View
@@ -103,7 +105,11 @@ function Page() {
                             Add Friends
                         </Text>
                     </TouchableOpacity>
-                    <TouchableOpacity>
+                    <TouchableOpacity
+                        onPress={() =>
+                            friendRequestsModalRef.current?.present()
+                        }
+                    >
                         <Text
                             style={{
                                 textDecorationLine: "underline",
@@ -122,6 +128,10 @@ function Page() {
             </TouchableOpacity>
             <AddFriendsModal ref={addFriendsModalRef} />
             <FriendsListModal ref={friendsListModalRef} />
+            <FriendRequestsModal
+                ref={friendRequestsModalRef}
+                requests={friendRequests}
+            />
         </View>
     );
 }

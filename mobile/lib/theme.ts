@@ -7,7 +7,7 @@ export const Colors = {
     background: "#FCFDFD",
     success: "#3D7068",
     error: "#FF6D64",
-    card_bg: "#6682A90D",
+    card_bg: "#F4F7F9",
     primary_gradient: "linear-gradient(180deg, #6682A9 0%, #9DB1CD 100%);",
 };
 
