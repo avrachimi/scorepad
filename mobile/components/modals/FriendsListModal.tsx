@@ -1,16 +1,26 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetBackdrop, BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useQuery } from "@tanstack/react-query";
+import { DefaultTheme } from "@react-navigation/native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import dayjs from "dayjs";
 import { forwardRef, useMemo } from "react";
-import { FlatList, Image, Text, View } from "react-native";
+import {
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Image,
+    Text,
+    View,
+} from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
 import { useAuth } from "~/hooks/useAuth";
 import { Colors } from "~/lib/theme";
 import { Friend } from "~/lib/types";
 
 const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
-    const { accessToken } = useAuth();
+    const queryClient = useQueryClient();
+    const { accessToken, loadAuth } = useAuth();
     const snapPoints = useMemo(() => ["35%", "92%"], []);
 
     const { data: friends } = useQuery({
@@ -29,6 +39,49 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
             return res.data;
         },
     });
+
+    const {
+        mutate: deleteFriend,
+        isPending: deletingFriend,
+        variables: deleteFriendVariables,
+    } = useMutation({
+        mutationKey: ["deleteFriend"],
+        mutationFn: async (friendshipId: string) => {
+            const res = await axios.delete(
+                process.env.EXPO_PUBLIC_API_ENDPOINT +
+                    `/v1/friends/${friendshipId}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            console.log(res.status);
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries();
+            await loadAuth();
+        },
+    });
+
+    const createDeleteAlert = (friendshipId: string) =>
+        Alert.alert(
+            "Remove Friend",
+            "Are you sure you want to remove this friend?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Cancel Pressed"),
+                    style: "cancel",
+                    isPreferred: true,
+                },
+                {
+                    text: "Remove",
+                    onPress: () => deleteFriend(friendshipId),
+                    style: "destructive",
+                },
+            ]
+        );
 
     const renderBackdrop = (props: any) => {
         return (
@@ -85,7 +138,7 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                         style={{
                             width: "100%",
                             flexDirection: "row",
-                            justifyContent: "flex-start",
+                            justifyContent: "space-between",
                             alignItems: "center",
                             paddingHorizontal: 21,
                             gap: 10,
@@ -137,6 +190,35 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                                 </Text>
                             )}
                         </View>
+                        <TouchableOpacity
+                            style={{
+                                backgroundColor: Colors.card_bg,
+                                paddingHorizontal: 10,
+                                paddingVertical: 6,
+                                borderRadius: 6,
+                                width: 80,
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                            onPress={() =>
+                                createDeleteAlert(item.friendship_id)
+                            }
+                        >
+                            {deletingFriend &&
+                            deleteFriendVariables === item.friendship_id ? (
+                                <ActivityIndicator />
+                            ) : (
+                                <Text
+                                    style={{
+                                        color: DefaultTheme.colors.notification,
+                                        fontWeight: "600",
+                                        fontSize: 14,
+                                    }}
+                                >
+                                    Remove
+                                </Text>
+                            )}
+                        </TouchableOpacity>
                     </View>
                 )}
             />

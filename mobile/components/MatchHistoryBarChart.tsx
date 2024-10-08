@@ -66,8 +66,8 @@ function MatchHistoryBarChart() {
                     xKey={"month"}
                     yKeys={["matches"]}
                     domainPadding={{
-                        left: 30,
-                        right: 30,
+                        left: 50,
+                        right: 50,
                         bottom: 30,
                         top: 30,
                     }}
@@ -88,7 +88,7 @@ function MatchHistoryBarChart() {
                         <Bar
                             points={points.matches}
                             chartBounds={chartBounds}
-                            barCount={12}
+                            barCount={points.matches.length}
                             roundedCorners={{ topLeft: 5, topRight: 5 }}
                             animate={{ type: "spring" }}
                         >

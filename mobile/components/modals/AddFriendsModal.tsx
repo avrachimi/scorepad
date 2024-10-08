@@ -1,9 +1,78 @@
+import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetBackdrop, BottomSheetModal } from "@gorhom/bottom-sheet";
-import { forwardRef, useMemo } from "react";
-import { Text, TextInput, View } from "react-native";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { forwardRef, useMemo, useState } from "react";
+import {
+    ActivityIndicator,
+    Image,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { FlatList } from "react-native-gesture-handler";
+import { useAuth } from "~/hooks/useAuth";
+import { Colors } from "~/lib/theme";
+import { User } from "~/lib/types";
 
 const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
+    const { accessToken } = useAuth();
+    const queryClient = useQueryClient();
+
+    const [searchQuery, setSearchQuery] = useState<string>();
+
     const snapPoints = useMemo(() => ["92%"], []);
+
+    const { data: userList, isLoading: loadingUserList } = useQuery({
+        queryKey: ["getSearchFriendsList", searchQuery],
+        queryFn: async () => {
+            try {
+                console.log("searchQuery", searchQuery);
+                const users = await axios.get<User[]>(
+                    process.env.EXPO_PUBLIC_API_ENDPOINT + "/v1/users",
+                    {
+                        headers: {
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                        params: {
+                            search: searchQuery,
+                        },
+                    }
+                );
+
+                return users.data;
+            } catch (error) {
+                console.error(error);
+                return [];
+            }
+        },
+    });
+
+    const {
+        mutate: sendFriendRequest,
+        isPending: sendingFriendRequest,
+        variables: friendRequestVariables,
+    } = useMutation({
+        mutationKey: ["sendFriendRequest"],
+        mutationFn: async (userId: string) => {
+            const res = await axios.post(
+                process.env.EXPO_PUBLIC_API_ENDPOINT + `/v1/friends`,
+                {
+                    user_id: userId,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+            console.log(res.status);
+        },
+        onSuccess: async () => {
+            await queryClient.invalidateQueries();
+        },
+    });
 
     const renderBackdrop = (props: any) => {
         return (
@@ -69,9 +138,110 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                         placeholderTextColor={"#A0A0A0"}
                         returnKeyType="search"
                         autoFocus
+                        value={searchQuery}
+                        onChangeText={(text) => setSearchQuery(text)}
                     />
                 </View>
-                <Text>Add Friends Modal</Text>
+                <FlatList
+                    data={userList}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={{
+                        width: "100%",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        marginTop: 10,
+                    }}
+                    ItemSeparatorComponent={() => (
+                        <View
+                            style={{
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginVertical: 6,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    width: "100%",
+                                    height: 1,
+                                    backgroundColor: Colors.primary,
+                                    opacity: 0.3,
+                                }}
+                            />
+                        </View>
+                    )}
+                    renderItem={({ item: user }) => (
+                        <View
+                            style={{
+                                width: "100%",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                paddingHorizontal: 21,
+                                gap: 10,
+                            }}
+                        >
+                            <View
+                                style={{
+                                    flexDirection: "row",
+                                    alignItems: "center",
+                                    justifyContent: "flex-start",
+                                    gap: 10,
+                                }}
+                            >
+                                {user.image_url ? (
+                                    <Image
+                                        style={{
+                                            width: 50,
+                                            height: 50,
+                                            borderRadius: 10,
+                                        }}
+                                        src={user.image_url}
+                                        resizeMode="cover"
+                                    />
+                                ) : (
+                                    <Ionicons
+                                        name="person-circle"
+                                        size={50}
+                                        color={Colors.secondary}
+                                    />
+                                )}
+                                <Text
+                                    style={{
+                                        fontSize: 17,
+                                    }}
+                                >
+                                    {user.name}
+                                </Text>
+                            </View>
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: Colors.primary,
+                                    borderRadius: 8,
+                                    paddingHorizontal: 15,
+                                    paddingVertical: 6,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
+                                onPress={() => sendFriendRequest(user.id)}
+                            >
+                                {sendingFriendRequest &&
+                                friendRequestVariables === user.id ? (
+                                    <ActivityIndicator />
+                                ) : (
+                                    <Text
+                                        style={{
+                                            fontSize: 14,
+                                            color: "white",
+                                            fontWeight: "600",
+                                        }}
+                                    >
+                                        Add
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
             </View>
         </BottomSheetModal>
     );

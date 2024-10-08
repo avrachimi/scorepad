@@ -1,7 +1,7 @@
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 import AddFriendsModal from "~/components/modals/AddFriendsModal";
 import FriendRequestsModal from "~/components/modals/FriendRequestsModal";
@@ -11,6 +11,8 @@ import { Colors, globalStyles } from "~/lib/theme";
 import { FriendRequest } from "~/lib/types";
 
 function Page() {
+    const queryClient = useQueryClient();
+
     const { signOut, user, accessToken } = useAuth();
 
     const { data: friendRequests } = useQuery({
@@ -32,6 +34,10 @@ function Page() {
     const addFriendsModalRef = useRef<BottomSheetModal>(null);
     const friendsListModalRef = useRef<BottomSheetModal>(null);
     const friendRequestsModalRef = useRef<BottomSheetModal>(null);
+
+    useEffect(() => {
+        queryClient.invalidateQueries();
+    }, []);
 
     return (
         <View

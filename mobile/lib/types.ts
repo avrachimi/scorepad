@@ -34,6 +34,7 @@ export type Friend = {
     friends_since: Date;
     total_friends: number;
     matches_played: number;
+    friendship_id: string;
 };
 
 export type FriendRequest = {
