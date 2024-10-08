@@ -31,9 +31,19 @@ export type Friend = {
     email: string;
     image_url?: string;
     created_at: Date;
-    friends_since: number;
+    friends_since: Date;
     total_friends: number;
     matches_played: number;
+};
+
+export type FriendRequest = {
+    id: string;
+    name: string;
+    email: string;
+    image_url?: string;
+    friendship_id: string;
+    requested_by: string;
+    requested_on: Date;
 };
 
 export type Match = {

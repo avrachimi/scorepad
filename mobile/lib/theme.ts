@@ -41,6 +41,27 @@ export const globalStyles = StyleSheet.create({
         color: "#fff",
         fontWeight: "bold",
     },
+    btnSecondary: {
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#F4F8FF",
+        borderRadius: 14,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+    },
+    btnSecondaryText: {
+        color: Colors.primary,
+        fontSize: 17,
+        fontWeight: "600",
+    },
     subHeading: {
         fontSize: 16,
         fontWeight: "bold",

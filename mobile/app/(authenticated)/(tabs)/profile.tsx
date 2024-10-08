@@ -1,9 +1,35 @@
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { useRef } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
+import AddFriendsModal from "~/components/modals/AddFriendsModal";
+import FriendsListModal from "~/components/modals/FriendsListModal";
 import { useAuth } from "~/hooks/useAuth";
-import { globalStyles } from "~/lib/theme";
+import { Colors, globalStyles } from "~/lib/theme";
+import { FriendRequest } from "~/lib/types";
 
 function Page() {
-    const { signOut, user } = useAuth();
+    const { signOut, user, accessToken } = useAuth();
+
+    const { data: friendRequests } = useQuery({
+        queryKey: ["getFriendRequests"],
+        queryFn: async () => {
+            const res = await axios.get<FriendRequest[]>(
+                process.env.EXPO_PUBLIC_API_ENDPOINT + "/v1/friends/requests",
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            return res.data;
+        },
+    });
+
+    const addFriendsModalRef = useRef<BottomSheetModal>(null);
+    const friendsListModalRef = useRef<BottomSheetModal>(null);
 
     return (
         <View
@@ -49,18 +75,53 @@ function Page() {
                     >
                         {user?.name}
                     </Text>
-                    <Text
-                        style={{
-                            fontSize: 20,
-                        }}
+                    <TouchableOpacity
+                        onPress={() => friendsListModalRef.current?.present()}
                     >
-                        {user?.total_friends} friends
-                    </Text>
+                        <Text
+                            style={{
+                                fontSize: 20,
+                            }}
+                        >
+                            {user?.total_friends} friends
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+                <View
+                    style={{
+                        marginTop: 30,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        gap: 20,
+                    }}
+                >
+                    <TouchableOpacity
+                        style={globalStyles.btnSecondary}
+                        onPress={() => addFriendsModalRef.current?.present()}
+                    >
+                        <Text style={globalStyles.btnSecondaryText}>
+                            Add Friends
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity>
+                        <Text
+                            style={{
+                                textDecorationLine: "underline",
+                                color: Colors.secondary,
+                                fontSize: 17,
+                                fontWeight: "600",
+                            }}
+                        >
+                            {friendRequests?.length ?? 0} friend requests
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </View>
             <TouchableOpacity style={globalStyles.btnPrimary} onPress={signOut}>
                 <Text style={globalStyles.btnPrimaryText}>Sign Out</Text>
             </TouchableOpacity>
+            <AddFriendsModal ref={addFriendsModalRef} />
+            <FriendsListModal ref={friendsListModalRef} />
         </View>
     );
 }
