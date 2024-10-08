@@ -56,12 +56,7 @@ SELECT
   u.email,
   u.image_url,
   f.id AS friendship_id,
-  CAST(
-    CASE
-      WHEN f.member1_id = $1 THEN f.member2_id
-      ELSE f.member1_id
-    END AS uuid
-  ) AS requested_by,
+  f.requested_by AS requested_by,
   f.created_at AS requested_on
 FROM
   friendships f
