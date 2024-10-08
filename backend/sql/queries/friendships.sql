@@ -66,7 +66,8 @@ RETURNING
 UPDATE friendships
 SET
   status = 'accepted',
-  accepted_on = NOW()
+  accepted_on = NOW(),
+  updated_at = NOW()
 WHERE
   id = $1;
 
