@@ -138,7 +138,7 @@ function SelectPlayerPage({
                     >
                         <Text
                             style={{
-                                color: DefaultTheme.colors.primary,
+                                color: "red",
                                 fontSize: 17,
                             }}
                         >

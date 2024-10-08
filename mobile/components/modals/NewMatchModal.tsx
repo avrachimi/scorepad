@@ -609,7 +609,12 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
                             maximumDate={new Date()}
                             onConfirm={(selectedDate) => {
                                 setOpenDatePicker(false);
-                                setDate(selectedDate);
+                                const hour = dayjs(date).hour();
+                                setDate(
+                                    dayjs(selectedDate)
+                                        .set("hour", hour)
+                                        .toDate()
+                                );
                             }}
                             onCancel={() => {
                                 setOpenDatePicker(false);

@@ -616,7 +616,12 @@ function Page() {
                             maximumDate={new Date()}
                             onConfirm={(selectedDate) => {
                                 setOpenDatePicker(false);
-                                setDate(selectedDate);
+                                const hour = dayjs(date).hour();
+                                setDate(
+                                    dayjs(selectedDate)
+                                        .set("hour", hour)
+                                        .toDate()
+                                );
                             }}
                             onCancel={() => {
                                 setOpenDatePicker(false);
@@ -671,7 +676,7 @@ function Page() {
                     </View>
                     <View
                         style={{
-                            marginTop: 20,
+                            marginTop: 40,
                         }}
                     >
                         <Button
