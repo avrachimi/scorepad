@@ -16,7 +16,11 @@ type User struct {
 }
 
 func (u *User) GetAll(w http.ResponseWriter, r *http.Request, user database.User) {
-	users, err := u.DB.GetUsersExcludingFriends(r.Context(), user.ID)
+	searchQuery := r.URL.Query().Get("search")
+	users, err := u.DB.GetUsersExcludingFriends(r.Context(), database.GetUsersExcludingFriendsParams{
+		SearchQuery: searchQuery,
+		UserID:      user.ID,
+	})
 	if err != nil {
 		responseWithError(w, 500, "Failed to get users")
 		return

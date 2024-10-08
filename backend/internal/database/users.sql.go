@@ -295,23 +295,35 @@ WHERE
   id NOT IN (
     SELECT
       CASE
-        WHEN member1_id = $1 THEN member2_id
-        WHEN member2_id = $1 THEN member1_id
+        WHEN member1_id = $1::uuid THEN member2_id
+        WHEN member2_id = $1::uuid THEN member1_id
       END
     FROM
       friendships
     WHERE
       (
-        member1_id = $1
-        OR member2_id = $1
+        member1_id = $1::uuid
+        OR member2_id = $1::uuid
       )
-      AND status = 'accepted'
+      AND (
+        status = 'accepted'
+        OR status = 'pending'
+      )
   )
-  AND id != $1
+  AND id != $1::uuid
+  AND (
+    $2::text IS NULL
+    OR name ILIKE '%' || $2::text || '%'
+  )
 `
 
-func (q *Queries) GetUsersExcludingFriends(ctx context.Context, member1ID uuid.UUID) ([]User, error) {
-	rows, err := q.db.QueryContext(ctx, getUsersExcludingFriends, member1ID)
+type GetUsersExcludingFriendsParams struct {
+	UserID      uuid.UUID
+	SearchQuery string
+}
+
+func (q *Queries) GetUsersExcludingFriends(ctx context.Context, arg GetUsersExcludingFriendsParams) ([]User, error) {
+	rows, err := q.db.QueryContext(ctx, getUsersExcludingFriends, arg.UserID, arg.SearchQuery)
 	if err != nil {
 		return nil, err
 	}
