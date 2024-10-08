@@ -81,9 +81,10 @@ func (f *Friendship) SendFriendRequest(w http.ResponseWriter, r *http.Request, u
 	}
 
 	friendRequest, err := f.DB.SendFriendRequest(r.Context(), database.SendFriendRequestParams{
-		ID:        uuid.New(),
-		Member1ID: user.ID,
-		Member2ID: params.UserId,
+		ID:          uuid.New(),
+		Member1ID:   user.ID,
+		Member2ID:   params.UserId,
+		RequestedBy: user.ID,
 	})
 	if err != nil {
 		responseWithError(w, 500, "Failed to send friend request")
