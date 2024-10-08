@@ -76,6 +76,7 @@ WHERE
   )
   AND f.status = 'pending'
   AND u.id != $1
+  AND f.requested_by != $1
 `
 
 type GetFriendRequestsRow struct {
@@ -253,21 +254,27 @@ func (q *Queries) RemoveFriend(ctx context.Context, arg RemoveFriendParams) erro
 
 const sendFriendRequest = `-- name: SendFriendRequest :one
 INSERT INTO
-  friendships (id, member1_id, member2_id, status)
+  friendships (id, member1_id, member2_id, requested_by, status)
 VALUES
-  ($1, $2, $3, 'pending')
+  ($1, $2, $3, $4, 'pending')
 RETURNING
-  id, member1_id, member2_id, status, accepted_on, created_at, updated_at
+  id, member1_id, member2_id, status, accepted_on, created_at, updated_at, requested_by
 `
 
 type SendFriendRequestParams struct {
-	ID        uuid.UUID
-	Member1ID uuid.UUID
-	Member2ID uuid.UUID
+	ID          uuid.UUID
+	Member1ID   uuid.UUID
+	Member2ID   uuid.UUID
+	RequestedBy uuid.UUID
 }
 
 func (q *Queries) SendFriendRequest(ctx context.Context, arg SendFriendRequestParams) (Friendship, error) {
-	row := q.db.QueryRowContext(ctx, sendFriendRequest, arg.ID, arg.Member1ID, arg.Member2ID)
+	row := q.db.QueryRowContext(ctx, sendFriendRequest,
+		arg.ID,
+		arg.Member1ID,
+		arg.Member2ID,
+		arg.RequestedBy,
+	)
 	var i Friendship
 	err := row.Scan(
 		&i.ID,
@@ -277,6 +284,7 @@ func (q *Queries) SendFriendRequest(ctx context.Context, arg SendFriendRequestPa
 		&i.AcceptedOn,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.RequestedBy,
 	)
 	return i, err
 }

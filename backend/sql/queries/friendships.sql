@@ -57,9 +57,9 @@ WHERE
 
 -- name: SendFriendRequest :one
 INSERT INTO
-  friendships (id, member1_id, member2_id, status)
+  friendships (id, member1_id, member2_id, requested_by, status)
 VALUES
-  ($1, $2, $3, 'pending')
+  ($1, $2, $3, $4, 'pending')
 RETURNING
   *;
 
@@ -91,12 +91,7 @@ SELECT
   u.email,
   u.image_url,
   f.id AS friendship_id,
-  CAST(
-    CASE
-      WHEN f.member1_id = $1 THEN f.member2_id
-      ELSE f.member1_id
-    END AS uuid
-  ) AS requested_by,
+  f.requested_by AS requested_by,
   f.created_at AS requested_on
 FROM
   friendships f
@@ -110,7 +105,8 @@ WHERE
     OR f.member2_id = $1
   )
   AND f.status = 'pending'
-  AND u.id != $1;
+  AND u.id != $1
+  AND f.requested_by != $1;
 
 -- name: DeleteFriendship :exec
 DELETE FROM friendships

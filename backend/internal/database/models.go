@@ -12,13 +12,14 @@ import (
 )
 
 type Friendship struct {
-	ID         uuid.UUID
-	Member1ID  uuid.UUID
-	Member2ID  uuid.UUID
-	Status     string
-	AcceptedOn sql.NullTime
-	CreatedAt  time.Time
-	UpdatedAt  sql.NullTime
+	ID          uuid.UUID
+	Member1ID   uuid.UUID
+	Member2ID   uuid.UUID
+	Status      string
+	AcceptedOn  sql.NullTime
+	CreatedAt   time.Time
+	UpdatedAt   sql.NullTime
+	RequestedBy uuid.UUID
 }
 
 type Match struct {
