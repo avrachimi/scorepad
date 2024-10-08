@@ -112,12 +112,11 @@ WHERE
   AND f.status = 'pending'
   AND u.id != $1;
 
--- name: DeleteFriendRequest :exec
+-- name: DeleteFriendship :exec
 DELETE FROM friendships
 WHERE
   id = $1
   AND (
     member1_id = sqlc.arg (user_id)::uuid
     OR member2_id = sqlc.arg (user_id)::uuid
-  )
-  AND status = 'pending';
+  );

@@ -120,22 +120,22 @@ func (f *Friendship) AcceptFriendRequest(w http.ResponseWriter, r *http.Request,
 	responseWithJSON(w, 200, map[string]string{"message": "Friend request accepted"})
 }
 
-func (f *Friendship) DeleteFriendRequest(w http.ResponseWriter, r *http.Request, user database.User) {
+func (f *Friendship) DeleteFriendship(w http.ResponseWriter, r *http.Request, user database.User) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		responseWithError(w, 400, fmt.Sprintf("Error parsing friend request ID: %v", err))
+		responseWithError(w, 400, fmt.Sprintf("Error parsing friendship ID: %v", err))
 		return
 	}
 
-	err = f.DB.DeleteFriendRequest(r.Context(), database.DeleteFriendRequestParams{
+	err = f.DB.DeleteFriendship(r.Context(), database.DeleteFriendshipParams{
 		ID:     id,
 		UserID: user.ID,
 	})
 	if err != nil {
-		responseWithError(w, 500, "Failed to delete friend request")
+		responseWithError(w, 500, "Failed to delete friendship")
 		return
 	}
 
-	responseWithJSON(w, 200, map[string]string{"message": "Friend request deleted"})
+	responseWithJSON(w, 200, map[string]string{"message": "Friendship deleted"})
 }

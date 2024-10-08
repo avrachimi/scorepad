@@ -77,7 +77,7 @@ func main() {
 	v1Router.Get("/friends", handler.MiddlewareAuth(handler.Friendship.GetAllFriends))
 	v1Router.Post("/friends", handler.MiddlewareAuth(handler.Friendship.SendFriendRequest))
 	v1Router.Patch("/friends/{id}", handler.MiddlewareAuth(handler.Friendship.AcceptFriendRequest))
-	v1Router.Delete("/friends/{id}", handler.MiddlewareAuth(handler.Friendship.DeleteFriendRequest))
+	v1Router.Delete("/friends/{id}", handler.MiddlewareAuth(handler.Friendship.DeleteFriendship))
 	v1Router.Get("/friends/requests", handler.MiddlewareAuth(handler.Friendship.GetFriendRequests))
 
 	v1Router.Get("/matches", handler.MiddlewareAuth(handler.Match.GetAll))

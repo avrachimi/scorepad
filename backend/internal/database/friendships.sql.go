@@ -29,7 +29,7 @@ func (q *Queries) AcceptFriendRequest(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
-const deleteFriendRequest = `-- name: DeleteFriendRequest :exec
+const deleteFriendship = `-- name: DeleteFriendship :exec
 DELETE FROM friendships
 WHERE
   id = $1
@@ -37,16 +37,15 @@ WHERE
     member1_id = $2::uuid
     OR member2_id = $2::uuid
   )
-  AND status = 'pending'
 `
 
-type DeleteFriendRequestParams struct {
+type DeleteFriendshipParams struct {
 	ID     uuid.UUID
 	UserID uuid.UUID
 }
 
-func (q *Queries) DeleteFriendRequest(ctx context.Context, arg DeleteFriendRequestParams) error {
-	_, err := q.db.ExecContext(ctx, deleteFriendRequest, arg.ID, arg.UserID)
+func (q *Queries) DeleteFriendship(ctx context.Context, arg DeleteFriendshipParams) error {
+	_, err := q.db.ExecContext(ctx, deleteFriendship, arg.ID, arg.UserID)
 	return err
 }
 
