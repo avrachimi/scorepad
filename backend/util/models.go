@@ -402,6 +402,16 @@ func DatabaseFriendRequestsToFriendRequests(dbFriendRequests []database.GetFrien
 	return friendRequests
 }
 
+func DatabaseSentFriendRequestsToSentFriendRequests(dbFriendRequests []database.GetSentFriendRequestsRow) []FriendRequest {
+	friendRequests := []FriendRequest{}
+
+	for _, dbFriendRequest := range dbFriendRequests {
+		friendRequests = append(friendRequests, DatabaseFriendRequestToFriendRequest(database.GetFriendRequestsRow(dbFriendRequest)))
+	}
+
+	return friendRequests
+}
+
 type MatchesByMonth struct {
 	Month   time.Time `json:"month"`
 	Matches int64     `json:"matches"`

@@ -235,6 +235,67 @@ func (q *Queries) GetFriends(ctx context.Context, arg GetFriendsParams) ([]GetFr
 	return items, nil
 }
 
+const getSentFriendRequests = `-- name: GetSentFriendRequests :many
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  u.image_url,
+  f.id AS friendship_id,
+  f.requested_by AS requested_by,
+  f.created_at AS requested_on
+FROM
+  friendships f
+  JOIN users u ON (
+    u.id = f.member1_id
+    OR u.id = f.member2_id
+  )
+WHERE
+  f.status = 'pending'
+  AND f.requested_by = $1::uuid
+`
+
+type GetSentFriendRequestsRow struct {
+	ID           uuid.UUID
+	Name         string
+	Email        string
+	ImageUrl     sql.NullString
+	FriendshipID uuid.UUID
+	RequestedBy  uuid.UUID
+	RequestedOn  time.Time
+}
+
+func (q *Queries) GetSentFriendRequests(ctx context.Context, userID uuid.UUID) ([]GetSentFriendRequestsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getSentFriendRequests, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSentFriendRequestsRow
+	for rows.Next() {
+		var i GetSentFriendRequestsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.ImageUrl,
+			&i.FriendshipID,
+			&i.RequestedBy,
+			&i.RequestedOn,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const removeFriend = `-- name: RemoveFriend :exec
 DELETE FROM friendships
 WHERE

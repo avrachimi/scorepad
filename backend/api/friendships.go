@@ -96,6 +96,18 @@ func (f *Friendship) SendFriendRequest(w http.ResponseWriter, r *http.Request, u
 }
 
 func (f *Friendship) GetFriendRequests(w http.ResponseWriter, r *http.Request, user database.User) {
+	typeParam := r.URL.Query().Get("type")
+
+	if typeParam == "sent" {
+		friendRequests, err := f.DB.GetSentFriendRequests(r.Context(), user.ID)
+		if err != nil {
+			responseWithError(w, 500, "Failed to get sent friend requests")
+			return
+		}
+
+		responseWithJSON(w, 200, util.DatabaseSentFriendRequestsToSentFriendRequests(friendRequests))
+	}
+
 	friendRequests, err := f.DB.GetFriendRequests(r.Context(), user.ID)
 	if err != nil {
 		responseWithError(w, 500, "Failed to get friend requests")

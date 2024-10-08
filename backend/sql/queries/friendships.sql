@@ -114,6 +114,25 @@ WHERE
   AND u.id != $1
   AND f.requested_by != $1;
 
+-- name: GetSentFriendRequests :many
+SELECT
+  u.id,
+  u.name,
+  u.email,
+  u.image_url,
+  f.id AS friendship_id,
+  f.requested_by AS requested_by,
+  f.created_at AS requested_on
+FROM
+  friendships f
+  JOIN users u ON (
+    u.id = f.member1_id
+    OR u.id = f.member2_id
+  )
+WHERE
+  f.status = 'pending'
+  AND f.requested_by = sqlc.arg (user_id)::uuid;
+
 -- name: DeleteFriendship :exec
 DELETE FROM friendships
 WHERE
