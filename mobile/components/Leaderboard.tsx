@@ -1,10 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useRef, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useAuth } from "~/hooks/useAuth";
 import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
+import UserProfileModal from "./modals/UserProfileModal";
 
 function Leaderboard() {
+    const { user } = useAuth();
+
     const { statsLeaderboardQuery } = useDatabase();
+
+    const [selectedUserId, setSelectedUserId] = useState<string>();
+    const userProfileModalRef = useRef<BottomSheetModal>(null);
 
     if (
         !statsLeaderboardQuery.data ||
@@ -12,6 +22,11 @@ function Leaderboard() {
     ) {
         return null;
     }
+
+    const openProfile = (userId: string) => {
+        setSelectedUserId(userId);
+        if (userId) userProfileModalRef.current?.present();
+    };
 
     return (
         <View style={styles.container}>
@@ -96,9 +111,16 @@ function Leaderboard() {
                                                 color={Colors.primary}
                                             />
                                         )}
-                                        <Text style={styles.leaderboardName}>
-                                            {item.name}
-                                        </Text>
+                                        <TouchableOpacity
+                                            disabled={item.id === user?.id}
+                                            onPress={() => openProfile(item.id)}
+                                        >
+                                            <Text
+                                                style={styles.leaderboardName}
+                                            >
+                                                {item.name}
+                                            </Text>
+                                        </TouchableOpacity>
                                     </View>
                                 </View>
                                 <View
@@ -126,6 +148,10 @@ function Leaderboard() {
                     }}
                 />
             </View>
+            <UserProfileModal
+                ref={userProfileModalRef}
+                userId={selectedUserId}
+            />
         </View>
     );
 }

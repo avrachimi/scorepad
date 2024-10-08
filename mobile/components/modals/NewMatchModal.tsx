@@ -1,5 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
-import { BottomSheetBackdrop, BottomSheetModal } from "@gorhom/bottom-sheet";
+import {
+    BottomSheetBackdrop,
+    BottomSheetBackdropProps,
+    BottomSheetModal,
+} from "@gorhom/bottom-sheet";
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { DefaultTheme } from "@react-navigation/native";
@@ -87,13 +91,10 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const { createMatchQuery } = useDatabase();
 
     const renderBackdrop = useCallback(
-        (props: any) => (
+        (props: BottomSheetBackdropProps) => (
             <BottomSheetBackdrop
-                style={{
-                    backgroundColor: Colors.primary,
-                }}
                 appearsOnIndex={0}
-                diasappearsOnIndex={-1}
+                disappearsOnIndex={-1}
                 {...props}
             />
         ),

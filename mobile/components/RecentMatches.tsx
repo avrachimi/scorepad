@@ -227,7 +227,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderRadius: 10,
         margin: 5,
-        ...globalStyles.shadow,
     },
     matchCardTop: {
         flexDirection: "column",

@@ -1,15 +1,13 @@
 import { StyleSheet, Text, View } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
-import { useDatabase } from "~/hooks/useDatabase";
 import { Colors } from "~/lib/theme";
 
-function MatchesPlayed() {
-    const { statsMatchesQuery } = useDatabase();
+interface MatchesPlayedProps {
+    matches?: number;
+}
 
-    if (
-        !statsMatchesQuery.isLoading &&
-        (!statsMatchesQuery.data || !statsMatchesQuery.data.total_matches)
-    ) {
+function MatchesPlayed({ matches }: MatchesPlayedProps) {
+    if (!matches) {
         return null;
     }
 
@@ -48,9 +46,7 @@ function MatchesPlayed() {
                     fill="url(#grad)"
                 />
             </Svg>
-            <Text style={styles.text}>
-                {statsMatchesQuery.data?.total_matches}
-            </Text>
+            <Text style={styles.text}>{matches}</Text>
             <Text style={[styles.text, { fontSize: 24, fontWeight: "500" }]}>
                 total matches played
             </Text>

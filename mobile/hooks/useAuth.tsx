@@ -269,7 +269,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                     setAccessToken(accessToken);
                     setUser(user);
                     setIsSignedIn(true);
-                    router.replace("/(authenticated)/(tabs)/home");
+                    // router.replace("/(authenticated)/(tabs)/home");
                     console.log("loaded auth");
                 }
             }

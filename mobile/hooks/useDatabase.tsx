@@ -33,10 +33,10 @@ export const DatabaseProvider = ({
 export const useDatabase = () => {
     const { accessToken, refreshAccessToken } = useAuth();
 
-    const handleAxiosError = (error: unknown) => {
+    const handleAxiosError = async (error: unknown) => {
         const err = error as AxiosError;
         if (err.response?.status === 403) {
-            refreshAccessToken();
+            await refreshAccessToken();
         } else {
             console.error(err);
         }
@@ -51,7 +51,7 @@ export const useDatabase = () => {
                 // console.warn("getUsersQuery");
                 return response.data;
             } catch (error) {
-                handleAxiosError(error);
+                await handleAxiosError(error);
                 return null;
             }
         },

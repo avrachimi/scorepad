@@ -11,12 +11,13 @@ import MatchesPlayed from "~/components/MatchesPlayed";
 import NewMatchModal from "~/components/modals/NewMatchModal";
 import RecentMatches from "~/components/RecentMatches";
 import { useDatabase } from "~/hooks/useDatabase";
-import { Colors, globalStyles } from "~/lib/theme";
+import { Colors } from "~/lib/theme";
 
 function Page() {
     const headerHeight = useHeaderHeight();
     const [refreshing] = useState(false);
-    const { invalidateQueries, recentMatchesQuery } = useDatabase();
+    const { invalidateQueries, recentMatchesQuery, statsMatchesQuery } =
+        useDatabase();
     const bottomSheetRef = useRef<BottomSheetModal>(null);
 
     const showBottomSheet = () => {
@@ -28,41 +29,6 @@ function Page() {
             {recentMatchesQuery.isLoading ? (
                 <View style={{ width: "100%", height: "100%" }}>
                     <ActivityIndicator />
-                </View>
-            ) : !recentMatchesQuery.data ||
-              recentMatchesQuery.data.length === 0 ? (
-                <View
-                    style={{
-                        width: "100%",
-                        height: "100%",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        gap: 20,
-                        marginVertical: 40,
-                    }}
-                >
-                    <Tabs.Screen
-                        options={{
-                            tabBarStyle: {
-                                opacity: 0,
-                            },
-                        }}
-                    />
-                    <Text
-                        style={{
-                            fontSize: 16,
-                        }}
-                    >
-                        You haven't added any matches, yet.
-                    </Text>
-                    <TouchableOpacity
-                        style={globalStyles.btnPrimary}
-                        onPress={() => showBottomSheet()}
-                    >
-                        <Text style={globalStyles.btnPrimaryText}>
-                            Create Match
-                        </Text>
-                    </TouchableOpacity>
                 </View>
             ) : (
                 <View
@@ -135,7 +101,9 @@ function Page() {
                             />
                         }
                     >
-                        <MatchesPlayed />
+                        <MatchesPlayed
+                            matches={statsMatchesQuery.data?.total_matches}
+                        />
                         <RecentMatches />
                         <Leaderboard />
                     </ScrollView>
