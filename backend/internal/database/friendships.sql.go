@@ -123,7 +123,7 @@ SELECT
   u.image_url,
   u.created_at,
   f.id AS friendship_id,
-  f.updated_at AS friends_since,
+  f.accepted_on AS friends_since,
   (
     SELECT
       COUNT(*)
