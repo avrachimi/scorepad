@@ -70,7 +70,13 @@ SET
   accepted_on = NOW(),
   updated_at = NOW()
 WHERE
-  id = $1;
+  id = $1
+  AND (
+    member1_id = sqlc.arg (user_id)::uuid
+    OR member2_id = sqlc.arg (user_id)::uuid
+  )
+  AND status = 'pending'
+  AND requested_by != sqlc.arg (user_id)::uuid;
 
 -- name: RemoveFriend :exec
 DELETE FROM friendships

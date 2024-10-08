@@ -22,10 +22,21 @@ SET
   updated_at = NOW()
 WHERE
   id = $1
+  AND (
+    member1_id = $2::uuid
+    OR member2_id = $2::uuid
+  )
+  AND status = 'pending'
+  AND requested_by != $2::uuid
 `
 
-func (q *Queries) AcceptFriendRequest(ctx context.Context, id uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, acceptFriendRequest, id)
+type AcceptFriendRequestParams struct {
+	ID     uuid.UUID
+	UserID uuid.UUID
+}
+
+func (q *Queries) AcceptFriendRequest(ctx context.Context, arg AcceptFriendRequestParams) error {
+	_, err := q.db.ExecContext(ctx, acceptFriendRequest, arg.ID, arg.UserID)
 	return err
 }
 

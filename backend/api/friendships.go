@@ -113,7 +113,10 @@ func (f *Friendship) AcceptFriendRequest(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
-	err = f.DB.AcceptFriendRequest(r.Context(), id)
+	err = f.DB.AcceptFriendRequest(r.Context(), database.AcceptFriendRequestParams{
+		ID:     id,
+		UserID: user.ID,
+	})
 	if err != nil {
 		responseWithError(w, 500, "Failed to accept friend request")
 		return
