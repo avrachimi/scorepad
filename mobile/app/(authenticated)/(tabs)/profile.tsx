@@ -1,3 +1,4 @@
+import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -100,31 +101,55 @@ function Page() {
                         marginTop: 30,
                         justifyContent: "center",
                         alignItems: "center",
-                        gap: 20,
+                        gap: 30,
                     }}
                 >
                     <TouchableOpacity
-                        style={globalStyles.btnSecondary}
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: 8,
+                            backgroundColor: Colors.card_bg,
+                            padding: 8,
+                            paddingHorizontal: 18,
+                            borderRadius: 8,
+                            ...globalStyles.shadow,
+                        }}
                         onPress={() => addFriendsModalRef.current?.present()}
                     >
+                        <Ionicons
+                            name="person-add"
+                            size={18}
+                            color={Colors.accent}
+                        />
                         <Text style={globalStyles.btnSecondaryText}>
                             Add Friends
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
+                        style={{
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            gap: 8,
+                            backgroundColor: Colors.card_bg,
+                            padding: 8,
+                            paddingHorizontal: 18,
+                            borderRadius: 8,
+                            ...globalStyles.shadow,
+                        }}
                         onPress={() =>
                             friendRequestsModalRef.current?.present()
                         }
                     >
-                        <Text
-                            style={{
-                                textDecorationLine: "underline",
-                                color: Colors.secondary,
-                                fontSize: 17,
-                                fontWeight: "600",
-                            }}
-                        >
-                            {friendRequests?.length ?? 0} friend requests
+                        <Ionicons
+                            name="people"
+                            size={18}
+                            color={Colors.accent}
+                        />
+                        <Text style={globalStyles.btnSecondaryText}>
+                            Friend Requests
                         </Text>
                     </TouchableOpacity>
                 </View>
