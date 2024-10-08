@@ -252,6 +252,7 @@ FROM
   )
 WHERE
   f.status = 'pending'
+  AND u.id != $1::uuid
   AND f.requested_by = $1::uuid
 `
 

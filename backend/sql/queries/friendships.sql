@@ -131,6 +131,7 @@ FROM
   )
 WHERE
   f.status = 'pending'
+  AND u.id != sqlc.arg (user_id)::uuid
   AND f.requested_by = sqlc.arg (user_id)::uuid;
 
 -- name: DeleteFriendship :exec
