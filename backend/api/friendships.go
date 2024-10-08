@@ -76,14 +76,15 @@ func (f *Friendship) SendFriendRequest(w http.ResponseWriter, r *http.Request, u
 	}
 
 	// member1 should be less than member2
+	firstUserId, secondUserId := user.ID, params.UserId
 	if user.ID.String() > params.UserId.String() {
-		user.ID, params.UserId = params.UserId, user.ID
+		firstUserId, secondUserId = params.UserId, user.ID
 	}
 
 	friendRequest, err := f.DB.SendFriendRequest(r.Context(), database.SendFriendRequestParams{
 		ID:          uuid.New(),
-		Member1ID:   user.ID,
-		Member2ID:   params.UserId,
+		Member1ID:   firstUserId,
+		Member2ID:   secondUserId,
 		RequestedBy: user.ID,
 	})
 	if err != nil {
