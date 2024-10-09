@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -109,4 +110,44 @@ func (u *User) GetFriendProfile(w http.ResponseWriter, r *http.Request, user dat
 	}
 
 	responseWithJSON(w, 200, util.DatabaseUserProfileToUserProfile(database.GetUserProfileByIdRow(dbUser)))
+}
+
+func (u *User) Update(w http.ResponseWriter, r *http.Request, user database.User) {
+
+	type parameters struct {
+		Name     string         `json:"name"`
+		ImageURL sql.NullString `json:"image_url"`
+	}
+
+	decoder := json.NewDecoder(r.Body)
+
+	params := parameters{}
+	err := decoder.Decode(&params)
+	if err != nil {
+		responseWithError(w, 400, fmt.Sprint("Error parsing JSON:", err))
+		return
+	}
+
+	name := user.Name
+	if params.Name != "" {
+		name = params.Name
+	}
+
+	imageUrl := user.ImageUrl
+	if params.ImageURL.Valid {
+		imageUrl = params.ImageURL
+	}
+
+	updatedUser, err := u.DB.UpdateUser(r.Context(), database.UpdateUserParams{
+		ID:       user.ID,
+		Name:     name,
+		ImageUrl: imageUrl,
+	})
+
+	if err != nil {
+		responseWithError(w, 500, fmt.Sprintf("Error updating user: %v", err))
+		return
+	}
+
+	responseWithJSON(w, 200, util.DatabaseUserToUser(updatedUser))
 }

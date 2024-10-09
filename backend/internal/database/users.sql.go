@@ -351,3 +351,35 @@ func (q *Queries) GetUsersExcludingFriends(ctx context.Context, arg GetUsersExcl
 	}
 	return items, nil
 }
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET
+  name = $2,
+  image_url = $3,
+  updated_at = NOW()
+WHERE
+  id = $1
+RETURNING
+  id, name, email, image_url, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	ID       uuid.UUID
+	Name     string
+	ImageUrl sql.NullString
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRowContext(ctx, updateUser, arg.ID, arg.Name, arg.ImageUrl)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.ImageUrl,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

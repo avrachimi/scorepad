@@ -145,3 +145,14 @@ WHERE
 DELETE FROM users
 WHERE
   id = $1;
+
+-- name: UpdateUser :one
+UPDATE users
+SET
+  name = $2,
+  image_url = $3,
+  updated_at = NOW()
+WHERE
+  id = $1
+RETURNING
+  *;

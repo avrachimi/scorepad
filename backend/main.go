@@ -70,6 +70,7 @@ func main() {
 
 	v1Router.Get("/users", handler.MiddlewareAuth(handler.User.GetAll))
 	v1Router.Post("/users", handler.User.Create)
+	v1Router.Patch("/users", handler.MiddlewareAuth(handler.User.Update))
 	v1Router.Delete("/users/{id}", handler.MiddlewareAuth(handler.User.Delete))
 	v1Router.Get("/users/profile", handler.MiddlewareAuth(handler.User.GetProfile))
 	v1Router.Get("/users/profile/{id}", handler.MiddlewareAuth(handler.User.GetFriendProfile))
