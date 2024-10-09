@@ -20,7 +20,7 @@ import { formatDuration, formatName, getDayWithSuffix } from "~/util/format";
 function Page() {
     const headerHeight = useHeaderHeight();
     const { allMatchesQuery, invalidateQueries } = useDatabase();
-    const [refreshing, setRefreshing] = useState(false);
+    const [refreshing] = useState(false);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
 
     const showBottomSheet = () => {
@@ -146,7 +146,7 @@ function Page() {
                                     <View style={styles.playerTextContainer}>
                                         <Text style={styles.textPlayer}>
                                             {formatName(
-                                                item.team2_player2?.name ?? "-"
+                                                item.team2_player1?.name ?? "-"
                                             )}
                                         </Text>
                                         <Text style={styles.textPlayer}>

@@ -1,20 +1,20 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useEffect, useRef } from "react";
-import { Image, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import AddFriendsModal from "~/components/modals/AddFriendsModal";
 import FriendRequestsModal from "~/components/modals/FriendRequestsModal";
 import FriendsListModal from "~/components/modals/FriendsListModal";
 import { useAuth } from "~/hooks/useAuth";
 import { Colors, globalStyles } from "~/lib/theme";
-import { FriendRequest } from "~/lib/types";
+import { FriendRequest, User } from "~/lib/types";
 
 function Page() {
     const queryClient = useQueryClient();
 
-    const { signOut, user, accessToken } = useAuth();
+    const { signOut, user, accessToken, loadAuth } = useAuth();
 
     const { data: friendRequests } = useQuery({
         queryKey: ["getFriendRequests"],
@@ -29,6 +29,29 @@ function Page() {
             );
 
             return res.data;
+        },
+    });
+
+    const { mutate: updateUser } = useMutation({
+        mutationKey: ["updateUser"],
+        mutationFn: async (newName: string) => {
+            const user = await axios.patch<User>(
+                process.env.EXPO_PUBLIC_API_ENDPOINT + "/v1/users",
+                {
+                    name: newName,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            return user.data;
+        },
+        onSuccess: async () => {
+            await loadAuth();
+            await queryClient.invalidateQueries();
         },
     });
 
@@ -76,14 +99,39 @@ function Page() {
                         alignItems: "center",
                     }}
                 >
-                    <Text
-                        style={{
-                            fontSize: 32,
-                            fontWeight: "bold",
+                    <TouchableOpacity
+                        onPress={() => {
+                            Alert.prompt(
+                                "Edit Name",
+                                "Enter your new name",
+                                [
+                                    {
+                                        text: "Cancel",
+                                        onPress: () => {},
+                                        style: "cancel",
+                                    },
+                                    {
+                                        text: "OK",
+                                        onPress: async (newName) => {
+                                            if (!newName) return;
+                                            updateUser(newName);
+                                        },
+                                    },
+                                ],
+                                "plain-text",
+                                user?.name
+                            );
                         }}
                     >
-                        {user?.name}
-                    </Text>
+                        <Text
+                            style={{
+                                fontSize: 32,
+                                fontWeight: "bold",
+                            }}
+                        >
+                            {user?.name}
+                        </Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                         onPress={() => friendsListModalRef.current?.present()}
                     >
