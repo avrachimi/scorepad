@@ -5,6 +5,7 @@ import dayjs from "dayjs";
 import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import {
+    ActivityIndicator,
     FlatList,
     RefreshControl,
     StyleSheet,
@@ -60,123 +61,149 @@ function Page() {
                 </TouchableOpacity>
                 <NewMatchModal bottomSheetRef={bottomSheetRef} />
             </View>
-            <FlatList
-                scrollEnabled={true}
-                horizontal={false}
-                showsVerticalScrollIndicator={false}
-                data={allMatchesQuery.data}
-                keyExtractor={(item) => item.id}
-                style={{ padding: 21, paddingBottom: 0, height: "100%" }}
-                contentContainerStyle={{
-                    flexDirection: "column",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    width: "100%",
-                    gap: 25,
-                    paddingBottom: 30,
-                }}
-                renderItem={({ item }) => {
-                    const day = dayjs(item.match_date).date();
-                    const suffix = getDayWithSuffix(day);
+            {allMatchesQuery.isLoading ? (
+                <View
+                    style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "70%",
+                        width: "100%",
+                    }}
+                >
+                    <ActivityIndicator size={"large"} color={Colors.primary} />
+                </View>
+            ) : (
+                <FlatList
+                    scrollEnabled={true}
+                    horizontal={false}
+                    showsVerticalScrollIndicator={false}
+                    data={allMatchesQuery.data}
+                    keyExtractor={(item) => item.id}
+                    style={{ padding: 21, paddingBottom: 0, height: "100%" }}
+                    contentContainerStyle={{
+                        flexDirection: "column",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        width: "100%",
+                        gap: 25,
+                        paddingBottom: 30,
+                    }}
+                    renderItem={({ item }) => {
+                        const day = dayjs(item.match_date).date();
+                        const suffix = getDayWithSuffix(day);
 
-                    return (
-                        <Link href={`/(authenticated)/match/${item.id}`}>
-                            <View style={styles.matchCard}>
-                                <View style={styles.matchCardTop}>
-                                    <View style={styles.dateRow}>
-                                        <Text style={styles.textDate}>
-                                            {dayjs(item.match_date).format(
-                                                "dddd, MMMM "
-                                            )}
-                                            {day}
-                                            <Text style={styles.superscript}>
-                                                {suffix}
+                        return (
+                            <Link href={`/(authenticated)/match/${item.id}`}>
+                                <View style={styles.matchCard}>
+                                    <View style={styles.matchCardTop}>
+                                        <View style={styles.dateRow}>
+                                            <Text style={styles.textDate}>
+                                                {dayjs(item.match_date).format(
+                                                    "dddd, MMMM "
+                                                )}
+                                                {day}
+                                                <Text
+                                                    style={styles.superscript}
+                                                >
+                                                    {suffix}
+                                                </Text>
                                             </Text>
-                                        </Text>
-                                        <View style={styles.tagContainer}>
-                                            <View style={globalStyles.tag}>
-                                                <Text
-                                                    style={globalStyles.tagText}
-                                                >
-                                                    {dayjs(
-                                                        item.match_date
-                                                    ).format("h:mm A")}
-                                                </Text>
-                                            </View>
-                                            <View style={globalStyles.tag}>
-                                                <Text
-                                                    style={globalStyles.tagText}
-                                                >
-                                                    {formatDuration(
-                                                        item.duration_minutes
-                                                    )}
-                                                </Text>
+                                            <View style={styles.tagContainer}>
+                                                <View style={globalStyles.tag}>
+                                                    <Text
+                                                        style={
+                                                            globalStyles.tagText
+                                                        }
+                                                    >
+                                                        {dayjs(
+                                                            item.match_date
+                                                        ).format("h:mm A")}
+                                                    </Text>
+                                                </View>
+                                                <View style={globalStyles.tag}>
+                                                    <Text
+                                                        style={
+                                                            globalStyles.tagText
+                                                        }
+                                                    >
+                                                        {formatDuration(
+                                                            item.duration_minutes
+                                                        )}
+                                                    </Text>
+                                                </View>
                                             </View>
                                         </View>
+                                        <View
+                                            style={{
+                                                flexDirection: "row",
+                                                width: "100%",
+                                                justifyContent: "space-around",
+                                            }}
+                                        >
+                                            <Text style={styles.textScore}>
+                                                {item.team1_score}
+                                            </Text>
+                                            <Text style={styles.textScore}>
+                                                {item.team2_score}
+                                            </Text>
+                                        </View>
                                     </View>
-                                    <View
-                                        style={{
-                                            flexDirection: "row",
-                                            width: "100%",
-                                            justifyContent: "space-around",
-                                        }}
-                                    >
-                                        <Text style={styles.textScore}>
-                                            {item.team1_score}
-                                        </Text>
-                                        <Text style={styles.textScore}>
-                                            {item.team2_score}
-                                        </Text>
+                                    <View style={styles.matchCardBottom}>
+                                        <View
+                                            style={styles.playerTextContainer}
+                                        >
+                                            <Text style={styles.textPlayer}>
+                                                {formatName(
+                                                    item.team1_player1.name
+                                                )}
+                                            </Text>
+                                            <Text style={styles.textPlayer}>
+                                                {formatName(
+                                                    item.team1_player2?.name ??
+                                                        "-"
+                                                )}
+                                            </Text>
+                                        </View>
+                                        <View
+                                            style={{
+                                                height: "80%",
+                                                borderLeftWidth: 1,
+                                                borderLeftColor: Colors.primary,
+                                            }}
+                                        />
+                                        <View
+                                            style={styles.playerTextContainer}
+                                        >
+                                            <Text style={styles.textPlayer}>
+                                                {formatName(
+                                                    item.team2_player1?.name ??
+                                                        "-"
+                                                )}
+                                            </Text>
+                                            <Text style={styles.textPlayer}>
+                                                {formatName(
+                                                    item.team2_player2?.name ??
+                                                        "-"
+                                                )}
+                                            </Text>
+                                        </View>
                                     </View>
                                 </View>
-                                <View style={styles.matchCardBottom}>
-                                    <View style={styles.playerTextContainer}>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team1_player1.name
-                                            )}
-                                        </Text>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team1_player2?.name ?? "-"
-                                            )}
-                                        </Text>
-                                    </View>
-                                    <View
-                                        style={{
-                                            height: "80%",
-                                            borderLeftWidth: 1,
-                                            borderLeftColor: Colors.primary,
-                                        }}
-                                    />
-                                    <View style={styles.playerTextContainer}>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team2_player1?.name ?? "-"
-                                            )}
-                                        </Text>
-                                        <Text style={styles.textPlayer}>
-                                            {formatName(
-                                                item.team2_player2?.name ?? "-"
-                                            )}
-                                        </Text>
-                                    </View>
-                                </View>
-                            </View>
-                        </Link>
-                    );
-                }}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={async () =>
-                            await invalidateQueries(["allMatches"]).catch(
-                                console.error
-                            )
-                        }
-                    />
-                }
-            />
+                            </Link>
+                        );
+                    }}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={async () =>
+                                await invalidateQueries(["allMatches"]).catch(
+                                    console.error
+                                )
+                            }
+                        />
+                    }
+                />
+            )}
         </View>
     );
 }

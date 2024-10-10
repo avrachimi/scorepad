@@ -122,7 +122,18 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                     My Friends
                 </Text>
             </View>
-            {(!friends || friends.length === 0) && !loadingFriends && (
+            {loadingFriends ? (
+                <View
+                    style={{
+                        justifyContent: "center",
+                        alignItems: "center",
+                        height: "20%",
+                        width: "100%",
+                    }}
+                >
+                    <ActivityIndicator size={"large"} color={Colors.primary} />
+                </View>
+            ) : !friends || friends.length === 0 ? (
                 <View
                     style={{
                         width: "100%",
@@ -149,114 +160,116 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                         Add friends to see them here
                     </Text>
                 </View>
-            )}
-            <FlatList
-                data={friends}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={{
-                    width: "100%",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    gap: 10,
-                    marginTop: 10,
-                }}
-                renderItem={({ item }) => (
-                    <View
-                        style={{
-                            width: "100%",
-                            flexDirection: "row",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            paddingHorizontal: 21,
-                            gap: 10,
-                        }}
-                    >
-                        {item.image_url ? (
-                            <View
-                                style={{
-                                    padding: 4.5,
-                                    width: 50,
-                                    height: 50,
-                                }}
-                            >
-                                <Image
-                                    style={{
-                                        width: "100%",
-                                        height: "100%",
-                                        borderRadius: 100,
-                                    }}
-                                    src={item.image_url}
-                                />
-                            </View>
-                        ) : (
-                            <Ionicons
-                                name="person-circle"
-                                size={50}
-                                color={Colors.primary}
-                            />
-                        )}
+            ) : (
+                <FlatList
+                    data={friends}
+                    keyExtractor={(item) => item.id}
+                    contentContainerStyle={{
+                        width: "100%",
+                        justifyContent: "flex-start",
+                        alignItems: "center",
+                        gap: 10,
+                        marginTop: 10,
+                    }}
+                    renderItem={({ item }) => (
                         <View
                             style={{
-                                flex: 1,
-                                justifyContent: "center",
-                                alignItems: "flex-start",
-                                gap: 2,
+                                width: "100%",
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                paddingHorizontal: 21,
+                                gap: 10,
                             }}
                         >
-                            <Text
+                            {item.image_url ? (
+                                <View
+                                    style={{
+                                        padding: 4.5,
+                                        width: 50,
+                                        height: 50,
+                                    }}
+                                >
+                                    <Image
+                                        style={{
+                                            width: "100%",
+                                            height: "100%",
+                                            borderRadius: 100,
+                                        }}
+                                        src={item.image_url}
+                                    />
+                                </View>
+                            ) : (
+                                <Ionicons
+                                    name="person-circle"
+                                    size={50}
+                                    color={Colors.primary}
+                                />
+                            )}
+                            <View
                                 style={{
-                                    fontSize: 17,
-                                    fontWeight: "600",
+                                    flex: 1,
+                                    justifyContent: "center",
+                                    alignItems: "flex-start",
+                                    gap: 2,
                                 }}
                             >
-                                {item.name}
-                            </Text>
-                            {item.friends_since && (
                                 <Text
                                     style={{
-                                        fontSize: 12,
-                                        opacity: 0.5,
-                                    }}
-                                >
-                                    friends since{" "}
-                                    {dayjs(item.friends_since).format(
-                                        "MMMM D, YYYY"
-                                    )}
-                                </Text>
-                            )}
-                        </View>
-                        <TouchableOpacity
-                            style={{
-                                backgroundColor: Colors.card_bg,
-                                paddingHorizontal: 10,
-                                paddingVertical: 6,
-                                borderRadius: 6,
-                                width: 80,
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}
-                            onPress={() =>
-                                createDeleteAlert(item.friendship_id)
-                            }
-                        >
-                            {deletingFriend &&
-                            deleteFriendVariables === item.friendship_id ? (
-                                <ActivityIndicator />
-                            ) : (
-                                <Text
-                                    style={{
-                                        color: DefaultTheme.colors.notification,
+                                        fontSize: 17,
                                         fontWeight: "600",
-                                        fontSize: 14,
                                     }}
                                 >
-                                    Remove
+                                    {item.name}
                                 </Text>
-                            )}
-                        </TouchableOpacity>
-                    </View>
-                )}
-            />
+                                {item.friends_since && (
+                                    <Text
+                                        style={{
+                                            fontSize: 12,
+                                            opacity: 0.5,
+                                        }}
+                                    >
+                                        friends since{" "}
+                                        {dayjs(item.friends_since).format(
+                                            "MMMM D, YYYY"
+                                        )}
+                                    </Text>
+                                )}
+                            </View>
+                            <TouchableOpacity
+                                style={{
+                                    backgroundColor: Colors.card_bg,
+                                    paddingHorizontal: 10,
+                                    paddingVertical: 6,
+                                    borderRadius: 6,
+                                    width: 80,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
+                                onPress={() =>
+                                    createDeleteAlert(item.friendship_id)
+                                }
+                            >
+                                {deletingFriend &&
+                                deleteFriendVariables === item.friendship_id ? (
+                                    <ActivityIndicator />
+                                ) : (
+                                    <Text
+                                        style={{
+                                            color: DefaultTheme.colors
+                                                .notification,
+                                            fontWeight: "600",
+                                            fontSize: 14,
+                                        }}
+                                    >
+                                        Remove
+                                    </Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    )}
+                />
+            )}
         </BottomSheetModal>
     );
 });

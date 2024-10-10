@@ -142,7 +142,21 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                         onChangeText={(text) => setSearchQuery(text)}
                     />
                 </View>
-                {(!userList || userList.length === 0) && !loadingUserList && (
+                {loadingUserList ? (
+                    <View
+                        style={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "45%",
+                            width: "100%",
+                        }}
+                    >
+                        <ActivityIndicator
+                            size={"large"}
+                            color={Colors.primary}
+                        />
+                    </View>
+                ) : !userList || userList.length === 0 ? (
                     <View
                         style={{
                             width: "100%",
@@ -169,114 +183,115 @@ const AddFriendsModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                             Try searching for a different name
                         </Text>
                     </View>
-                )}
-                <FlatList
-                    data={userList}
-                    keyExtractor={(item) => item.id}
-                    contentContainerStyle={{
-                        width: "100%",
-                        justifyContent: "flex-start",
-                        alignItems: "center",
-                        marginTop: 10,
-                    }}
-                    ItemSeparatorComponent={() => (
-                        <View
-                            style={{
-                                justifyContent: "center",
-                                alignItems: "center",
-                                marginVertical: 6,
-                            }}
-                        >
+                ) : (
+                    <FlatList
+                        data={userList}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={{
+                            width: "100%",
+                            justifyContent: "flex-start",
+                            alignItems: "center",
+                            marginTop: 10,
+                        }}
+                        ItemSeparatorComponent={() => (
+                            <View
+                                style={{
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    marginVertical: 6,
+                                }}
+                            >
+                                <View
+                                    style={{
+                                        width: "100%",
+                                        height: 1,
+                                        backgroundColor: Colors.primary,
+                                        opacity: 0.3,
+                                    }}
+                                />
+                            </View>
+                        )}
+                        renderItem={({ item: user }) => (
                             <View
                                 style={{
                                     width: "100%",
-                                    height: 1,
-                                    backgroundColor: Colors.primary,
-                                    opacity: 0.3,
-                                }}
-                            />
-                        </View>
-                    )}
-                    renderItem={({ item: user }) => (
-                        <View
-                            style={{
-                                width: "100%",
-                                flexDirection: "row",
-                                justifyContent: "space-between",
-                                alignItems: "center",
-                                paddingHorizontal: 21,
-                                gap: 10,
-                            }}
-                        >
-                            <View
-                                style={{
                                     flexDirection: "row",
+                                    justifyContent: "space-between",
                                     alignItems: "center",
-                                    justifyContent: "flex-start",
+                                    paddingHorizontal: 21,
                                     gap: 10,
                                 }}
                             >
-                                {user.image_url ? (
-                                    <View
-                                        style={{
-                                            padding: 4.5,
-                                            width: 50,
-                                            height: 50,
-                                        }}
-                                    >
-                                        <Image
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                borderRadius: 100,
-                                            }}
-                                            src={user.image_url}
-                                        />
-                                    </View>
-                                ) : (
-                                    <Ionicons
-                                        name="person-circle"
-                                        size={50}
-                                        color={Colors.secondary}
-                                    />
-                                )}
-                                <Text
+                                <View
                                     style={{
-                                        fontSize: 17,
+                                        flexDirection: "row",
+                                        alignItems: "center",
+                                        justifyContent: "flex-start",
+                                        gap: 10,
                                     }}
                                 >
-                                    {user.name}
-                                </Text>
-                            </View>
-                            <TouchableOpacity
-                                style={{
-                                    backgroundColor: Colors.primary,
-                                    borderRadius: 8,
-                                    paddingHorizontal: 15,
-                                    paddingVertical: 6,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                                onPress={() => sendFriendRequest(user.id)}
-                            >
-                                {sendingFriendRequest &&
-                                friendRequestVariables === user.id ? (
-                                    <ActivityIndicator />
-                                ) : (
+                                    {user.image_url ? (
+                                        <View
+                                            style={{
+                                                padding: 4.5,
+                                                width: 50,
+                                                height: 50,
+                                            }}
+                                        >
+                                            <Image
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    borderRadius: 100,
+                                                }}
+                                                src={user.image_url}
+                                            />
+                                        </View>
+                                    ) : (
+                                        <Ionicons
+                                            name="person-circle"
+                                            size={50}
+                                            color={Colors.secondary}
+                                        />
+                                    )}
                                     <Text
                                         style={{
-                                            fontSize: 14,
-                                            color: "white",
-                                            fontWeight: "600",
+                                            fontSize: 17,
                                         }}
                                     >
-                                        Add
+                                        {user.name}
                                     </Text>
-                                )}
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                />
+                                </View>
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: Colors.primary,
+                                        borderRadius: 8,
+                                        paddingHorizontal: 15,
+                                        paddingVertical: 6,
+                                        justifyContent: "center",
+                                        alignItems: "center",
+                                    }}
+                                    onPress={() => sendFriendRequest(user.id)}
+                                >
+                                    {sendingFriendRequest &&
+                                    friendRequestVariables === user.id ? (
+                                        <ActivityIndicator />
+                                    ) : (
+                                        <Text
+                                            style={{
+                                                fontSize: 14,
+                                                color: "white",
+                                                fontWeight: "600",
+                                            }}
+                                        >
+                                            Add
+                                        </Text>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    />
+                )}
             </View>
         </BottomSheetModal>
     );

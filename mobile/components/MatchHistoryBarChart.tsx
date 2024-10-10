@@ -1,48 +1,19 @@
 import { LinearGradient, useFont, vec } from "@shopify/react-native-skia";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import dayjs from "dayjs";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { Bar, CartesianChart } from "victory-native";
 import { inter } from "~/assets/fonts/Inter_18pt-Medium.ttf";
-import { useAuth } from "~/hooks/useAuth";
 import { Colors, globalStyles } from "~/lib/theme";
 import { Stats } from "~/lib/types";
 
-function MatchHistoryBarChart() {
-    const { accessToken } = useAuth();
+interface MatchHistoryBarChartProps {
+    matchHistory: Stats["matches_by_month"];
+}
+
+function MatchHistoryBarChart({ matchHistory }: MatchHistoryBarChartProps) {
     const font = useFont(inter, 18);
 
-    const { data: matchHistory, isLoading: loadingMatchHistory } = useQuery({
-        queryKey: ["statsMatchHistory"],
-        queryFn: async () => {
-            const res = await axios.get<Stats>(
-                process.env.EXPO_PUBLIC_API_ENDPOINT + "/v1/stats",
-                {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                    params: {
-                        type: "matches",
-                    },
-                }
-            );
-            console.log("matchHistory", res.data);
-            return res.data.matches_by_month;
-        },
-    });
-
-    if (loadingMatchHistory) {
-        return (
-            <View style={{ width: "100%", height: 150 }}>
-                <ActivityIndicator />
-            </View>
-        );
-    }
-
-    if (!matchHistory) {
-        return null;
-    }
+    if (!matchHistory) return null;
 
     return (
         <View style={styles.container}>
