@@ -88,7 +88,7 @@ function Page() {
                         height: 150,
                         borderRadius: 100,
                     }}
-                    src={user?.image_url}
+                    src={user?.image_url?.replace("=s96-c", "")}
                     resizeMode="cover"
                 />
                 <View

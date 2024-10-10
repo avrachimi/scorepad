@@ -35,7 +35,6 @@ const FriendsListModal = forwardRef<BottomSheetModal, {}>((props, ref) => {
                 }
             );
 
-            console.log(res.data);
             return res.data;
         },
     });

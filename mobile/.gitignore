@@ -3,6 +3,8 @@
 
 *.ipa
 
+*.cer
+
 node_modules/
 .expo/
 dist/
