@@ -90,11 +90,13 @@ func DatabaseUserToUser(dbUser database.User) User {
 	var updatedAt *time.Time
 
 	if dbUser.ImageUrl.Valid {
-		imageUrl = &dbUser.ImageUrl.String
+		url := dbUser.ImageUrl.String
+		imageUrl = &url
 	}
 
 	if dbUser.UpdatedAt.Valid {
-		updatedAt = &dbUser.UpdatedAt.Time
+		date := dbUser.UpdatedAt.Time
+		updatedAt = &date
 	}
 
 	return User{
@@ -121,11 +123,13 @@ func DatabaseUserProfileToUserProfile(dbUser database.GetUserProfileByIdRow) Use
 	var updatedAt *time.Time
 
 	if dbUser.ImageUrl.Valid {
-		imageUrl = &dbUser.ImageUrl.String
+		url := dbUser.ImageUrl.String
+		imageUrl = &url
 	}
 
 	if dbUser.UpdatedAt.Valid {
-		updatedAt = &dbUser.UpdatedAt.Time
+		date := dbUser.UpdatedAt.Time
+		updatedAt = &date
 	}
 
 	return UserProfile{
@@ -157,19 +161,23 @@ func DatabaseMatchToMatch(dbMatch database.Match) Match {
 	var updatedAt *time.Time
 
 	if dbMatch.Team1Player2.Valid {
-		team1Player2 = &dbMatch.Team1Player2.UUID
+		t1p2 := dbMatch.Team1Player2.UUID
+		team1Player2 = &t1p2
 	}
 
 	if dbMatch.Team2Player1.Valid {
-		team2Player1 = &dbMatch.Team2Player1.UUID
+		t2p1 := dbMatch.Team2Player1.UUID
+		team2Player1 = &t2p1
 	}
 
 	if dbMatch.Team2Player2.Valid {
-		team2Player2 = &dbMatch.Team2Player2.UUID
+		t2p2 := dbMatch.Team2Player2.UUID
+		team2Player2 = &t2p2
 	}
 
 	if dbMatch.UpdatedAt.Valid {
-		updatedAt = &dbMatch.UpdatedAt.Time
+		date := dbMatch.UpdatedAt.Time
+		updatedAt = &date
 	}
 
 	return Match{
@@ -221,7 +229,8 @@ func DatabaseMatchByIdRowToMatch(dbMatch database.GetMatchByIdRow) MatchByIdRow 
 	}
 
 	if dbMatch.UpdatedAt.Valid {
-		updatedAt = &dbMatch.UpdatedAt.Time
+		date := dbMatch.UpdatedAt.Time
+		updatedAt = &date
 	}
 
 	createdByPlayer := getPlayerFromJson(dbMatch.CreatedBy_2)
@@ -303,11 +312,13 @@ func DatabaseFriendshipToFriendship(dbFriendship database.Friendship) Friendship
 	var updatedAt *time.Time
 
 	if dbFriendship.AcceptedOn.Valid {
-		acceptedOn = &dbFriendship.AcceptedOn.Time
+		date := dbFriendship.AcceptedOn.Time
+		acceptedOn = &date
 	}
 
 	if dbFriendship.UpdatedAt.Valid {
-		updatedAt = &dbFriendship.UpdatedAt.Time
+		date := dbFriendship.UpdatedAt.Time
+		updatedAt = &date
 	}
 
 	return Friendship{
@@ -351,11 +362,13 @@ func DatabaseFriendsToFriends(dbFriends []database.GetFriendsRow) []Friend {
 		var friendsSince *time.Time
 
 		if dbFriendship.ImageUrl.Valid {
-			imageUrl = &dbFriendship.ImageUrl.String
+			url := dbFriendship.ImageUrl.String
+			imageUrl = &url
 		}
 
 		if dbFriendship.FriendsSince.Valid {
-			friendsSince = &dbFriendship.FriendsSince.Time
+			date := dbFriendship.FriendsSince.Time
+			friendsSince = &date
 		}
 
 		friends = append(friends, Friend{
@@ -378,7 +391,8 @@ func DatabaseFriendRequestToFriendRequest(dbFriendRequest database.GetFriendRequ
 	var imageUrl *string
 
 	if dbFriendRequest.ImageUrl.Valid {
-		imageUrl = &dbFriendRequest.ImageUrl.String
+		url := dbFriendRequest.ImageUrl.String
+		imageUrl = &url
 	}
 
 	return FriendRequest{
@@ -451,7 +465,8 @@ func DatabaseStatsToStats(dbTotalMatches int64, dbMatchesByMonth []database.GetM
 		var imageUrl *string
 
 		if dbLeaderboard.ImageUrl.Valid {
-			imageUrl = &dbLeaderboard.ImageUrl.String
+			url := dbLeaderboard.ImageUrl.String
+			imageUrl = &url
 		}
 
 		leaderboard = append(leaderboard, LeaderboardRow{

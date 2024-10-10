@@ -26,7 +26,6 @@ func (f *Friendship) GetAllFriends(w http.ResponseWriter, r *http.Request, user 
 					excludeList = append(excludeList, parsedUUID)
 				} else {
 					fmt.Printf("Invalid UUID in exclude parameter: %s", s)
-					// responseWithError(w, http.StatusBadRequest, "Invalid UUID in exclude parameter")
 					return
 				}
 			}
@@ -52,6 +51,14 @@ func (f *Friendship) GetAllFriends(w http.ResponseWriter, r *http.Request, user 
 		responseWithError(w, 500, "Failed to get friends")
 		return
 	}
+
+	// dbFriends := util.DatabaseFriendsToFriends(friends)
+	// for _, friend := range dbFriends {
+	// 	fmt.Print("FRIEND ---")
+	// 	fmt.Printf("Image URL: %v\n", friend.ImageUrl)
+	// 	fmt.Printf("Friends Since: %v\n", friend.FriendsSince)
+	//
+	// }
 
 	responseWithJSON(w, 200, util.DatabaseFriendsToFriends(friends))
 }
