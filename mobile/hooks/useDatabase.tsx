@@ -31,12 +31,12 @@ export const DatabaseProvider = ({
 };
 
 export const useDatabase = () => {
-    const { accessToken, refreshAccessToken } = useAuth();
+    const { accessToken, loadAuth } = useAuth();
 
     const handleAxiosError = async (error: unknown) => {
         const err = error as AxiosError;
         if (err.response?.status === 403) {
-            await refreshAccessToken();
+            await loadAuth(queryClient);
         } else {
             console.error(err);
         }
@@ -55,6 +55,7 @@ export const useDatabase = () => {
                 return null;
             }
         },
+        refetchOnWindowFocus: "always",
     });
 
     // Matches
@@ -99,6 +100,7 @@ export const useDatabase = () => {
                     return null;
                 }
             },
+            refetchOnWindowFocus: "always",
         });
 
     const allMatchesQuery = useQuery({
@@ -112,6 +114,7 @@ export const useDatabase = () => {
                 return null;
             }
         },
+        refetchOnWindowFocus: "always",
     });
 
     const recentMatchesQuery = useQuery({
@@ -129,6 +132,7 @@ export const useDatabase = () => {
                 return null;
             }
         },
+        refetchOnWindowFocus: "always",
     });
 
     // Stats
@@ -147,6 +151,7 @@ export const useDatabase = () => {
                 return null;
             }
         },
+        refetchOnWindowFocus: "always",
     });
 
     const statsLeaderboardQuery = useQuery({
@@ -163,6 +168,7 @@ export const useDatabase = () => {
                 return null;
             }
         },
+        refetchOnWindowFocus: "always",
     });
 
     // Invalidations

@@ -2,7 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useEffect, useRef } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useRef } from "react";
 import { Alert, Image, Text, TouchableOpacity, View } from "react-native";
 import AddFriendsModal from "~/components/modals/AddFriendsModal";
 import FriendRequestsModal from "~/components/modals/FriendRequestsModal";
@@ -16,7 +17,7 @@ function Page() {
 
     const { signOut, user, accessToken, loadAuth } = useAuth();
 
-    const { data: friendRequests } = useQuery({
+    const { data: friendRequests, refetch } = useQuery({
         queryKey: ["getFriendRequests"],
         queryFn: async () => {
             const res = await axios.get<FriendRequest[]>(
@@ -28,6 +29,7 @@ function Page() {
                 }
             );
 
+            console.log(res.data);
             return res.data;
         },
     });
@@ -59,9 +61,11 @@ function Page() {
     const friendsListModalRef = useRef<BottomSheetModal>(null);
     const friendRequestsModalRef = useRef<BottomSheetModal>(null);
 
-    useEffect(() => {
-        queryClient.invalidateQueries();
-    }, []);
+    useFocusEffect(
+        useCallback(() => {
+            refetch();
+        }, [refetch])
+    );
 
     return (
         <View

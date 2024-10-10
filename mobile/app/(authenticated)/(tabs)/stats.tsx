@@ -1,5 +1,6 @@
 import { useHeaderHeight } from "@react-navigation/elements";
-import { useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import Leaderboard from "~/components/Leaderboard";
@@ -11,6 +12,12 @@ function Page() {
     const headerHeight = useHeaderHeight();
     const [refreshing] = useState(false);
     const { invalidateQueries, statsMatchesQuery } = useDatabase();
+
+    useFocusEffect(
+        useCallback(() => {
+            statsMatchesQuery.refetch();
+        }, [statsMatchesQuery.refetch])
+    );
 
     return (
         <View

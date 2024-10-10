@@ -1,3 +1,4 @@
+import { QueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import dayjs from "dayjs";
 import { useRouter } from "expo-router";
@@ -20,7 +21,7 @@ interface AuthContextType {
     signIn: () => Promise<void>;
     signOut: () => Promise<void>;
     refreshAccessToken: () => Promise<boolean>;
-    loadAuth: () => Promise<void>;
+    loadAuth: (queryClient?: QueryClient) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -257,28 +258,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
     }, [signOut]);
 
-    const loadAuth = useCallback(async () => {
-        try {
-            const refreshed = await refreshAccessToken();
-            if (refreshed) {
-                const accessToken =
-                    await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
+    const loadAuth = useCallback(
+        async (queryClient?: QueryClient) => {
+            try {
+                const refreshed = await refreshAccessToken();
+                if (refreshed) {
+                    const accessToken =
+                        await SecureStore.getItemAsync(ACCESS_TOKEN_KEY);
 
-                if (accessToken) {
-                    const user = await getUserProfile();
-                    setAccessToken(accessToken);
-                    setUser(user);
-                    setIsSignedIn(true);
-                    // router.replace("/(authenticated)/(tabs)/home");
-                    console.log("loaded auth");
+                    if (accessToken) {
+                        const user = await getUserProfile();
+                        setAccessToken(accessToken);
+                        setUser(user);
+                        setIsSignedIn(true);
+                        if (queryClient) await queryClient.invalidateQueries();
+                        console.log("loaded auth");
+                    }
                 }
+            } catch (error) {
+                console.error("Failed to load tokens", (error as any).message);
+            } finally {
+                setIsLoaded(true);
             }
-        } catch (error) {
-            console.error("Failed to load tokens", (error as any).message);
-        } finally {
-            setIsLoaded(true);
-        }
-    }, [router]);
+        },
+        [router]
+    );
 
     const getUserProfile = useCallback(async () => {
         try {

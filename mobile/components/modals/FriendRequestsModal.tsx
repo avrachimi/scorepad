@@ -49,6 +49,8 @@ const FriendRequestsModal = forwardRef<
             console.log(res.data);
             return res.data;
         },
+        refetchOnWindowFocus: "always",
+        staleTime: 0,
     });
 
     const {

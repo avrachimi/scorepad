@@ -2,8 +2,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
 import dayjs from "dayjs";
-import { Link } from "expo-router";
-import { useRef, useState } from "react";
+import { Link, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import {
     FlatList,
     RefreshControl,
@@ -26,6 +26,12 @@ function Page() {
     const showBottomSheet = () => {
         bottomSheetRef.current?.present();
     };
+
+    useFocusEffect(
+        useCallback(() => {
+            allMatchesQuery.refetch();
+        }, [allMatchesQuery.refetch])
+    );
 
     return (
         <View

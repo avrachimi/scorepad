@@ -2,7 +2,7 @@
     "expo": {
         "name": "ScorePad",
         "slug": "scorepad-avrachimi",
-        "version": "0.1",
+        "version": "1.0.1",
         "orientation": "portrait",
         "icon": "./assets/images/AppIcons/Assets.xcassets/AppIcon.appiconset/1024.png",
         "scheme": "com.scorepad",

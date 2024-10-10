@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useRef, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useAuth } from "~/hooks/useAuth";
@@ -12,6 +13,12 @@ function Leaderboard() {
     const { user } = useAuth();
 
     const { statsLeaderboardQuery } = useDatabase();
+
+    useFocusEffect(
+        useCallback(() => {
+            statsLeaderboardQuery.refetch();
+        }, [statsLeaderboardQuery.refetch])
+    );
 
     const [selectedUserId, setSelectedUserId] = useState<string>();
     const userProfileModalRef = useRef<BottomSheetModal>(null);

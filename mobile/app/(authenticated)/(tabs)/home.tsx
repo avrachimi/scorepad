@@ -1,9 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
-import { Tabs } from "expo-router";
+import { Tabs, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { RefreshControl, TouchableOpacity } from "react-native-gesture-handler";
 import Leaderboard from "~/components/Leaderboard";
@@ -23,6 +23,13 @@ function Page() {
     const showBottomSheet = () => {
         bottomSheetRef.current?.present();
     };
+
+    useFocusEffect(
+        useCallback(() => {
+            recentMatchesQuery.refetch();
+            statsMatchesQuery.refetch();
+        }, [recentMatchesQuery.refetch, statsMatchesQuery.refetch])
+    );
 
     return (
         <>
