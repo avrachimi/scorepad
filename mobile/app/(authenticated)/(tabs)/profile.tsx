@@ -181,6 +181,7 @@ function Page() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={{
+                            position: "relative",
                             flexDirection: "row",
                             justifyContent: "center",
                             alignItems: "center",
@@ -203,6 +204,31 @@ function Page() {
                         <Text style={globalStyles.btnSecondaryText}>
                             Friend Requests
                         </Text>
+                        {friendRequests && friendRequests.length > 0 && (
+                            <View
+                                style={{
+                                    position: "absolute",
+                                    top: -8,
+                                    left: -8,
+                                    borderRadius: 100,
+                                    backgroundColor: Colors.error,
+                                    width: 23,
+                                    height: 23,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        color: "white",
+                                        fontWeight: "bold",
+                                        fontSize: 12,
+                                    }}
+                                >
+                                    {friendRequests.length}
+                                </Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
             </View>

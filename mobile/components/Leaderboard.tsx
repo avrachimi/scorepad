@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useQuery } from "@tanstack/react-query";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
@@ -13,20 +14,22 @@ function Leaderboard() {
     const { user } = useAuth();
 
     const { statsLeaderboardQuery } = useDatabase();
+    const { data: stats, refetch: refetchLeaderboard } = useQuery({
+        queryKey: ["statsLeaderboard"],
+        queryFn: statsLeaderboardQuery,
+        refetchOnWindowFocus: "always",
+    });
 
     useFocusEffect(
         useCallback(() => {
-            statsLeaderboardQuery.refetch();
-        }, [statsLeaderboardQuery.refetch])
+            refetchLeaderboard();
+        }, [refetchLeaderboard])
     );
 
     const [selectedUserId, setSelectedUserId] = useState<string>();
     const userProfileModalRef = useRef<BottomSheetModal>(null);
 
-    if (
-        !statsLeaderboardQuery.data ||
-        statsLeaderboardQuery.data.leaderboard?.length === 0
-    ) {
+    if (!stats || !stats.leaderboard || stats?.leaderboard.length === 0) {
         return null;
     }
 
@@ -81,7 +84,7 @@ function Leaderboard() {
                 </View>
                 <FlatList
                     scrollEnabled={false}
-                    data={statsLeaderboardQuery.data?.leaderboard}
+                    data={stats.leaderboard}
                     keyExtractor={(item) => item.id}
                     style={{ width: "100%", padding: 5 }}
                     renderItem={({ item, index }) => {

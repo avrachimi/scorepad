@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { DefaultTheme } from "@react-navigation/native";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import dayjs from "dayjs";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -36,8 +36,13 @@ function Page() {
     }>();
 
     const { singleMatchQuery } = useDatabase();
+    const { data: match } = useQuery({
+        queryKey: ["singleMatch", id],
+        queryFn: async () => await singleMatchQuery(id ?? ""),
+        refetchOnWindowFocus: "always",
+    });
 
-    const existingMatch = singleMatchQuery(id!).data;
+    const existingMatch = match;
 
     const [team1Score, setTeam1Score] = useState(
         existingMatch?.team1_score || 0

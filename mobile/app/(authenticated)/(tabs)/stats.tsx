@@ -23,6 +23,16 @@ function Page() {
     const headerHeight = useHeaderHeight();
     const [refreshing] = useState(false);
     const { invalidateQueries, statsMatchesQuery } = useDatabase();
+    const {
+        data: matchStats,
+        isLoading: loadingStats,
+        refetch: refetchStats,
+    } = useQuery({
+        queryKey: ["statsMatches"],
+        queryFn: statsMatchesQuery,
+        refetchOnWindowFocus: "always",
+    });
+
     const { accessToken } = useAuth();
 
     const {
@@ -49,9 +59,9 @@ function Page() {
 
     useFocusEffect(
         useCallback(() => {
-            statsMatchesQuery.refetch();
+            refetchStats();
             refetchMatchHistory();
-        }, [statsMatchesQuery.refetch, refetchMatchHistory])
+        }, [refetchStats, refetchMatchHistory])
     );
 
     return (
@@ -64,7 +74,7 @@ function Page() {
             }}
         >
             <Text style={styles.heading}>Stats</Text>
-            {statsMatchesQuery.isLoading || loadingMatchHistory ? (
+            {loadingStats || loadingMatchHistory ? (
                 <View
                     style={{
                         justifyContent: "center",
@@ -99,9 +109,7 @@ function Page() {
                         />
                     }
                 >
-                    <MatchesPlayed
-                        matches={statsMatchesQuery.data?.total_matches}
-                    />
+                    <MatchesPlayed matches={matchStats?.total_matches} />
                     <MatchHistoryBarChart matchHistory={matchHistory} />
                     <Leaderboard />
                 </ScrollView>

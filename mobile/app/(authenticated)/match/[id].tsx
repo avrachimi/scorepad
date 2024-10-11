@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -19,7 +20,11 @@ function Page() {
     const headerHeight = useHeaderHeight();
 
     const { singleMatchQuery } = useDatabase();
-    const { data: match, isLoading } = singleMatchQuery.call(undefined, id!);
+    const { data: match, isLoading } = useQuery({
+        queryKey: ["singleMatch", id],
+        queryFn: async () => await singleMatchQuery(id ?? ""),
+        refetchOnWindowFocus: "always",
+    });
 
     useEffect(() => {
         if (!isLoading && !match) {

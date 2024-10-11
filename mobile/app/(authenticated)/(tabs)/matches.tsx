@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useQuery } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { Link, useFocusEffect } from "expo-router";
 import { useCallback, useRef, useState } from "react";
@@ -21,6 +22,15 @@ import { formatDuration, formatName, getDayWithSuffix } from "~/util/format";
 function Page() {
     const headerHeight = useHeaderHeight();
     const { allMatchesQuery, invalidateQueries } = useDatabase();
+    const {
+        data: matches,
+        refetch,
+        isLoading: loadingMatches,
+    } = useQuery({
+        queryKey: ["allMatches"],
+        queryFn: allMatchesQuery,
+        refetchOnWindowFocus: "always",
+    });
     const [refreshing] = useState(false);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
 
@@ -30,8 +40,8 @@ function Page() {
 
     useFocusEffect(
         useCallback(() => {
-            allMatchesQuery.refetch();
-        }, [allMatchesQuery.refetch])
+            refetch();
+        }, [refetch])
     );
 
     return (
@@ -61,7 +71,7 @@ function Page() {
                 </TouchableOpacity>
                 <NewMatchModal bottomSheetRef={bottomSheetRef} />
             </View>
-            {allMatchesQuery.isLoading ? (
+            {loadingMatches ? (
                 <View
                     style={{
                         justifyContent: "center",
@@ -77,7 +87,7 @@ function Page() {
                     scrollEnabled={true}
                     horizontal={false}
                     showsVerticalScrollIndicator={false}
-                    data={allMatchesQuery.data}
+                    data={matches}
                     keyExtractor={(item) => item.id}
                     style={{ padding: 21, paddingBottom: 0, height: "100%" }}
                     contentContainerStyle={{

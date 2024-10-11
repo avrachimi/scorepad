@@ -7,6 +7,7 @@ import {
 import { BottomSheetModalMethods } from "@gorhom/bottom-sheet/lib/typescript/types";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { DefaultTheme } from "@react-navigation/native";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Image, StyleSheet, Text, TextInput, View } from "react-native";
@@ -87,8 +88,18 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const headerHeight = useHeaderHeight();
     const snapPoints = useMemo(() => ["92%"], []);
 
+    const queryClient = useQueryClient();
     const { user } = useAuth();
     const { createMatchQuery } = useDatabase();
+    const { mutate: createMatch } = useMutation({
+        mutationFn: createMatchQuery,
+        onSuccess: () => {
+            queryClient.invalidateQueries();
+        },
+        onError: (e) => {
+            console.log("Failed to create match: ", e);
+        },
+    });
 
     const renderBackdrop = useCallback(
         (props: BottomSheetBackdropProps) => (
@@ -116,7 +127,7 @@ function NewMatchModal({ bottomSheetRef }: NewMatchModalProps) {
     const onSave = () => {
         if (user && team1Player1) {
             if (team1Score > 0 || team2Score > 0) {
-                createMatchQuery.mutate({
+                createMatch({
                     match_date: date,
                     duration_minutes: duration,
                     created_by: user.id,

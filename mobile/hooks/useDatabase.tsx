@@ -1,12 +1,10 @@
 import {
     QueryClientProvider,
     QueryClientProviderProps,
-    useMutation,
-    useQuery,
     useQueryClient,
 } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { CreateMatchParams, Match, Stats, User } from "~/lib/types";
+import { CreateMatchParams, Match, Stats } from "~/lib/types";
 import { useAuth } from "./useAuth";
 
 const apiClient = axios.create({
@@ -42,134 +40,92 @@ export const useDatabase = () => {
         }
     };
 
-    // Users
-    const getUsersQuery = useQuery({
-        queryKey: ["users"],
-        queryFn: async () => {
-            try {
-                const response = await get<User[]>("/users", accessToken!);
-                // console.warn("getUsersQuery");
-                return response.data;
-            } catch (error) {
-                await handleAxiosError(error);
-                return null;
-            }
-        },
-        refetchOnWindowFocus: "always",
-    });
-
     // Matches
-    const createMatchQuery = useMutation({
-        mutationFn: async (match: CreateMatchParams) => {
-            try {
-                const createdMatch = await apiClient.post<Match>(
-                    "/matches",
-                    match,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                        },
-                    }
-                );
-                return createdMatch.data;
-            } catch (error) {
-                handleAxiosError(error);
-                return null;
-            }
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries();
-        },
-        onError: (e) => {
-            console.log("Failed to create match: ", e);
-        },
-    });
-
-    const singleMatchQuery = (id: string) =>
-        useQuery({
-            queryKey: ["singleMatch", id],
-            queryFn: async () => {
-                try {
-                    const response = await get<Match>(
-                        "/matches/" + id,
-                        accessToken!
-                    );
-                    return response.data;
-                } catch (error) {
-                    handleAxiosError(error);
-                    return null;
+    const createMatchQuery = async (match: CreateMatchParams) => {
+        try {
+            const createdMatch = await apiClient.post<Match>(
+                "/matches",
+                match,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
                 }
-            },
-            refetchOnWindowFocus: "always",
-        });
+            );
+            return createdMatch.data;
+        } catch (error) {
+            handleAxiosError(error);
+            return null;
+        }
+    };
 
-    const allMatchesQuery = useQuery({
-        queryKey: ["allMatches"],
-        queryFn: async () => {
-            try {
-                const response = await get<Match[]>("/matches", accessToken!);
-                return response.data;
-            } catch (error) {
-                handleAxiosError(error);
-                return null;
-            }
-        },
-        refetchOnWindowFocus: "always",
-    });
+    const singleMatchQuery = async (id: string) => {
+        try {
+            const match = await apiClient.get<Match>(`/matches/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            return match.data;
+        } catch (error) {
+            handleAxiosError(error);
+            return null;
+        }
+    };
 
-    const recentMatchesQuery = useQuery({
-        queryKey: ["recentMatches"],
-        queryFn: async () => {
-            try {
-                const response = await get<Match[]>(
-                    "/matches/recent",
-                    accessToken!
-                );
-                // console.warn("recentMatchesQuery");
-                return response.data;
-            } catch (error) {
-                handleAxiosError(error);
-                return null;
-            }
-        },
-        refetchOnWindowFocus: "always",
-    });
+    const allMatchesQuery = async () => {
+        try {
+            const matches = await apiClient.get<Match[]>("/matches", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
+            return matches.data;
+        } catch (error) {
+            handleAxiosError(error);
+            return null;
+        }
+    };
+
+    const recentMatchesQuery = async () => {
+        try {
+            const response = await get<Match[]>(
+                "/matches/recent",
+                accessToken!
+            );
+            return response.data;
+        } catch (error) {
+            handleAxiosError(error);
+            return null;
+        }
+    };
 
     // Stats
-    const statsMatchesQuery = useQuery({
-        queryKey: ["statsMatches"],
-        queryFn: async () => {
-            try {
-                const response = await get<Stats>(
-                    "/stats?type=matches",
-                    accessToken!
-                );
-                // console.warn("statsMatchesQuery");
-                return response.data;
-            } catch (error) {
-                handleAxiosError(error);
-                return null;
-            }
-        },
-        refetchOnWindowFocus: "always",
-    });
+    const statsMatchesQuery = async () => {
+        try {
+            const response = await get<Stats>(
+                "/stats?type=matches",
+                accessToken!
+            );
+            return response.data;
+        } catch (error) {
+            handleAxiosError(error);
+            return null;
+        }
+    };
 
-    const statsLeaderboardQuery = useQuery({
-        queryKey: ["statsLeaderboard"],
-        queryFn: async () => {
-            try {
-                const response = await get<Stats>(
-                    "/stats?type=leaderboard",
-                    accessToken!
-                );
-                return response.data;
-            } catch (error) {
-                handleAxiosError(error);
-                return null;
-            }
-        },
-        refetchOnWindowFocus: "always",
-    });
+    const statsLeaderboardQuery = async () => {
+        try {
+            const response = await get<Stats>(
+                "/stats?type=leaderboard",
+                accessToken!
+            );
+            return response.data;
+        } catch (error) {
+            handleAxiosError(error);
+            return null;
+        }
+    };
 
     // Invalidations
     const queryClient = useQueryClient();
@@ -185,7 +141,6 @@ export const useDatabase = () => {
 
     return {
         createMatchQuery,
-        getUsersQuery,
         allMatchesQuery,
         recentMatchesQuery,
         statsMatchesQuery,

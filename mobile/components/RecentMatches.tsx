@@ -1,23 +1,19 @@
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback } from "react";
+import { useRouter } from "expo-router";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
-import { useDatabase } from "~/hooks/useDatabase";
 import { Colors, globalStyles } from "~/lib/theme";
+import { Match } from "~/lib/types";
 import { getDayWithSuffix } from "~/util/format";
 
-function RecentMatches() {
-    const router = useRouter();
-    const { recentMatchesQuery } = useDatabase();
+interface RecentMatchesProps {
+    matches: Match[] | null | undefined;
+}
 
-    useFocusEffect(
-        useCallback(() => {
-            recentMatchesQuery.refetch();
-        }, [recentMatchesQuery.refetch])
-    );
+function RecentMatches({ matches: recentMatches }: RecentMatchesProps) {
+    const router = useRouter();
 
     return (
         <View style={styles.container}>
@@ -28,7 +24,7 @@ function RecentMatches() {
                 showsHorizontalScrollIndicator={false}
                 horizontal={true}
                 scrollEnabled={true}
-                data={recentMatchesQuery.data}
+                data={recentMatches}
                 keyExtractor={(item) => item.id}
                 style={{ maxHeight: 120 }}
                 contentContainerStyle={{
