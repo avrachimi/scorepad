@@ -89,10 +89,11 @@ export const useDatabase = () => {
 
     const recentMatchesQuery = async () => {
         try {
-            const response = await get<Match[]>(
-                "/matches/recent",
-                accessToken!
-            );
+            const response = await apiClient.get<Match[]>("/matches/recent", {
+                headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                },
+            });
             return response.data;
         } catch (error) {
             handleAxiosError(error);

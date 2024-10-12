@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useFocusEffect } from "expo-router";
+import { Tabs, useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
@@ -11,18 +11,27 @@ import Leaderboard from "~/components/Leaderboard";
 import MatchesPlayed from "~/components/MatchesPlayed";
 import NewMatchModal from "~/components/modals/NewMatchModal";
 import RecentMatches from "~/components/RecentMatches";
+import { useAuth } from "~/hooks/useAuth";
 import { useDatabase } from "~/hooks/useDatabase";
-import { Colors } from "~/lib/theme";
+import { Colors, globalStyles } from "~/lib/theme";
 
 function Page() {
     const headerHeight = useHeaderHeight();
     const [refreshing] = useState(false);
+
+    const { signOut } = useAuth();
+
     const queryClient = useQueryClient();
     const { invalidateQueries, recentMatchesQuery, statsMatchesQuery } =
         useDatabase();
     const { data: recentMatches, isLoading: loadingRecentMatches } = useQuery({
         queryKey: ["recentMatches"],
         queryFn: recentMatchesQuery,
+        refetchOnWindowFocus: "always",
+    });
+    const { data: matchStats } = useQuery({
+        queryKey: ["statsMatches"],
+        queryFn: statsMatchesQuery,
         refetchOnWindowFocus: "always",
     });
 
@@ -77,7 +86,68 @@ function Page() {
                     <Ionicons name="add" size={30} color={Colors.primary} />
                 </TouchableOpacity>
             </View>
-            {loadingRecentMatches ? (
+            {!loadingRecentMatches &&
+            (!recentMatches || recentMatches.length === 0) ? (
+                <View
+                    style={{
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                        gap: 25,
+                    }}
+                >
+                    <Tabs.Screen
+                        options={{
+                            tabBarStyle: {
+                                display: "none",
+                            },
+                        }}
+                    />
+                    <View
+                        style={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: "75%",
+                            width: "100%",
+                            gap: 25,
+                        }}
+                    >
+                        <View
+                            style={{
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 5,
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    fontSize: 18,
+                                    textAlign: "center",
+                                }}
+                            >
+                                No matches found.
+                            </Text>
+                            <Text>Create new match to get started.</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={globalStyles.btnPrimary}
+                            onPress={showBottomSheet}
+                        >
+                            <Text style={globalStyles.btnPrimaryText}>
+                                Create match
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                    <TouchableOpacity
+                        style={globalStyles.btnSecondary}
+                        onPress={signOut}
+                    >
+                        <Text style={globalStyles.btnSecondaryText}>
+                            Sign Out
+                        </Text>
+                    </TouchableOpacity>
+                </View>
+            ) : loadingRecentMatches ? (
                 <View
                     style={{
                         justifyContent: "center",
@@ -115,9 +185,14 @@ function Page() {
                         />
                     }
                 >
-                    <MatchesPlayed
-                        matches={statsMatchesQuery.data?.total_matches}
+                    <Tabs.Screen
+                        options={{
+                            tabBarStyle: {
+                                display: "flex",
+                            },
+                        }}
                     />
+                    <MatchesPlayed matches={matchStats?.total_matches} />
                     <RecentMatches matches={recentMatches} />
                     <Leaderboard />
                 </ScrollView>

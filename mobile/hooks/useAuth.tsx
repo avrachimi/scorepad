@@ -60,7 +60,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                 API_ENDPOINT + "/auth/signin?provider=google"
             );
             const result = await WebBrowser.openAuthSessionAsync(
-                endpoint.toString()
+                endpoint.toString(),
+                null,
+                {
+                    preferEphemeralSession: true,
+                }
             );
 
             if (result.type === "success") {
